@@ -1,0 +1,252 @@
+<?php
+
+if (strpos($_SERVER['PHP_SELF'], 'modern.inc') !== false) {
+    die('This file can not be used on its own.');
+}
+
+function plugin_getcapabilities_faq()
+{
+    return array(
+        'schema' => 1,
+        'roles' => array('content', 'relationship'),
+        'capabilities' => array(
+            'content.read',
+            'content.collection',
+            'content.search',
+            'content.url.resolve',
+            'content.lifecycle',
+            'content.related'
+        )
+    );
+}
+
+function faq_getItemUrl($id)
+{
+    global $_CONF;
+    return $_CONF['site_url'] . '/faq/index.php?faq=' . rawurlencode($id);
+}
+
+function faq_getCategoryUrl($id)
+{
+    global $_CONF;
+    return $_CONF['site_url'] . '/faq/index.php?cat=' . rawurlencode($id);
+}
+
+function faq_normalizeItemRow($row, $what = '')
+{
+    $all = array(
+        'id' => $row['id'],
+        'title' => $row['title'],
+        'url' => faq_getItemUrl($row['id']),
+        'description' => $row['description'],
+        'excerpt' => COM_truncate(strip_tags(PLG_replaceTags($row['description'])), 240, '...'),
+        'date-created' => isset($row['date_created']) ? (int) $row['date_created'] : (int) $row['date_modified'],
+        'date-modified' => (int) $row['date_modified'],
+        'category' => $row['category'],
+        'type' => 'faq',
+        'subtype' => 'question',
+        'hits' => (int) $row['hits']
+    );
+
+    if ($what === '' || $what === '*' || $what === null) {
+        return $all;
+    }
+
+    $wanted = is_array($what) ? $what : preg_split('/\s*,\s*/', $what, -1, PREG_SPLIT_NO_EMPTY);
+    if (count($wanted) === 1 && isset($all[$wanted[0]])) {
+        return $all[$wanted[0]];
+    }
+
+    $result = array();
+    foreach ($wanted as $field) {
+        if (array_key_exists($field, $all)) {
+            $result[$field] = $all[$field];
+        }
+    }
+
+    return $result;
+}
+
+function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
+{
+    global $_TABLES;
+
+    $fields = "faq.id, faq.title, faq.description, faq.category, faq.hits,
+               UNIX_TIMESTAMP(faq.date) AS date_created,
+               UNIX_TIMESTAMP(faq.date) AS date_modified";
+
+    $perm = COM_getPermSQL('AND', $uid, 2, 'faq')
+          . COM_getPermSQL('AND', $uid, 2, 'cat');
+
+    if ($id !== '*') {
+        $safe_id = DB_escapeString($id);
+        $sql = "SELECT {$fields}
+                  FROM {$_TABLES['faq']} faq
+                  JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category
+                 WHERE faq.id = '{$safe_id}' {$perm}
+                 LIMIT 1";
+        $result = DB_query($sql);
+        if (DB_numRows($result) !== 1) {
+            return false;
+        }
+
+        return faq_normalizeItemRow(DB_fetchArray($result), $what);
+    }
+
+    $limit = isset($options['limit']) ? (int) $options['limit'] : 50;
+    if ($limit < 1) {
+        $limit = 1;
+    } elseif ($limit > 200) {
+        $limit = 200;
+    }
+
+    $order = isset($options['order']) ? $options['order'] : 'modified-desc';
+    switch ($order) {
+        case 'hits-desc':
+            $order_sql = 'faq.hits DESC, faq.date DESC';
+            break;
+        case 'created-desc':
+        case 'modified-desc':
+        default:
+            $order_sql = 'faq.date DESC, faq.id ASC';
+            break;
+    }
+
+    $since_sql = '';
+    if (!empty($options['since']) && is_numeric($options['since'])) {
+        $since = (int) $options['since'];
+        $since_sql = " AND faq.date >= FROM_UNIXTIME({$since})";
+    }
+
+    $category_sql = '';
+    if (!empty($options['category'])) {
+        $category = DB_escapeString($options['category']);
+        $category_sql = " AND faq.category = '{$category}'";
+    }
+
+    $sql = "SELECT {$fields}
+              FROM {$_TABLES['faq']} faq
+              JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category
+             WHERE 1=1 {$perm}{$since_sql}{$category_sql}
+             ORDER BY {$order_sql}
+             LIMIT {$limit}";
+
+    $result = DB_query($sql);
+    $items = array();
+    while ($row = DB_fetchArray($result)) {
+        $items[] = faq_normalizeItemRow($row, $what);
+    }
+
+    return $items;
+}
+
+function plugin_idtourl_faq($sub_type, $item_id)
+{
+    if ($sub_type !== '' && $sub_type !== null && $sub_type !== 'question' && $sub_type !== 'faq') {
+        return '';
+    }
+
+    return faq_getItemUrl($item_id);
+}
+
+function plugin_itemdisplay_faq($id, $type)
+{
+    global $_FAQ_CONF;
+
+    if (empty($_FAQ_CONF['contextual_enabled'])) {
+        return '';
+    }
+
+    return faq_renderContextual($type, (string) $id, '', '');
+}
+
+function plugin_collectSitemapItems_faq($uid = 0, $limit = 0)
+{
+    $options = array(
+        'limit' => $limit > 0 ? (int) $limit : 200,
+        'order' => 'modified-desc'
+    );
+
+    $rows = plugin_getiteminfo_faq('*', 'id,url,date-modified', $uid, $options);
+    $items = array();
+
+    if (!is_array($rows)) {
+        return $items;
+    }
+
+    foreach ($rows as $row) {
+        if (!is_array($row) || empty($row['url'])) {
+            continue;
+        }
+
+        $items[] = array(
+            'url' => $row['url'],
+            'date-modified' => isset($row['date-modified']) ? $row['date-modified'] : 0,
+            'change-freq' => 'monthly',
+            'priority' => 0.5
+        );
+    }
+
+    return $items;
+}
+
+function plugin_getmetatags_faq($type, $id)
+{
+    $item = plugin_getiteminfo_faq($id, 'title,description,url', 0, array());
+    if (!is_array($item)) {
+        return array();
+    }
+
+    $description = trim(strip_tags(PLG_replaceTags($item['description'])));
+    $description = COM_truncate($description, 160, '...');
+
+    return array(
+        'title' => $item['title'],
+        'description' => $description,
+        'canonical' => $item['url']
+    );
+}
+
+function plugin_getstructureddatatypes_faq()
+{
+    return array('FAQPage', 'Question', 'Answer');
+}
+
+function plugin_clearcache_faq()
+{
+    faq_clearLocalCache();
+    return true;
+}
+
+function plugin_configchange_faq($group, $changes = array())
+{
+    if ($group === 'faq') {
+        faq_clearLocalCache();
+    }
+}
+
+function faq_notifySaved($id, $old_id = '')
+{
+    if (!function_exists('PLG_itemSaved')) {
+        return;
+    }
+
+    if (version_compare(VERSION, '2.2.0', '>=')) {
+        PLG_itemSaved($id, 'faq', $old_id, 'question');
+    } else {
+        PLG_itemSaved($id, 'faq', $old_id);
+    }
+}
+
+function faq_notifyDeleted($id)
+{
+    if (!function_exists('PLG_itemDeleted')) {
+        return;
+    }
+
+    if (version_compare(VERSION, '2.2.0', '>=')) {
+        PLG_itemDeleted($id, 'faq', 'question');
+    } else {
+        PLG_itemDeleted($id, 'faq');
+    }
+}
