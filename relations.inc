@@ -21,6 +21,18 @@ function faq_relationProviderAllowed($provider)
     return (bool) preg_match('/^[a-z0-9_-]{1,40}$/i', $provider);
 }
 
+function faq_normalizeProvider($provider)
+{
+    $provider = strtolower(trim((string) $provider));
+    if ($provider === 'story') {
+        return 'article';
+    }
+    if ($provider === 'staticpage') {
+        return 'staticpages';
+    }
+    return $provider;
+}
+
 function faq_relationItemAllowed($item_id)
 {
     return is_string($item_id) && $item_id !== '' && strlen($item_id) <= 128;
@@ -49,6 +61,7 @@ function faq_relationAdd($faq_id, $provider, $item_id, $subtype = '', $placement
     if (!faq_relationTableExists() || !faq_relationFaqExists($faq_id, 3)) {
         return false;
     }
+    $provider = faq_normalizeProvider($provider);
     if (!faq_relationProviderAllowed($provider) || !faq_relationItemAllowed($item_id)) {
         return false;
     }
@@ -113,6 +126,7 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
     global $_TABLES;
 
     $items = array();
+    $provider = faq_normalizeProvider($provider);
     if (!faq_relationTableExists() || !faq_relationProviderAllowed($provider) || !faq_relationItemAllowed($item_id)) {
         return $items;
     }
