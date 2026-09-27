@@ -14,8 +14,7 @@ function plugin_getcapabilities_faq()
             'content.collection',
             'content.search',
             'content.url.resolve',
-            'content.lifecycle',
-            'content.related'
+            'content.lifecycle'
         )
     );
 }
@@ -197,19 +196,12 @@ function plugin_collectSitemapItems_faq($uid = 0, $limit = 0)
 
 function plugin_getmetatags_faq($type, $id)
 {
-    $item = plugin_getiteminfo_faq($id, 'title,description,url', 0, array());
-    if (!is_array($item)) {
-        return array();
-    }
-
-    $description = trim(strip_tags(PLG_replaceTags($item['description'])));
-    $description = COM_truncate($description, 160, '...');
-
-    return array(
-        'title' => $item['title'],
-        'description' => $description,
-        'canonical' => $item['url']
-    );
+    /*
+     * PLG_getMetaTags() calls this callback only when FAQ is not the owning
+     * provider of the current page. FAQ does not override host metadata.
+     * Standalone FAQ metadata is supplied by the FAQ page itself.
+     */
+    return array();
 }
 
 function plugin_getstructureddatatypes_faq()
@@ -254,4 +246,68 @@ function faq_notifyDeleted($id)
     } else {
         PLG_itemDeleted($id, 'faq');
     }
+}
+
+
+function plugin_getconfigtooltip_faq($id)
+{
+    $tips = array(
+        'hidenewfaq' => 'Hide FAQ entries from the Geeklog What\'s New block.',
+        'hidefaqmenu' => 'Hide the FAQ entry from the site menu.',
+        'newfaqinterval' => 'Number of seconds during which a FAQ is considered new.',
+        'no_hit_rights' => 'Comma-separated rights whose users should not increment FAQ hit counters.',
+        'contextual_enabled' => 'Render FAQ associations when a content provider exposes PLG_itemDisplay().',
+        'contextual_default_placement' => 'Placement consumed by the contextual FAQ renderer. Manual disables automatic output.',
+        'structured_data' => 'Emit machine-readable Question/Answer JSON-LD for visible FAQ content.',
+        'coverage_limit' => 'Maximum number of provider items inspected on one Coverage request.',
+        'default_permissions' => 'Geeklog ACL applied to newly created FAQ entries and categories.'
+    );
+
+    return isset($tips[$id]) ? $tips[$id] : '';
+}
+
+function faq_structuredQuestions($items, $asFaqPage)
+{
+    global $_FAQ_CONF;
+
+    if (empty($_FAQ_CONF['structured_data']) || !is_array($items) || count($items) === 0) {
+        return '';
+    }
+
+    $questions = array();
+    foreach ($items as $item) {
+        if (empty($item['title']) || !isset($item['description'])) {
+            continue;
+        }
+
+        $questions[] = array(
+            '@type' => 'Question',
+            'name' => html_entity_decode(strip_tags($item['title']), ENT_QUOTES, 'UTF-8'),
+            'acceptedAnswer' => array(
+                '@type' => 'Answer',
+                'text' => html_entity_decode(strip_tags(PLG_replaceTags($item['description'])), ENT_QUOTES, 'UTF-8')
+            )
+        );
+    }
+
+    if (count($questions) === 0) {
+        return '';
+    }
+
+    if ($asFaqPage) {
+        $data = array(
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => $questions
+        );
+    } else {
+        $data = array(
+            '@context' => 'https://schema.org',
+            '@graph' => $questions
+        );
+    }
+
+    return '<script type="application/ld+json">'
+         . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+         . '</script>';
 }
