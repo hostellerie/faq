@@ -12,7 +12,8 @@ function faq_relationTableExists()
         return false;
     }
 
-    $result = DB_query("SHOW TABLES LIKE '" . DB_escapeString($_TABLES['faq_relations']) . "'");
+    $table = str_replace(array('\\', '%', '_'), array('\\\\', '\\%', '\\_'), $_TABLES['faq_relations']);
+    $result = DB_query("SHOW TABLES LIKE '" . DB_escapeString($table) . "'");
     return DB_numRows($result) > 0;
 }
 
