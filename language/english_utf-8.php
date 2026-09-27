@@ -35,6 +35,7 @@ $LANG_FAQ_COMMON = array(
     'Hits' => 'Hits',
     'Updated' => 'Updated',
     'Answer' => 'Answer',
+    'permalink' => 'Permalink',
     'no_autolink_faq' => '[FAQ ID "%s" does not exist or you do not have access to it]',
     'no_autolink_cat' => '[FAQ category "%s" does not exist or you do not have access to it]',
     'autolink_error' => '[error in "%s" FAQ link]'
