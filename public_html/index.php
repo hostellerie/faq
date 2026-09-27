@@ -96,6 +96,7 @@ if ( ! empty($faq_id)) {
         
 	$tpl->parse('output', 'faq');
     $display .= $tpl->finish($tpl->get_var('output'));
+    $display .= faq_structuredQuestions(array(array('title' => $A['title'], 'description' => $A['description'])), true);
     
     if ( ! SEC_hasRights($_FAQ_CONF['no_hit_rights'], 'OR'))
         DB_query("UPDATE {$_TABLES['faq']} SET hits = hits + 1 WHERE id = '{$faq_id}'");
