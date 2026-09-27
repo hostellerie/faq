@@ -208,6 +208,7 @@ function faq_renderContextual($provider, $item_id, $subtype = '', $placement = '
     }
 
     $html .= '</section>';
+    $html .= faq_structuredQuestions($items, false);
 
     return $html;
 }
