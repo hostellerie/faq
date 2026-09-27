@@ -121,3 +121,55 @@ $LANG_FAQ_IMPORT = array(
     'unknown' => 'Unknown import action: ',
     'imported' => '%d FAQs in %d Categories imported'
 );
+
+
+/* Geeklog Configuration API metadata */
+$LANG_configsections['faq'] = array(
+    'label' => 'FAQ',
+    'title' => 'FAQ Configuration'
+);
+
+$LANG_confignames['faq'] = array(
+    'hidenewfaq' => 'Hide FAQs from What\'s New',
+    'hidefaqmenu' => 'Hide FAQ menu item',
+    'newfaqinterval' => 'New FAQ interval (seconds)',
+    'no_hit_rights' => 'Rights excluded from hit counting',
+    'contextual_enabled' => 'Enable contextual FAQs',
+    'contextual_default_placement' => 'Default contextual placement',
+    'structured_data' => 'Enable FAQ structured data',
+    'coverage_limit' => 'Coverage page result limit',
+    'default_permissions' => 'Default permissions'
+);
+
+$LANG_configsubgroups['faq'] = array(
+    'sg_main' => 'FAQ settings'
+);
+
+$LANG_tab['faq'] = array(
+    'tab_general' => 'General',
+    'tab_context' => 'Contextual FAQs',
+    'tab_permissions' => 'Permissions'
+);
+
+$LANG_fs['faq'] = array(
+    'fs_general' => 'General settings',
+    'fs_context' => 'Contextual FAQ settings',
+    'fs_permissions' => 'Default permissions'
+);
+
+$LANG_configselects['faq'][0] = array(
+    0 => 'No',
+    1 => 'Yes'
+);
+
+$LANG_configselects['faq'][1] = array(
+    'after' => 'After content',
+    'before' => 'Before content',
+    'manual' => 'Manual only'
+);
+
+$LANG_configselects['faq'][12] = array(
+    0 => 'No access',
+    2 => 'Read only',
+    3 => 'Read and write'
+);
