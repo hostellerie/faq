@@ -181,36 +181,54 @@ function faq_relationCountForItem($provider, $item_id, $subtype = '')
     return count(faq_relationGetForItem($provider, $item_id, $subtype));
 }
 
-function faq_renderContextual($provider, $item_id, $subtype = '', $placement = '')
+function faq_renderFaqItems($items, $css_class, $asFaqPage)
 {
     global $_CONF, $LANG_FAQ_COMMON;
 
-    $items = faq_relationGetForItem($provider, $item_id, $subtype, $placement);
-    if (empty($items)) {
+    if (!is_array($items) || count($items) === 0) {
         return '';
     }
 
-    $html = '<section class="faq-contextual" aria-label="' . htmlspecialchars($LANG_FAQ_COMMON['FAQs'], ENT_QUOTES, 'UTF-8') . '">';
-    $html .= '<h2 class="faq-contextual-title">' . htmlspecialchars($LANG_FAQ_COMMON['FAQs'], ENT_QUOTES, 'UTF-8') . '</h2>';
+    $label = isset($LANG_FAQ_COMMON['FAQs']) ? $LANG_FAQ_COMMON['FAQs'] : 'FAQs';
+    $permalink = isset($LANG_FAQ_COMMON['permalink']) ? $LANG_FAQ_COMMON['permalink'] : 'Permalink';
+
+    $html = '<section class="' . htmlspecialchars($css_class, ENT_QUOTES, 'UTF-8') . '" aria-label="'
+          . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '">';
+    $html .= '<h2 class="faq-contextual-title">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</h2>';
 
     foreach ($items as $item) {
+        if (empty($item['title']) || !isset($item['description'])) {
+            continue;
+        }
+
+        $faq_id = isset($item['faq_id']) ? $item['faq_id'] : (isset($item['id']) ? $item['id'] : '');
         $question = htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8');
         $answer = PLG_replaceTags($item['description']);
-        $url = $_CONF['site_url'] . '/faq/index.php?faq=' . rawurlencode($item['faq_id']);
 
         $html .= '<details class="faq-contextual-item">';
         $html .= '<summary class="faq-contextual-question">' . $question . '</summary>';
         $html .= '<div class="faq-contextual-answer">' . $answer;
-        $permalink = isset($LANG_FAQ_COMMON['permalink']) ? $LANG_FAQ_COMMON['permalink'] : 'Permalink';
-        $html .= '<p class="faq-contextual-permalink"><a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">'
-              . htmlspecialchars($permalink, ENT_QUOTES, 'UTF-8') . '</a></p>';
+
+        if ($faq_id !== '') {
+            $url = $_CONF['site_url'] . '/faq/index.php?faq=' . rawurlencode($faq_id);
+            $html .= '<p class="faq-contextual-permalink"><a href="'
+                  . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">'
+                  . htmlspecialchars($permalink, ENT_QUOTES, 'UTF-8') . '</a></p>';
+        }
+
         $html .= '</div></details>';
     }
 
     $html .= '</section>';
-    $html .= faq_structuredQuestions($items, false);
+    $html .= faq_structuredQuestions($items, $asFaqPage);
 
     return $html;
+}
+
+function faq_renderContextual($provider, $item_id, $subtype = '', $placement = '')
+{
+    $items = faq_relationGetForItem($provider, $item_id, $subtype, $placement);
+    return faq_renderFaqItems($items, 'faq-contextual', false);
 }
 
 function faq_clearLocalCache()
