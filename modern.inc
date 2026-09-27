@@ -153,15 +153,20 @@ function plugin_itemdisplay_faq($id, $type)
     global $_FAQ_CONF;
 
     if (empty($_FAQ_CONF['contextual_enabled'])) {
-        return '';
+        return array(true);
     }
 
     $placement = !empty($_FAQ_CONF['contextual_default_placement']) ? $_FAQ_CONF['contextual_default_placement'] : 'after';
     if ($placement === 'manual') {
-        return '';
+        return array(true);
     }
 
-    return faq_renderContextual($type, (string) $id, '', $placement);
+    $html = faq_renderContextual($type, (string) $id, '', $placement);
+    if ($html === '') {
+        return array(true);
+    }
+
+    return array(true, $html);
 }
 
 function plugin_collectSitemapItems_faq($uid = 0, $limit = 0)
@@ -228,7 +233,7 @@ function faq_notifySaved($id, $old_id = '')
         return;
     }
 
-    if (version_compare(VERSION, '2.2.0', '>=')) {
+    if (version_compare(VERSION, '2.2.2', '>=')) {
         PLG_itemSaved($id, 'faq', $old_id, 'question');
     } else {
         PLG_itemSaved($id, 'faq', $old_id);
