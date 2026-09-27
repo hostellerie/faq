@@ -158,18 +158,18 @@ $LANG_fs['faq'] = array(
 );
 
 $LANG_configselects['faq'][0] = array(
-    0 => 'No',
-    1 => 'Yes'
+    'True' => 1,
+    'False' => 0
 );
 
 $LANG_configselects['faq'][1] = array(
-    'after' => 'After content',
-    'before' => 'Before content',
-    'manual' => 'Manual only'
+    'After content' => 'after',
+    'Before content' => 'before',
+    'Manual only' => 'manual'
 );
 
 $LANG_configselects['faq'][12] = array(
-    0 => 'No access',
-    2 => 'Read only',
-    3 => 'Read and write'
+    'No access' => 0,
+    'Read-Only' => 2,
+    'Read-Write' => 3
 );
