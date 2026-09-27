@@ -56,6 +56,10 @@ require_once ($_CONF['path'] . 'plugins/faq/util.inc');
 // database table names - don't change
 $_TABLES['faq']               = $_DB_table_prefix . 'faq';
 $_TABLES['faq_category']      = $_DB_table_prefix . 'faq_category';
+$_TABLES['faq_relations']     = $_DB_table_prefix . 'faq_relations';
+
+require_once ($_CONF['path'] . 'plugins/faq/relations.inc');
+require_once ($_CONF['path'] . 'plugins/faq/modern.inc');
 
 function phpblock_faq_random()
 {
@@ -71,7 +75,10 @@ function phpblock_faq_random()
                 . COM_getPermSQL( 'AND', 0, 2, 'cat' ));
                 
     $n = DB_numRows($r);
-    $f = rand(0,$n-1);
+    if ($n < 1) {
+        return '';
+    }
+    $f = rand(0, $n - 1);
     
     $retval .= DB_result($r, $f, 'title');
     $retval .= '<p align="right"><a href="' . $_CONF['site_url'];
