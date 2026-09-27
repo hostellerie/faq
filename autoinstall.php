@@ -76,7 +76,8 @@ function plugin_autoinstall_faq($pi_name)
         'groups'    => $groups,
         'features'  => $features,
         'mappings'  => $mappings,
-        'tables'    => $tables
+        'tables'    => $tables,
+        'requires'  => $requires
     );
 
     return $inst_parms;
@@ -101,7 +102,14 @@ function plugin_postinstall_faq($pi_name)
 
 function plugin_compatible_with_this_version_faq($pi_name)
 {
-    
+    if (!defined('VERSION') || version_compare(VERSION, '2.1.1', '<')) {
+        return false;
+    }
+
+    if (version_compare(PHP_VERSION, '5.6.0', '<')) {
+        return false;
+    }
+
     return true;
 }
 
