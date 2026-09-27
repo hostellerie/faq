@@ -407,7 +407,16 @@ function savefaq ($id, $old_id, $category, $description, $title, $hits, $date, $
                             $id, $category, $title, $description, $hits, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon);
         }        
         DB_query($sql);
-        
+
+        if ($do_update && $old_id !== $id && faq_relationTableExists()) {
+            DB_query("UPDATE {$_TABLES['faq_relations']}
+                         SET faq_id = '" . DB_escapeString($id) . "', modified = NOW()
+                       WHERE faq_id = '" . DB_escapeString($old_id) . "'");
+        }
+
+        faq_clearLocalCache();
+        faq_notifySaved($id, $old_id);
+
         return COM_refresh ($_CONF['site_admin_url'] . '/plugins/faq/index.php?msg=4&mode=faq&cat=' . $category);
     } else { // missing fields
         $retval .= COM_errorLog($LANG_FAQ_ADMIN['missing_fields_faq'],2);
@@ -674,7 +683,10 @@ function deletefaq ($id)
         return COM_refresh ($_CONF['site_admin_url'] . '/plugins/faq/index.php?msq=5&mode=faq');
     }
 
+    faq_relationDeleteForFaq($id);
     DB_delete ($_TABLES['faq'], 'id', $id);
+    faq_clearLocalCache();
+    faq_notifyDeleted($id);
 
     return COM_refresh ($_CONF['site_admin_url'] . '/plugins/faq/index.php?msg=3&mode=faq');
 }
@@ -693,8 +705,15 @@ function deletecat ($id)
         return COM_refresh ($_CONF['site_admin_url'] . '/plugins/faq/index.php?msq=5&mode=cat');
     }
 
+    $faq_result = DB_query("SELECT id FROM {$_TABLES['faq']} WHERE category = '" . DB_escapeString($id) . "'");
+    while ($faq_row = DB_fetchArray($faq_result)) {
+        faq_relationDeleteForFaq($faq_row['id']);
+        faq_notifyDeleted($faq_row['id']);
+    }
+
     DB_delete ($_TABLES['faq'], 'category', $id);
     DB_delete ($_TABLES['faq_category'], 'id', $id);
+    faq_clearLocalCache();
 
     return COM_refresh ($_CONF['site_admin_url'] . '/plugins/faq/index.php?msg=3&mode=cat');
 }
@@ -787,6 +806,8 @@ if (($action == $LANG_FAQ_ADMIN['delete']) && !empty ($LANG_FAQ_ADMIN['delete'])
         if (SEC_hasRights ('faq.admin'))
             $display .= "<li><a href=\"{$_CONF['site_admin_url']}/plugins/faq/index.php?mode=cat\">{$LANG_FAQ_ADMIN['Cat Editor']}</a></li>\n";
         $display .= "<li><a href=\"{$_CONF['site_admin_url']}/plugins/faq/index.php?mode=faq\">{$LANG_FAQ_ADMIN['FAQ Editor']}</a></li>\n";
+        $display .= "<li><a href=\"{$_CONF['site_admin_url']}/plugins/faq/relations.php\">Associations</a></li>\n";
+        $display .= "<li><a href=\"{$_CONF['site_admin_url']}/plugins/faq/coverage.php\">Coverage</a></li>\n";
         if (SEC_inGroup ('Root') && 
             0 < DB_count($_TABLES['plugins'], 'pi_name', 'faqman') &&
             0 < DB_count($_TABLES['faq_topics'])) {
