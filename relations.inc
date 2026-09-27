@@ -1,0 +1,229 @@
+<?php
+
+if (strpos($_SERVER['PHP_SELF'], 'relations.inc') !== false) {
+    die('This file can not be used on its own.');
+}
+
+function faq_relationTableExists()
+{
+    global $_TABLES;
+
+    if (empty($_TABLES['faq_relations'])) {
+        return false;
+    }
+
+    $result = DB_query("SHOW TABLES LIKE '" . DB_escapeString($_TABLES['faq_relations']) . "'");
+    return DB_numRows($result) > 0;
+}
+
+function faq_relationProviderAllowed($provider)
+{
+    return (bool) preg_match('/^[a-z0-9_-]{1,40}$/i', $provider);
+}
+
+function faq_relationItemAllowed($item_id)
+{
+    return is_string($item_id) && $item_id !== '' && strlen($item_id) <= 128;
+}
+
+function faq_relationFaqExists($faq_id, $access = 2)
+{
+    global $_TABLES;
+
+    $faq_id = DB_escapeString($faq_id);
+    $sql = "SELECT faq.id
+              FROM {$_TABLES['faq']} faq, {$_TABLES['faq_category']} cat
+             WHERE faq.category = cat.id
+               AND faq.id = '{$faq_id}'"
+         . COM_getPermSQL('AND', 0, $access, 'faq')
+         . COM_getPermSQL('AND', 0, $access, 'cat');
+
+    $result = DB_query($sql);
+    return DB_numRows($result) === 1;
+}
+
+function faq_relationAdd($faq_id, $provider, $item_id, $subtype = '', $placement = 'after', $sort_order = 0)
+{
+    global $_TABLES;
+
+    if (!faq_relationTableExists() || !faq_relationFaqExists($faq_id, 3)) {
+        return false;
+    }
+    if (!faq_relationProviderAllowed($provider) || !faq_relationItemAllowed($item_id)) {
+        return false;
+    }
+
+    $faq_id = DB_escapeString($faq_id);
+    $provider = DB_escapeString($provider);
+    $item_id = DB_escapeString($item_id);
+    $subtype = DB_escapeString(substr((string) $subtype, 0, 64));
+    $placement = in_array($placement, array('before', 'after', 'manual')) ? $placement : 'after';
+    $sort_order = (int) $sort_order;
+
+    $sql = "INSERT INTO {$_TABLES['faq_relations']}
+                (faq_id, provider, item_id, item_subtype, placement, sort_order, enabled, created, modified)
+            VALUES
+                ('{$faq_id}', '{$provider}', '{$item_id}', '{$subtype}', '{$placement}', {$sort_order}, 1, NOW(), NOW())
+            ON DUPLICATE KEY UPDATE
+                placement = VALUES(placement),
+                sort_order = VALUES(sort_order),
+                enabled = 1,
+                modified = NOW()";
+
+    DB_query($sql);
+    faq_clearLocalCache();
+
+    return true;
+}
+
+function faq_relationDelete($relation_id)
+{
+    global $_TABLES;
+
+    if (!faq_relationTableExists()) {
+        return false;
+    }
+
+    $relation_id = (int) $relation_id;
+    if ($relation_id < 1) {
+        return false;
+    }
+
+    DB_query("DELETE FROM {$_TABLES['faq_relations']} WHERE relation_id = {$relation_id}");
+    faq_clearLocalCache();
+
+    return true;
+}
+
+function faq_relationDeleteForFaq($faq_id)
+{
+    global $_TABLES;
+
+    if (!faq_relationTableExists()) {
+        return;
+    }
+
+    $faq_id = DB_escapeString($faq_id);
+    DB_query("DELETE FROM {$_TABLES['faq_relations']} WHERE faq_id = '{$faq_id}'");
+    faq_clearLocalCache();
+}
+
+function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement = '')
+{
+    global $_TABLES;
+
+    $items = array();
+    if (!faq_relationTableExists() || !faq_relationProviderAllowed($provider) || !faq_relationItemAllowed($item_id)) {
+        return $items;
+    }
+
+    $provider = DB_escapeString($provider);
+    $item_id = DB_escapeString($item_id);
+    $subtype = DB_escapeString(substr((string) $subtype, 0, 64));
+
+    $sql = "SELECT rel.relation_id, rel.faq_id, rel.provider, rel.item_id, rel.item_subtype,
+                   rel.placement, rel.sort_order, faq.title, faq.description, faq.category,
+                   faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
+              FROM {$_TABLES['faq_relations']} rel
+              JOIN {$_TABLES['faq']} faq ON faq.id = rel.faq_id
+              JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category
+             WHERE rel.enabled = 1
+               AND rel.provider = '{$provider}'
+               AND rel.item_id = '{$item_id}'
+               AND (rel.item_subtype = '' OR rel.item_subtype = '{$subtype}')";
+
+    if ($placement !== '') {
+        $placement = DB_escapeString($placement);
+        $sql .= " AND rel.placement = '{$placement}'";
+    }
+
+    $sql .= COM_getPermSQL('AND', 0, 2, 'faq')
+          . COM_getPermSQL('AND', 0, 2, 'cat')
+          . ' ORDER BY rel.sort_order ASC, faq.title ASC';
+
+    $result = DB_query($sql);
+    while ($row = DB_fetchArray($result)) {
+        $items[] = $row;
+    }
+
+    return $items;
+}
+
+function faq_relationGetForFaq($faq_id)
+{
+    global $_TABLES;
+
+    $items = array();
+    if (!faq_relationTableExists()) {
+        return $items;
+    }
+
+    $faq_id = DB_escapeString($faq_id);
+    $result = DB_query("SELECT relation_id, faq_id, provider, item_id, item_subtype, placement, sort_order, enabled,
+                               UNIX_TIMESTAMP(created) AS created, UNIX_TIMESTAMP(modified) AS modified
+                          FROM {$_TABLES['faq_relations']}
+                         WHERE faq_id = '{$faq_id}'
+                         ORDER BY provider, item_id, sort_order");
+
+    while ($row = DB_fetchArray($result)) {
+        $items[] = $row;
+    }
+
+    return $items;
+}
+
+function faq_relationCountForItem($provider, $item_id, $subtype = '')
+{
+    if (!faq_relationTableExists()) {
+        return 0;
+    }
+
+    return count(faq_relationGetForItem($provider, $item_id, $subtype));
+}
+
+function faq_renderContextual($provider, $item_id, $subtype = '', $placement = '')
+{
+    global $_CONF, $LANG_FAQ_COMMON;
+
+    $items = faq_relationGetForItem($provider, $item_id, $subtype, $placement);
+    if (empty($items)) {
+        return '';
+    }
+
+    $html = '<section class="faq-contextual" aria-label="' . htmlspecialchars($LANG_FAQ_COMMON['FAQs'], ENT_QUOTES, 'UTF-8') . '">';
+    $html .= '<h2 class="faq-contextual-title">' . htmlspecialchars($LANG_FAQ_COMMON['FAQs'], ENT_QUOTES, 'UTF-8') . '</h2>';
+
+    foreach ($items as $item) {
+        $question = htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8');
+        $answer = PLG_replaceTags($item['description']);
+        $url = $_CONF['site_url'] . '/faq/index.php?faq=' . rawurlencode($item['faq_id']);
+
+        $html .= '<details class="faq-contextual-item">';
+        $html .= '<summary class="faq-contextual-question">' . $question . '</summary>';
+        $html .= '<div class="faq-contextual-answer">' . $answer;
+        $html .= '<p class="faq-contextual-permalink"><a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">'
+              . htmlspecialchars($LANG_FAQ_COMMON['permalink'], ENT_QUOTES, 'UTF-8') . '</a></p>';
+        $html .= '</div></details>';
+    }
+
+    $html .= '</section>';
+
+    return $html;
+}
+
+function faq_clearLocalCache()
+{
+    if (function_exists('CACHE_remove_instance')) {
+        CACHE_remove_instance('faq');
+    }
+}
+
+function faq_providerCollection($provider, $fields, $options)
+{
+    if (!function_exists('PLG_getItemInfo')) {
+        return false;
+    }
+
+    $items = PLG_getItemInfo($provider, '*', $fields, 0, $options);
+    return is_array($items) ? $items : false;
+}
