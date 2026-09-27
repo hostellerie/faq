@@ -1,0 +1,52 @@
+name: Build installable FAQ archive
+
+on:
+  push:
+    branches:
+      - develop-1.3.0
+    paths-ignore:
+      - 'dist/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-dist:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: develop-1.3.0
+          fetch-depth: 0
+
+      - name: Build installable archive
+        run: |
+          chmod +x build-dist.sh
+          ./build-dist.sh
+
+      - name: Validate archive
+        run: |
+          test -f dist/faq_1.3.0.zip
+          if zipinfo -1 dist/faq_1.3.0.zip | grep -E '(^|/)\.[^/]*($|/)'; then
+            echo "Archive contains a hidden file or directory."
+            exit 1
+          fi
+          zipinfo -1 dist/faq_1.3.0.zip | grep '^faq/plugin.json$'
+          zipinfo -1 dist/faq_1.3.0.zip | grep '^faq/functions.inc$'
+          zipinfo -1 dist/faq_1.3.0.zip | grep '^faq/public_html/'
+          zipinfo -1 dist/faq_1.3.0.zip | grep '^faq/admin/'
+
+      - name: Commit generated archive
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist/faq_1.3.0.zip
+          if git diff --cached --quiet; then
+            echo "Archive is already up to date."
+            exit 0
+          fi
+          git commit -m "Build FAQ 1.3.0 installable archive [dist]"
+          git push origin HEAD:develop-1.3.0
