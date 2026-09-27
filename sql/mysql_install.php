@@ -63,6 +63,26 @@ CREATE TABLE {$_TABLES['faq']} (
 ) TYPE=MyISAM
 ";
 
+
+$_SQL[] = "
+CREATE TABLE {$_TABLES['faq_relations']} (
+  relation_id int(11) unsigned NOT NULL AUTO_INCREMENT,
+  faq_id varchar(40) NOT NULL,
+  provider varchar(40) NOT NULL,
+  item_id varchar(128) NOT NULL,
+  item_subtype varchar(64) NOT NULL DEFAULT '',
+  placement varchar(16) NOT NULL DEFAULT 'after',
+  sort_order int(11) NOT NULL DEFAULT 0,
+  enabled tinyint(1) unsigned NOT NULL DEFAULT 1,
+  created datetime DEFAULT NULL,
+  modified datetime DEFAULT NULL,
+  PRIMARY KEY (relation_id),
+  UNIQUE KEY faq_target (faq_id, provider, item_id, item_subtype),
+  KEY target_lookup (provider, item_id, item_subtype, enabled),
+  KEY faq_lookup (faq_id, enabled)
+) ENGINE=InnoDB
+";
+
 $_SQL[] = "INSERT INTO {$_TABLES['faq_category']}(id,title,description,owner_id,group_id) 
            VALUES('faqfaq','FAQ for the FAQ Plugin','Common questions about the FAQ Plugin administration.',{$_USER['uid']},#group#)";
 $_SQL[] = "INSERT INTO {$_TABLES['faq']}(id,category,title,description,date,owner_id,group_id) 
