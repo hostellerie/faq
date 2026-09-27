@@ -437,12 +437,12 @@ function plugin_user_delete_faq ($uid)
     DB_query ("UPDATE {$_TABLES['faq_category']} SET owner_id = $rootuser WHERE owner_id = $uid");
 }
 
-function plugin_autotags_faq ($op, $content = '', $autotag = '')
+function plugin_autotags_faq ($op, $content = '', $autotag = '', $parameters = array())
 {
     global $_CONF, $_TABLES, $LANG_FAQ_COMMON, $_FAQ_CONF;
 
     if ($op == 'tagname' ) {
-        return array ('faq', 'faqcat');     
+        return array ('faq', 'faqcat', 'faqembed', 'faqrelated');     
     } 
     else if ($op == 'parse') { 
         switch ($autotag['tag']) { 
@@ -505,6 +505,41 @@ function plugin_autotags_faq ($op, $content = '', $autotag = '')
             $url = $_CONF['site_url'] . '/faq/index.php?cat=' . $autotag['parm1'];
             $link = '<a href="' . $url . '">' . $label . '</a>';
             break;
+        case 'faqembed':
+            $faq_id = isset($autotag['parm1']) ? $autotag['parm1'] : '';
+            $item = plugin_getiteminfo_faq($faq_id, 'id,title,description,url', 0, array());
+            if (!is_array($item)) {
+                $link = sprintf($LANG_FAQ_COMMON['no_autolink_faq'], $faq_id);
+                break;
+            }
+            $embedded = array(array(
+                'faq_id' => $item['id'],
+                'title' => $item['title'],
+                'description' => $item['description']
+            ));
+            $link = faq_renderFaqItems($embedded, 'faq-autotag faq-autotag-embed', false);
+            break;
+
+        case 'faqrelated':
+            $provider = isset($autotag['parm1']) ? trim($autotag['parm1']) : '';
+            $item_id = isset($autotag['parm2']) ? trim($autotag['parm2']) : '';
+
+            if ($provider === '' && isset($parameters['type'])) {
+                $provider = $parameters['type'];
+            }
+            if ($item_id === '' && isset($parameters['id'])) {
+                $item_id = (string) $parameters['id'];
+            }
+
+            if ($provider === '' || $item_id === '') {
+                $link = '[faqrelated requires a provider and item id]';
+                break;
+            }
+
+            $related = faq_relationGetForItem($provider, $item_id, '', '');
+            $link = faq_renderFaqItems($related, 'faq-autotag faq-autotag-related', false);
+            break;
+
         default:
             $link = sprintf($LANG_FAQ_COMMON['autolink_error'], $autotag['tag']);
         }
