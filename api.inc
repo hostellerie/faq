@@ -532,7 +532,8 @@ function plugin_autouninstall_faq()
     $out = array (
         /* give the name of the tables, without $_TABLES[] */
         'tables' => array('faq',
-                          'faq_category'),
+                          'faq_category',
+                          'faq_relations'),
         /* give the full name of the group, as in the db */
         'groups' => array('FAQ Admin'),
         /* give the full name of the feature, as in the db */
@@ -553,7 +554,7 @@ function plugin_autouninstall_faq()
  */
 function plugin_upgrade_faq()
 {
-    global $_CONF, $_TABLES, $_DB_dbms;
+    global $_CONF, $_TABLES, $_DB_dbms, $_DB_table_prefix;
 
     $installed_version = DB_getItem($_TABLES['plugins'], 'pi_version', "pi_name = 'faq'");
     $code_version = plugin_chkVersion_faq();
@@ -605,6 +606,28 @@ function plugin_upgrade_faq()
             case '1.2.0.2':
                 // no db changes
                 $current_version = '1.2.0.3';
+                break;
+
+            case '1.2.0.3':
+                $_TABLES['faq_relations'] = $_DB_table_prefix . 'faq_relations';
+                $sql = "CREATE TABLE IF NOT EXISTS {$_TABLES['faq_relations']} (
+                            relation_id int(11) unsigned NOT NULL AUTO_INCREMENT,
+                            faq_id varchar(40) NOT NULL,
+                            provider varchar(40) NOT NULL,
+                            item_id varchar(128) NOT NULL,
+                            item_subtype varchar(64) NOT NULL DEFAULT '',
+                            placement varchar(16) NOT NULL DEFAULT 'after',
+                            sort_order int(11) NOT NULL DEFAULT 0,
+                            enabled tinyint(1) unsigned NOT NULL DEFAULT 1,
+                            created datetime DEFAULT NULL,
+                            modified datetime DEFAULT NULL,
+                            PRIMARY KEY (relation_id),
+                            UNIQUE KEY faq_target (faq_id, provider, item_id, item_subtype),
+                            KEY target_lookup (provider, item_id, item_subtype, enabled),
+                            KEY faq_lookup (faq_id, enabled)
+                        ) ENGINE=InnoDB";
+                DB_query($sql);
+                $current_version = '1.3.0';
                 break;
 
             default:
