@@ -201,8 +201,9 @@ function faq_renderContextual($provider, $item_id, $subtype = '', $placement = '
         $html .= '<details class="faq-contextual-item">';
         $html .= '<summary class="faq-contextual-question">' . $question . '</summary>';
         $html .= '<div class="faq-contextual-answer">' . $answer;
+        $permalink = isset($LANG_FAQ_COMMON['permalink']) ? $LANG_FAQ_COMMON['permalink'] : 'Permalink';
         $html .= '<p class="faq-contextual-permalink"><a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">'
-              . htmlspecialchars($LANG_FAQ_COMMON['permalink'], ENT_QUOTES, 'UTF-8') . '</a></p>';
+              . htmlspecialchars($permalink, ENT_QUOTES, 'UTF-8') . '</a></p>';
         $html .= '</div></details>';
     }
 
