@@ -316,3 +316,59 @@ function faq_structuredQuestions($items, $asFaqPage)
          . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
          . '</script>';
 }
+
+
+function plugin_itemsaved_faq($id, $type, $old_id = '', $sub_type = '')
+{
+    global $_TABLES;
+
+    if (!faq_relationTableExists()) {
+        return;
+    }
+
+    $provider = faq_normalizeProvider($type);
+    if ($provider === 'faq' || !faq_relationProviderAllowed($provider)) {
+        return;
+    }
+
+    if ($old_id !== '' && (string) $old_id !== (string) $id) {
+        $old_id_sql = DB_escapeString((string) $old_id);
+        $id_sql = DB_escapeString((string) $id);
+        $provider_sql = DB_escapeString($provider);
+
+        DB_query("UPDATE {$_TABLES['faq_relations']}
+                     SET item_id = '{$id_sql}', modified = NOW()
+                   WHERE provider = '{$provider_sql}'
+                     AND item_id = '{$old_id_sql}'");
+        faq_clearLocalCache();
+    }
+}
+
+function plugin_itemdeleted_faq($id, $type, $sub_type = '')
+{
+    global $_TABLES;
+
+    if (!faq_relationTableExists()) {
+        return;
+    }
+
+    $provider = faq_normalizeProvider($type);
+    if ($provider === 'faq' || !faq_relationProviderAllowed($provider)) {
+        return;
+    }
+
+    $provider_sql = DB_escapeString($provider);
+    $id_sql = DB_escapeString((string) $id);
+    $subtype_sql = DB_escapeString((string) $sub_type);
+
+    $sql = "DELETE FROM {$_TABLES['faq_relations']}
+             WHERE provider = '{$provider_sql}'
+               AND item_id = '{$id_sql}'";
+
+    if ($subtype_sql !== '') {
+        $sql .= " AND (item_subtype = '' OR item_subtype = '{$subtype_sql}')";
+    }
+
+    DB_query($sql);
+    faq_clearLocalCache();
+}
