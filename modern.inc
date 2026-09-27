@@ -157,7 +157,12 @@ function plugin_itemdisplay_faq($id, $type)
         return '';
     }
 
-    return faq_renderContextual($type, (string) $id, '', '');
+    $placement = !empty($_FAQ_CONF['contextual_default_placement']) ? $_FAQ_CONF['contextual_default_placement'] : 'after';
+    if ($placement === 'manual') {
+        return '';
+    }
+
+    return faq_renderContextual($type, (string) $id, '', $placement);
 }
 
 function plugin_collectSitemapItems_faq($uid = 0, $limit = 0)
