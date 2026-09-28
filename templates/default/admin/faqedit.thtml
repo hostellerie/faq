@@ -12,7 +12,7 @@
 
 <dt><label for="sel_editmode">{lang_editor_mode}</label></dt>
 <dd>
-<select id="sel_editmode" name="faq_editor_mode" onchange="change_editmode(this);">
+<select id="sel_editmode" name="faq_editor_mode" {change_editormode}>
 {editor_mode_options}
 </select>
 </dd>
