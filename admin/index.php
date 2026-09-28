@@ -39,6 +39,9 @@ $display = '';
 $pagetitle = '';
 
 $mode = UTIL_getParamStr('mode', '');
+if ($mode === '') {
+    $mode = 'faq';
+}
 
 $no_access = ! SEC_hasRights ('faq.admin,faq.edit','OR');
 
@@ -54,6 +57,8 @@ if ( $no_access ) {
     COM_output($display);
     exit;
 }
+
+$_SCRIPTS->setCSSFile('faq_admin', '/faq/faq-admin.css');
 
 /**
  * Return whether FAQ can safely enable Geeklog's visual Advanced Editor.
@@ -889,10 +894,12 @@ if (($action == $LANG_FAQ_ADMIN['delete']) && !empty ($LANG_FAQ_ADMIN['delete'])
 } else if ($action == 'edit') {
     if ( $mode == 'faq' ) {
         $pagetitle = $LANG_FAQ_ADMIN['FAQ Editor'];
+        $display .= faq_adminNavigation('faq');
         $display .= editfaq($id);
     }
     else if ( $mode == 'cat' ) {
         $pagetitle = $LANG_FAQ_ADMIN['Cat Editor'];
+        $display .= faq_adminNavigation('cat');
         $display .= editcat($id);
     }
     else {
@@ -909,47 +916,21 @@ if (($action == $LANG_FAQ_ADMIN['delete']) && !empty ($LANG_FAQ_ADMIN['delete'])
     
     if ( $mode == 'faq' ) {
         $pagetitle = $LANG_FAQ_ADMIN['FAQ Editor'];
+        $display .= faq_adminNavigation('faq');
         $display .= $msg_txt;
         $display .= listfaq(UTIL_getParamStr('cat'));
     }
     else if ( $mode == 'cat' ) {
         $pagetitle = $LANG_FAQ_ADMIN['Cat Editor'];
+        $display .= faq_adminNavigation('cat');
         $display .= $msg_txt;
         $display .= listcat();
     }
     else {
         $pagetitle = $LANG_FAQ_ADMIN['FAQ Editor'];
+        $display .= faq_adminNavigation('faq');
         $display .= $msg_txt;
-        $display .= "<h2>{$LANG_FAQ_ADMIN['FAQ Plugin']}</h2>\n";
-        $display .= "<ul>\n";
-        if (SEC_hasRights ('faq.admin'))
-            $display .= "<li><a href=\"{$_CONF['site_admin_url']}/plugins/faq/index.php?mode=cat\">{$LANG_FAQ_ADMIN['Cat Editor']}</a></li>\n";
-        $display .= "<li><a href=\"{$_CONF['site_admin_url']}/plugins/faq/index.php?mode=faq\">{$LANG_FAQ_ADMIN['FAQ Editor']}</a></li>\n";
-        $display .= "<li><a href=\"{$_CONF['site_admin_url']}/plugins/faq/relations.php\">Associations</a></li>\n";
-        $display .= "<li><a href=\"{$_CONF['site_admin_url']}/plugins/faq/coverage.php\">Coverage</a></li>\n";
-        if (SEC_inGroup ('Root') && 
-            0 < DB_count($_TABLES['plugins'], 'pi_name', 'faqman') &&
-            0 < DB_count($_TABLES['faq_topics'])) {
-            $display .= "<li>{$LANG_FAQ_ADMIN['faqman_import']}\n";
-            $display .= "<form action=\"{$_CONF['site_admin_url']}/plugins/faq/import.php\" method=\"post\">";
-            $display .= '<input type="hidden" name="import" value="faqman"/>';
-            $usergroups = SEC_getUserGroups();
-            $groupdd = '<select name="group_id">' . LB;
-            for ($i = 0; $i < count($usergroups); $i++) {
-                $groupdd .= '<option value="' . $usergroups[key($usergroups)] . '"';
-                if ($_GROUPS['FAQ Admin'] == $usergroups[key($usergroups)]) {
-                    $groupdd .= ' selected="selected"';
-                }
-                $groupdd.= '>' . key($usergroups) . '</option>' . LB;
-                next($usergroups);
-            }
-            $groupdd .= '</select>' . LB;
-            
-            $display .= $LANG_ACCESS['group'] . ': ' . $groupdd;
-            $display .= "<input type=\"submit\" name=\"action\" value=\"{$LANG_FAQ_ADMIN['import']}\"/>";
-            $display .= "</form></li>\n";
-        }
-        $display .= "</ul>\n";
+        $display .= listfaq(UTIL_getParamStr('cat'));
     }
 }
 
