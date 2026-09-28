@@ -28,3 +28,33 @@
         flex-direction: column;
     }
 }
+
+.faq-admin-nav {
+    margin: 0 0 1rem;
+}
+.faq-admin-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.faq-admin-nav a {
+    display: inline-block;
+    padding: .45rem .7rem;
+    border: 1px solid currentColor;
+    border-radius: .25rem;
+    text-decoration: none;
+}
+.faq-admin-nav .active a {
+    font-weight: 700;
+}
+@media (max-width: 640px) {
+    .faq-admin-nav ul {
+        flex-direction: column;
+    }
+    .faq-admin-nav a {
+        display: block;
+    }
+}
