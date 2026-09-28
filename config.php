@@ -24,3 +24,14 @@ if (isset($_PI_CONF) && isset($_PI_CONF['faq']) && is_array($_PI_CONF['faq'])) {
         $_FAQ_CONF[$key] = $value;
     }
 }
+
+/*
+ * Legacy development values used before the PLG_itemDisplay contract was
+ * clarified. Geeklog exposes one provider-defined automatic insertion point,
+ * not generic before/after slots.
+ */
+if (isset($_FAQ_CONF['contextual_default_placement'])
+    && ($_FAQ_CONF['contextual_default_placement'] === 'after'
+        || $_FAQ_CONF['contextual_default_placement'] === 'before')) {
+    $_FAQ_CONF['contextual_default_placement'] = 'automatic';
+}
