@@ -171,4 +171,60 @@ function faq_getCategoryList($selected = '')
   return $retval;
 }
 
+
+function faq_adminNavigation($active = '')
+{
+    global $_CONF;
+
+    if (!SEC_hasRights('faq.admin,faq.edit', 'OR')) {
+        return '';
+    }
+
+    $items = array();
+
+    $items[] = array(
+        'key' => 'faq',
+        'label' => 'Questions',
+        'url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=faq'
+    );
+
+    if (SEC_hasRights('faq.admin')) {
+        $items[] = array(
+            'key' => 'cat',
+            'label' => 'Categories',
+            'url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=cat'
+        );
+    }
+
+    $items[] = array(
+        'key' => 'relations',
+        'label' => 'Associations',
+        'url' => $_CONF['site_admin_url'] . '/plugins/faq/relations.php'
+    );
+
+    $items[] = array(
+        'key' => 'coverage',
+        'label' => 'Coverage',
+        'url' => $_CONF['site_admin_url'] . '/plugins/faq/coverage.php'
+    );
+
+    if (SEC_inGroup('Root')) {
+        $items[] = array(
+            'key' => 'config',
+            'label' => 'Configuration',
+            'url' => $_CONF['site_admin_url'] . '/configuration.php?conf_group=faq'
+        );
+    }
+
+    $html = '<nav class="faq-admin-nav" aria-label="FAQ administration"><ul>';
+    foreach ($items as $item) {
+        $class = $active === $item['key'] ? ' class="active"' : '';
+        $html .= '<li' . $class . '><a href="' . htmlspecialchars($item['url'], ENT_QUOTES, 'UTF-8') . '">'
+              . htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') . '</a></li>';
+    }
+    $html .= '</ul></nav>';
+
+    return $html;
+}
+
 ?>
