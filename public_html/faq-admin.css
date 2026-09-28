@@ -113,3 +113,75 @@
         min-height: 16rem;
     }
 }
+
+.faq-admin-config-form {
+    margin: 0;
+}
+
+.faq-admin-config-form button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding: .45rem .75rem;
+    border: 1px solid currentColor;
+    border-radius: .35rem;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.faq-admin-nav .active .faq-admin-config-form button {
+    font-weight: 700;
+    box-shadow: inset 0 -2px 0 currentColor;
+}
+
+.faq-relation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: .8rem;
+    align-items: end;
+}
+
+.faq-relation-grid label {
+    display: block;
+    font-weight: 600;
+}
+
+.faq-relation-grid select,
+.faq-relation-grid input {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: .3rem;
+}
+
+.faq-relation-advanced {
+    margin: .85rem 0;
+    padding: .65rem .8rem;
+    border: 1px solid rgba(127, 127, 127, .28);
+    border-radius: .4rem;
+}
+
+.faq-relation-advanced summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.faq-relation-advanced[open] summary {
+    margin-bottom: .7rem;
+}
+
+.faq-admin-table code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+    .faq-admin-config-form button {
+        width: 100%;
+    }
+
+    .faq-relation-grid {
+        grid-template-columns: 1fr;
+    }
+}
