@@ -9,7 +9,7 @@ if (!SEC_hasRights('faq.admin,faq.edit', 'OR')) {
 }
 
 $display = '';
-$_SCRIPTS->setCSSFile('faq_admin', '/faq/faq-admin.css');
+$_SCRIPTS->setCSSFile('faq_admin', faq_assetPath('faq-admin.css'));
 $display .= faq_adminNavigation('relations');
 $msg = '';
 
@@ -38,6 +38,8 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
 }
 
 $token = SEC_createToken();
+$prefillProvider = isset($_GET['provider']) ? COM_applyFilter($_GET['provider']) : 'article';
+$prefillItem = isset($_GET['item_id']) ? COM_applyFilter($_GET['item_id']) : '';
 
 $display .= COM_startBlock('FAQ Associations');
 
@@ -47,7 +49,7 @@ if ($msg !== '') {
 
 $display .= '<h2>Add or update an association</h2>';
 $display .= '<form method="post" action="' . $_CONF['site_admin_url'] . '/plugins/faq/relations.php">';
-$display .= '<table class="admin-list">';
+$display .= '<div class="faq-admin-table"><table class="admin-list">';
 $display .= '<tr><th>FAQ ID</th><td><select name="faq_id" required>';
 $result = DB_query("SELECT faq.id, faq.title
                       FROM {$_TABLES['faq']} faq
@@ -60,12 +62,12 @@ while ($row = DB_fetchArray($result)) {
               . htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8') . '</option>';
 }
 $display .= '</select></td></tr>';
-$display .= '<tr><th>Provider</th><td><input type="text" name="provider" value="article" maxlength="40" required> <small>Examples: article, staticpages, videos, documents</small></td></tr>';
-$display .= '<tr><th>Item ID</th><td><input type="text" name="item_id" maxlength="128" required></td></tr>';
+$display .= '<tr><th>Provider</th><td><input type="text" name="provider" value="' . htmlspecialchars($prefillProvider, ENT_QUOTES, 'UTF-8') . '" maxlength="40" required> <small>Examples: article, staticpages, videos, documents</small></td></tr>';
+$display .= '<tr><th>Item ID</th><td><input type="text" name="item_id" value="' . htmlspecialchars($prefillItem, ENT_QUOTES, 'UTF-8') . '" maxlength="128" required></td></tr>';
 $display .= '<tr><th>Subtype</th><td><input type="text" name="item_subtype" maxlength="64"></td></tr>';
 $display .= '<tr><th>Placement</th><td><select name="placement"><option value="after">After content</option><option value="before">Before content</option><option value="manual">Manual only</option></select></td></tr>';
 $display .= '<tr><th>Order</th><td><input type="number" name="sort_order" value="0"></td></tr>';
-$display .= '</table>';
+$display .= '</table></div>';
 $display .= '<input type="hidden" name="faq_relation_action" value="add">';
 $display .= '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . $token . '">';
 $display .= '<p><input type="submit" value="Save association"></p>';
@@ -83,7 +85,7 @@ if (!faq_relationTableExists()) {
              ORDER BY rel.provider, rel.item_id, rel.sort_order, faq.title";
     $result = DB_query($sql);
 
-    $display .= '<table class="admin-list"><thead><tr><th>FAQ</th><th>Target</th><th>Placement</th><th>Order</th><th></th></tr></thead><tbody>';
+    $display .= '<div class="faq-admin-table"><table class="admin-list"><thead><tr><th>FAQ</th><th>Target</th><th>Placement</th><th>Order</th><th></th></tr></thead><tbody>';
     while ($row = DB_fetchArray($result)) {
         $target = $row['provider'] . ':' . $row['item_id'];
         if ($row['item_subtype'] !== '') {
@@ -101,7 +103,7 @@ if (!faq_relationTableExists()) {
         $display .= '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . SEC_createToken() . '">';
         $display .= '<input type="submit" value="Delete"></form></td></tr>';
     }
-    $display .= '</tbody></table>';
+    $display .= '</tbody></table></div>';
 }
 
 $display .= COM_endBlock();
