@@ -1,4 +1,4 @@
-<form action="{site_admin_url}/plugins/faq/index.php" method="post" onsubmit="set_postcontent();" class="compact uk-form">
+<form action="{site_admin_url}/plugins/faq/index.php" method="post" onsubmit="return faqEditorPrepareSubmit();" class="compact uk-form">
 <input type="hidden" name="mode" value="cat">
 <input type="hidden" id="faq_desc_edited" name="faq_desc_edited" value="0">
 
