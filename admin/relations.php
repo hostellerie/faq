@@ -49,12 +49,7 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
             $subtype = $subtypeManual;
         }
 
-        $placement = COM_applyFilter(isset($_POST['placement']) ? $_POST['placement'] : 'after');
-        if ($placement === 'automatic') {
-            // Keep the existing storage value for compatibility. Both legacy
-            // before/after values are treated as automatic at render time.
-            $placement = 'after';
-        }
+        $placement = COM_applyFilter(isset($_POST['placement']) ? $_POST['placement'] : 'automatic');
         $sort_order = isset($_POST['sort_order']) ? (int) $_POST['sort_order'] : 0;
 
         if (faq_relationAdd($faq_id, $provider, $item_id, $subtype, $placement, $sort_order)) {
