@@ -33,7 +33,6 @@
 
 require_once ('../lib-common.php');
 
-$_SCRIPTS->setCSSFile('faq_public', faq_assetPath('faq.css'));
 
 // MAIN
 //
