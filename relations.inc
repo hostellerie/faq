@@ -380,8 +380,17 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
               JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category
              WHERE rel.enabled = 1
                AND rel.provider = '{$provider}'
-               AND rel.item_id = '{$item_id}'
-               AND (rel.item_subtype = '' OR rel.item_subtype = '{$subtype}')";
+               AND rel.item_id = '{$item_id}'";
+
+    /*
+     * PLG_itemDisplay() only passes item id + type, not a subtype. When no
+     * subtype is supplied by the caller, do not filter subtype-specific
+     * relations out. The subtype remains useful metadata for consumers that
+     * can provide it explicitly.
+     */
+    if ($subtype !== '') {
+        $sql .= " AND (rel.item_subtype = '' OR rel.item_subtype = '{$subtype}')";
+    }
 
     if ($placement === 'automatic') {
         $sql .= " AND rel.placement <> 'manual'";
