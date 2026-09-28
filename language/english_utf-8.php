@@ -110,13 +110,20 @@ $LANG_FAQ_ADMIN = array(
     'delete_note' => 'NOTE: Deleting this category deletes ALL FAQs associated with this category.',
     'FAQ Plugin' => 'FAQ Plugin',
     'faqman_import' => 'You have the FAQMAN plugin installed (which is not the same as this plugin). But you may import data from the FAQMAN plugin.',
-    'cat instructions' => 'Click on "Create New" menu item to create a FAQ Category. Click on the "FAQ Editor" menu item to create FAQ entries for your FAQ Category.',
+    'cat instructions' => 'Create and manage FAQ categories here. Use the Questions tab to manage the questions attached to each category.',
     'import' => 'import',
     'access' => 'Access',
     'editor_mode' => 'Editor mode',
     'visual_editor' => 'Visual editor',
     'html_source' => 'HTML source',
-    'insert_media' => 'Insert media'
+    'insert_media' => 'Insert media',
+    'questions' => 'Questions',
+    'categories' => 'Categories',
+    'associations' => 'Associations',
+    'coverage' => 'Coverage',
+    'configuration' => 'Configuration',
+    'new_question' => 'New question',
+    'new_category' => 'New category'
 );
 
 $LANG_FAQ_IMPORT = array(
