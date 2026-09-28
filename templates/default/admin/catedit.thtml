@@ -1,70 +1,66 @@
-<form action="{site_admin_url}/plugins/faq/index.php" method="post">
+<form action="{site_admin_url}/plugins/faq/index.php" method="post" onsubmit="set_postcontent();" class="compact uk-form">
 <input type="hidden" name="mode" value="cat">
-<table border="0" cellspacing="0" cellpadding="2" width="100%">
+<input type="hidden" id="faq_desc_edited" name="faq_desc_edited" value="0">
 
-<tr>
-  <td align="right">{faq_lang_id}:</td>
-  <td>
-    <input type="text" size="40" maxlength="40" name="faq_id" value="{faq_id}">
-  </td>
-</tr>
-<tr>
-  <td align="right">{faq_lang_title}:</td>
-  <td>
-    <input type="text" size="69" maxlength="250" name="faq_title" value="{faq_title}">
-  </td>
-</tr>
-<tr>
-  <td align="right" valign="top">{faq_lang_desc}:</td>
-  <td>
-    <textarea name="faq_desc" cols="50" rows="8">{faq_desc}</textarea>
-    <br>{lang_allowed_html}
-  </td>
-</tr>
-<tr>
-  <td colspan="2"><hr><td>
-</tr>
-<tr>
-  <td colspan="2"><b>{lang_accessrights}</b></td>
-</tr>
-<tr>
-  <td align="right">{lang_owner}:</td>
-  <td>{owner_username}<input type="hidden" name="owner_id" value="{faq_ownerid}"></td>
-</tr>
-<tr>
-  <td align="right">{lang_group}:</td>
-  <td>
-    {group_dropdown}
-  </td>
-<tr>
-<tr>
-  <td colspan="2"><b>{lang_permissions}</b>:</td>
-</tr>
-<!--tr>
-  <td colspan="2"></td>
-</tr-->
-<tr>
-  <td colspan="2">{lang_permissionskey}</td>
-</tr>
-<tr>
-  <td colspan="2">
-  {permissions_editor}
-  </td>
-</tr>
-<tr>
-  <td colspan="2">{lang_lockmsg}<td>
-</tr>
-<tr><td>&nbsp;</td></tr>
-<tr>
-  <td colspan="2">
-    <input type="submit" value="{lang_save}" name="action"> 
-    <input type="submit" value="{lang_cancel}" name="action">
-    {delete_option}
-    <input type="hidden" value="{faq_id}" name="faq_old_id">
-  </td>
-</tr>
-</table>
+<div class="admin_basic">
+<dl class="form_block">
+<dt><label for="faq-editor-id">{faq_lang_id}</label></dt>
+<dd><input type="text" size="40" maxlength="40" id="faq-editor-id" name="faq_id" value="{faq_id}" class="size5"></dd>
+
+<dt><label for="faq-editor-title">{faq_lang_title}</label></dt>
+<dd><input type="text" size="69" maxlength="250" id="faq-editor-title" name="faq_title" value="{faq_title}" class="size5"></dd>
+
+<dt><label for="sel_editmode">{lang_editor_mode}</label></dt>
+<dd>
+<select id="sel_editmode" name="faq_editor_mode" onchange="change_editmode(this);">
+{editor_mode_options}
+</select>
+</dd>
+
+<dt><label>{faq_lang_desc}</label></dt>
+<dd class="faq-content-editor">
+<div id="faq_editor_toolbar" class="faq-editor-controls" style="display:{show_adveditor};">
+<label for="adveditor_toolbar_selector">{lang_toolbar}</label>
+<select id="adveditor_toolbar_selector" onchange="changeToolbar(this.value);">
+<option value="editor-toolbar1">{toolbar1}</option>
+<option value="editor-toolbar2" selected="selected">{toolbar2}</option>
+<option value="editor-toolbar3">{toolbar3}</option>
+<option value="Default">{toolbar_full}</option>
+</select>
+{media_picker_button}
+</div>
+
+<div id="faq_advanced_editarea" style="display:{show_adveditor};">
+<textarea id="faq_desc_advanced" cols="60" rows="20">{faq_desc}</textarea>
+</div>
+
+<div id="faq_html_editarea" style="display:{show_htmleditor};">
+<textarea id="faq_desc_source" name="faq_desc" cols="60" rows="20" wrap="virtual">{faq_desc}</textarea>
+<div class="warningsmall faq-editor-note">{lang_allowed_html}</div>
+{media_picker_button_source}
+</div>
+</dd>
+
+</dl>
+
+<hr>
+<h3>{lang_accessrights}</h3>
+<dl class="form_block">
+<dt>{lang_owner}</dt>
+<dd>{owner_username}<input type="hidden" name="owner_id" value="{faq_ownerid}"></dd>
+<dt>{lang_group}</dt>
+<dd>{group_dropdown}</dd>
+<dt>{lang_permissions}</dt>
+<dd>{permissions_editor}</dd>
+<dd class="description">{lang_permissionskey}</dd>
+<dd class="description">{lang_lockmsg}</dd>
+</dl>
+
+<p>
+<input type="submit" value="{lang_save}" name="action">
+<input type="submit" value="{lang_cancel}" name="action">
+{delete_option}
+<input type="hidden" value="{faq_id}" name="faq_old_id">
+</p>
+</div>
 </form>
-<script language="JavaScript1.2" defer>
-editor_generate('description');
-</script>
