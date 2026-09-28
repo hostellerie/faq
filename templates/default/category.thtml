@@ -1,0 +1,29 @@
+{block_start}
+<div class="faq-public faq-category">
+  <nav class="faq-breadcrumbs" aria-label="FAQ breadcrumb">
+    <a href="{faq_cats_url}">{faq_lang_cats}</a>
+    <span aria-hidden="true">›</span>
+    <span>{faq_cat_title}</span>
+  </nav>
+
+  <header class="faq-category-header">
+    <h1 class="faq-category-title">{faq_cat_title}</h1>
+    <div class="faq-category-description">{faq_cat_desc}</div>
+    {faq_cat_edit}
+  </header>
+
+  <ul class="faq-question-list">
+    {faq_question_list_item}
+  </ul>
+</div>
+{block_end}
+
+<!-- BEGIN faq_question_list_item -->
+<li class="faq-question-card">
+  <h2><a href="{faq_url}">{faq_title}</a></h2>
+  <div class="faq-card-meta">
+    <span>{faq_updated_label}: {faq_updated}</span>
+    <span>{faq_hits_label}: {faq_hits}</span>
+  </div>
+</li>
+<!-- END faq_question_list_item -->
