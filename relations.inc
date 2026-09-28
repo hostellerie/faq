@@ -291,7 +291,7 @@ function faq_relationFaqExists($faq_id, $access = 2)
     return DB_numRows($result) === 1;
 }
 
-function faq_relationAdd($faq_id, $provider, $item_id, $subtype = '', $placement = 'after', $sort_order = 0)
+function faq_relationAdd($faq_id, $provider, $item_id, $subtype = '', $placement = 'automatic', $sort_order = 0)
 {
     global $_TABLES;
 
@@ -307,7 +307,14 @@ function faq_relationAdd($faq_id, $provider, $item_id, $subtype = '', $placement
     $provider = DB_escapeString($provider);
     $item_id = DB_escapeString($item_id);
     $subtype = DB_escapeString(substr((string) $subtype, 0, 64));
-    $placement = in_array($placement, array('before', 'after', 'manual')) ? $placement : 'after';
+    $placement = strtolower(trim((string) $placement));
+    if ($placement === 'before' || $placement === 'after') {
+        // Legacy 1.3.0-development values: Geeklog exposes one provider-defined
+        // PLG_itemDisplay() insertion point, not generic before/after slots.
+        $placement = 'automatic';
+    }
+    $placement = in_array($placement, array('automatic', 'manual'), true)
+        ? $placement : 'automatic';
     $sort_order = (int) $sort_order;
 
     $sql = "INSERT INTO {$_TABLES['faq_relations']}
