@@ -111,7 +111,11 @@ $LANG_FAQ_ADMIN = array(
     'faqman_import' => 'You have the FAQMAN plugin installed (which is not the same as this plugin). But you may import data from the FAQMAN plugin.',
     'cat instructions' => 'Click on "Create New" menu item to create a FAQ Category. Click on the "FAQ Editor" menu item to create FAQ entries for your FAQ Category.',
     'import' => 'import',
-    'access' => 'Access'
+    'access' => 'Access',
+    'editor_mode' => 'Editor mode',
+    'visual_editor' => 'Visual editor',
+    'html_source' => 'HTML source',
+    'insert_media' => 'Insert media'
 );
 
 $LANG_FAQ_IMPORT = array(
