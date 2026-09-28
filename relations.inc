@@ -461,9 +461,9 @@ function faq_renderFaqItems($items, $css_class, $asFaqPage)
     $label = isset($LANG_FAQ_COMMON['FAQs']) ? $LANG_FAQ_COMMON['FAQs'] : 'FAQs';
     $permalink = isset($LANG_FAQ_COMMON['permalink']) ? $LANG_FAQ_COMMON['permalink'] : 'Permalink';
 
-    $html = '<section class="' . htmlspecialchars($css_class, ENT_QUOTES, 'UTF-8') . '" aria-label="'
+    $html = '<section class="faq-context-block ' . htmlspecialchars($css_class, ENT_QUOTES, 'UTF-8') . '" aria-label="'
           . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '">';
-    $html .= '<h2 class="faq-contextual-title">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</h2>';
+    $html .= '<div class="faq-context-title">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</div>';
 
     foreach ($items as $item) {
         if (empty($item['title']) || !isset($item['description'])) {
