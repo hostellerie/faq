@@ -464,6 +464,28 @@ Support:
 - linked content;
 - ordering/placement metadata where relevant.
 
+#### Modern editor integration guardrail
+
+Do **not** select, bundle or recreate a FAQ-specific WYSIWYG editor before checking the editor API actually exposed by the supported Geeklog versions.
+
+For Geeklog 2.1.1 through 2.2.2, FAQ should integrate through Geeklog's native Advanced Editor API (`COM_setupAdvancedEditor()` / `AdvancedEditor`) and let Geeklog own the configured editor implementation. FAQ must not call the old `editor_generate()` mechanism and must not depend on an unrelated global JavaScript editor.
+
+Editor requirements:
+
+- keep `description` as the authoritative HTML source field;
+- provide a source-HTML mode for both FAQ answers and category descriptions;
+- load historical HTML without rewriting, normalizing or migrating it on open;
+- never replace stored historical `description` merely because the record was opened in a visual editor;
+- consider content editable only after an explicit user content edit;
+- only then synchronize visual-editor output back to `description` and pass it through Geeklog's normal HTML validation on save;
+- preserve Geeklog autotags;
+- use paragraph/block semantics supplied by the Geeklog editor adapter rather than newline-to-`<br>` normalization;
+- integrate MediaGallery through its modern picker contract when available, without depending on the historical jQuery media-browser mechanism;
+- degrade to HTML source editing when the configured editor adapter cannot guarantee the no-silent-rewrite contract;
+- remain responsive and theme-neutral, including Denim and Eclipse.
+
+The bundled editor used by a particular Geeklog release is an implementation detail. FAQ owns the preservation and integration contract, not the WYSIWYG engine.
+
 Keep UI compatible with standard Geeklog administration patterns.
 
 Do not require Eclipse.
@@ -884,7 +906,10 @@ FAQ 1.3.0 is ready when:
 15. configuration uses Geeklog-native configuration patterns;
 16. sitemap/metadata/structured-data features do not cause failures on older supported Geeklog versions;
 17. README, upgrade instructions and release notes are complete;
-18. an installable release archive can be generated from the final 1.3.0 tree.
+18. an installable release archive can be generated from the final 1.3.0 tree;
+19. opening and saving an existing FAQ/category without editing its content leaves its stored `description` unchanged;
+20. the FAQ editor uses Geeklog's Advanced Editor API where safely available and contains no `editor_generate()` dependency;
+21. HTML source mode remains available and MediaGallery insertion uses the modern picker when that capability is present.
 
 ---
 
