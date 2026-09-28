@@ -202,7 +202,7 @@ function faq_assetPath($relative)
 
 function faq_adminNavigation($active = '')
 {
-    global $_CONF;
+    global $_CONF, $LANG_FAQ_ADMIN;
 
     if (!SEC_hasRights('faq.admin,faq.edit', 'OR')) {
         return '';
@@ -236,20 +236,28 @@ function faq_adminNavigation($active = '')
         'url' => $_CONF['site_admin_url'] . '/plugins/faq/coverage.php'
     );
 
-    if (SEC_inGroup('Root')) {
-        $items[] = array(
-            'key' => 'config',
-            'label' => isset($LANG_FAQ_ADMIN['configuration']) ? $LANG_FAQ_ADMIN['configuration'] : 'Configuration',
-            'url' => $_CONF['site_admin_url'] . '/configuration.php?conf_group=faq'
-        );
-    }
-
     $html = '<nav class="faq-admin-nav" aria-label="FAQ administration"><ul>';
     foreach ($items as $item) {
         $class = $active === $item['key'] ? ' class="active"' : '';
         $html .= '<li' . $class . '><a href="' . htmlspecialchars($item['url'], ENT_QUOTES, 'UTF-8') . '">'
               . htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') . '</a></li>';
     }
+
+    if (SEC_inGroup('Root')) {
+        $class = $active === 'config' ? ' class="active"' : '';
+        $html .= '<li' . $class . '><form method="post" action="'
+              . htmlspecialchars($_CONF['site_admin_url'] . '/configuration.php', ENT_QUOTES, 'UTF-8')
+              . '" class="faq-admin-config-form">'
+              . '<input type="hidden" name="conf_group" value="faq">'
+              . '<button type="submit">'
+              . htmlspecialchars(
+                    isset($LANG_FAQ_ADMIN['configuration']) ? $LANG_FAQ_ADMIN['configuration'] : 'Configuration',
+                    ENT_QUOTES,
+                    'UTF-8'
+                )
+              . '</button></form></li>';
+    }
+
     $html .= '</ul></nav>';
 
     return $html;
