@@ -50,6 +50,11 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
         }
 
         $placement = COM_applyFilter(isset($_POST['placement']) ? $_POST['placement'] : 'after');
+        if ($placement === 'automatic') {
+            // Keep the existing storage value for compatibility. Both legacy
+            // before/after values are treated as automatic at render time.
+            $placement = 'after';
+        }
         $sort_order = isset($_POST['sort_order']) ? (int) $_POST['sort_order'] : 0;
 
         if (faq_relationAdd($faq_id, $provider, $item_id, $subtype, $placement, $sort_order)) {
@@ -126,8 +131,7 @@ $display .= '<label id="faq-relation-item-manual-wrap" style="display:none">Cont
 $display .= '<input type="hidden" id="faq-relation-subtype" name="item_subtype" value="">';
 
 $display .= '<label>Placement<select name="placement">'
-          . '<option value="after">After content</option>'
-          . '<option value="before">Before content</option>'
+          . '<option value="automatic">Automatic</option>'
           . '<option value="manual">Manual only</option>'
           . '</select></label>';
 
@@ -194,7 +198,8 @@ if (!faq_relationTableExists()) {
         }
         $display .= '</td>';
 
-        $display .= '<td>' . htmlspecialchars($row['placement'], ENT_QUOTES, 'UTF-8') . '</td>';
+                $placementLabel = $row['placement'] === 'manual' ? 'Manual only' : 'Automatic';
+        $display .= '<td>' . htmlspecialchars($placementLabel, ENT_QUOTES, 'UTF-8') . '</td>';
         $display .= '<td>' . (int) $row['sort_order'] . '</td><td>';
         $display .= '<form method="post" action="' . $_CONF['site_admin_url'] . '/plugins/faq/relations.php" style="display:inline">';
         $display .= '<input type="hidden" name="faq_relation_action" value="delete">';
