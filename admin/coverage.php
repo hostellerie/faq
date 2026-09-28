@@ -23,16 +23,16 @@ $items = faq_providerCollection($provider, 'id,title,url,date-modified', array(
     'order' => 'modified-desc'
 ));
 
-$_SCRIPTS->setCSSFile('faq_admin', '/faq/faq-admin.css');
+$_SCRIPTS->setCSSFile('faq_admin', faq_assetPath('faq-admin.css'));
 $display = faq_adminNavigation('coverage');
 $display .= COM_startBlock('FAQ Coverage');
-$display .= '<form method="get" action="' . $_CONF['site_admin_url'] . '/plugins/faq/coverage.php">';
-$display .= '<label>Provider <select name="provider">';
+$display .= '<form method="get" action="' . $_CONF['site_admin_url'] . '/plugins/faq/coverage.php" class="faq-admin-toolbar">';
+$display .= '<label for="faq-coverage-provider">Provider</label><select id="faq-coverage-provider" name="provider">';
 foreach (array('article' => 'Articles', 'staticpages' => 'Static Pages', 'videos' => 'Videos', 'documents' => 'Documents', 'maps' => 'Maps', 'mediagallery' => 'Media Gallery') as $key => $label) {
     $selected = $provider === $key ? ' selected' : '';
     $display .= '<option value="' . $key . '"' . $selected . '>' . $label . '</option>';
 }
-$display .= '</select></label> <input type="submit" value="Show"></form>';
+$display .= '</select><input type="submit" value="Show"></form>';
 
 if ($items === false) {
     $display .= '<p>This provider does not expose an enumerable Item Info collection on this installation. FAQ will not query its private SQL tables. Manual associations remain available.</p>';
@@ -62,11 +62,12 @@ if ($items === false) {
 
         $rows .= '<tr><td>' . $titleHtml . '<br><small>' . htmlspecialchars((string) $item['id'], ENT_QUOTES, 'UTF-8') . '</small></td>';
         $rows .= '<td>' . $count . '</td>';
-        $rows .= '<td><a href="' . $_CONF['site_admin_url'] . '/plugins/faq/relations.php">Manage</a></td></tr>';
+        $rows .= '<td><a href="' . $_CONF['site_admin_url'] . '/plugins/faq/relations.php?provider='
+              . rawurlencode($provider) . '&amp;item_id=' . rawurlencode((string) $item['id']) . '">Manage</a></td></tr>';
     }
 
-    $display .= '<p><strong>With FAQ:</strong> ' . $with . ' &nbsp; <strong>Without FAQ:</strong> ' . $without . '</p>';
-    $display .= '<table class="admin-list"><thead><tr><th>Content</th><th>FAQ</th><th></th></tr></thead><tbody>' . $rows . '</tbody></table>';
+    $display .= '<div class="faq-admin-summary"><span><strong>' . $with . '</strong>With FAQ</span><span><strong>' . $without . '</strong>Without FAQ</span></div>';
+    $display .= '<div class="faq-admin-table"><table class="admin-list"><thead><tr><th>Content</th><th>FAQ</th><th>Action</th></tr></thead><tbody>' . $rows . '</tbody></table></div>';
 }
 
 $display .= COM_endBlock();
