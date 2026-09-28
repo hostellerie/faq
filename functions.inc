@@ -175,7 +175,7 @@ function faq_getCategoryList($selected = '')
 
 function faq_assetUrl($relative)
 {
-    global $_CONF;
+    global $_CONF, $LANG_FAQ_ADMIN;
 
     $relative = ltrim((string) $relative, '/');
     $path = $_CONF['path_html'] . 'faq/' . $relative;
@@ -212,34 +212,34 @@ function faq_adminNavigation($active = '')
 
     $items[] = array(
         'key' => 'faq',
-        'label' => 'Questions',
+        'label' => isset($LANG_FAQ_ADMIN['questions']) ? $LANG_FAQ_ADMIN['questions'] : 'Questions',
         'url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=faq'
     );
 
     if (SEC_hasRights('faq.admin')) {
         $items[] = array(
             'key' => 'cat',
-            'label' => 'Categories',
+            'label' => isset($LANG_FAQ_ADMIN['categories']) ? $LANG_FAQ_ADMIN['categories'] : 'Categories',
             'url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=cat'
         );
     }
 
     $items[] = array(
         'key' => 'relations',
-        'label' => 'Associations',
+        'label' => isset($LANG_FAQ_ADMIN['associations']) ? $LANG_FAQ_ADMIN['associations'] : 'Associations',
         'url' => $_CONF['site_admin_url'] . '/plugins/faq/relations.php'
     );
 
     $items[] = array(
         'key' => 'coverage',
-        'label' => 'Coverage',
+        'label' => isset($LANG_FAQ_ADMIN['coverage']) ? $LANG_FAQ_ADMIN['coverage'] : 'Coverage',
         'url' => $_CONF['site_admin_url'] . '/plugins/faq/coverage.php'
     );
 
     if (SEC_inGroup('Root')) {
         $items[] = array(
             'key' => 'config',
-            'label' => 'Configuration',
+            'label' => isset($LANG_FAQ_ADMIN['configuration']) ? $LANG_FAQ_ADMIN['configuration'] : 'Configuration',
             'url' => $_CONF['site_admin_url'] . '/configuration.php?conf_group=faq'
         );
     }
