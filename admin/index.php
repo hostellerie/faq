@@ -730,7 +730,7 @@ function listfaq ($cat = '')
         $data_arr[] = $A;
     }
 
-    $retval .= COM_startBlock($LANG_FAQ_ADMIN['FAQ Editor'], '', COM_getBlockTemplate('_admin_block', 'header'));
+    $retval .= COM_startBlock(isset($LANG_FAQ_ADMIN['questions']) ? $LANG_FAQ_ADMIN['questions'] : $LANG_FAQ_ADMIN['FAQ Editor'], '', COM_getBlockTemplate('_admin_block', 'header'));
     $retval .= ADMIN_createMenu($menu_arr, $text_arr['instructions'], $text_arr['icon']);
     $retval .= ADMIN_simpleList('faq_getListField_faq', $header_arr, $text_arr, $data_arr);
     $retval .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
@@ -784,7 +784,7 @@ function listcat ()
         $data_arr[] = $A;
     }
 
-    $retval .= COM_startBlock($LANG_FAQ_ADMIN['Cat Editor'], '', COM_getBlockTemplate('_admin_block', 'header'));
+    $retval .= COM_startBlock(isset($LANG_FAQ_ADMIN['categories']) ? $LANG_FAQ_ADMIN['categories'] : $LANG_FAQ_ADMIN['Cat Editor'], '', COM_getBlockTemplate('_admin_block', 'header'));
     $retval .= ADMIN_createMenu($menu_arr, $text_arr['instructions'], $text_arr['icon']);
     $retval .= ADMIN_simpleList('faq_getListField_cat', $header_arr, $text_arr, $data_arr);
     $retval .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
