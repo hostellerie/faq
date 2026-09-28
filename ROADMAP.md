@@ -375,13 +375,22 @@ If a host does not expose the provider placement point:
 
 ### Supported placement modes
 
-Plan for:
+FAQ follows Geeklog's actual `PLG_itemDisplay($id, $type)` contract.
 
-- after content;
-- before content;
-- explicit/manual only.
+Supported modes are:
 
-Do not assume every provider supports every placement.
+- **automatic** — render the FAQ fragment at the insertion point chosen by the host provider;
+- **manual only** — never return the relation through `plugin_itemdisplay_faq()`; use an autotag or other explicit placement.
+
+FAQ must not advertise generic "before content" or "after content" positions because Geeklog does not pass such a placement argument to `PLG_itemDisplay()`. The host provider owns the physical insertion point.
+
+Verified provider examples:
+
+- Documents `documents_1.3.0`: after the rendered document body;
+- Videos `videos_0.21.0`: after the full video article;
+- Maps `update/maps-1.7`: at the provider-defined map/marker item display point.
+
+Legacy development values `before` and `after` must be treated as `automatic` without breaking existing test data.
 
 ---
 
