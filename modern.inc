@@ -4,6 +4,40 @@ if (strpos($_SERVER['PHP_SELF'], 'modern.inc') !== false) {
     die('This file can not be used on its own.');
 }
 
+/**
+ * Remove editor-generated <br> elements that sit directly on HTML block
+ * boundaries. Real line breaks inside textual content are preserved.
+ *
+ * @param string $html
+ * @return string
+ */
+function faq_normalizeContentHtml($html)
+{
+    $html = (string) $html;
+    if ($html === '' || stripos($html, '<br') === false) {
+        return $html;
+    }
+
+    $block = '(?:p|ol|ul|li|dl|dt|dd|h[1-6]|blockquote|table|thead|tbody|tfoot|tr|th|td|section|article|div)';
+    $previous = null;
+
+    while ($html !== $previous) {
+        $previous = $html;
+        $html = preg_replace(
+            '#(?:<br\\s*/?>\\s*)+(?=</?' . $block . '\\b)#i',
+            '',
+            $html
+        );
+        $html = preg_replace(
+            '#(</?' . $block . '\\b[^>]*>)\\s*(?:<br\\s*/?>\\s*)+#i',
+            '$1',
+            $html
+        );
+    }
+
+    return $html;
+}
+
 function plugin_getcapabilities_faq()
 {
     return array(
