@@ -1,16 +1,28 @@
 {block_start}
+<div class="faq-public faq-entry">
+  <nav class="faq-breadcrumbs" aria-label="FAQ breadcrumb">
+    <a href="{faq_cats_url}">{faq_lang_cats}</a>
+    <span aria-hidden="true">›</span>
+    <a href="{faq_cat_url}">{faq_cat_title}</a>
+  </nav>
 
-<h2><img src="{site_url}/faq/images/faq-entry.png" style="padding-right:5px; border:none; float:left;" alt="{faq_title}">
-{faq_title}</h2>
-<dl><dd>
-{faq_desc}
-</dd></dl>
-<hr>
-<table style="border: none;">
-<tr><td align="right"><b>{faq_lang_hits}:</b></td><td>{faq_hits}</td></tr>
-<tr><td align="right"><b>{faq_lang_updated}:</b></td><td>{faq_updated}</td></tr>
-</table>
-<hr>
-[ <a href="{faq_cats_url}">{faq_lang_cats}</a> | <a href="{faq_cat_url}">{faq_cat_title}</a>{faq_edit} ]
+  <article>
+    <h1 class="faq-entry-title">{faq_title}</h1>
 
+    <div class="faq-entry-answer">
+      {faq_desc}
+    </div>
+
+    <div class="faq-meta">
+      <span><strong>{faq_lang_hits}:</strong> {faq_hits}</span>
+      <span><strong>{faq_lang_updated}:</strong> {faq_updated}</span>
+    </div>
+
+    <div class="faq-actions">
+      <a href="{faq_cats_url}">{faq_lang_cats}</a>
+      <a href="{faq_cat_url}">{faq_cat_title}</a>
+      {faq_edit}
+    </div>
+  </article>
+</div>
 {block_end}
