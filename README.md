@@ -171,3 +171,17 @@ The build is reproducible through:
 ```
 
 PHP syntax is validated in GitHub Actions against PHP 5.6 and PHP 8.1.
+
+
+### Automatic placement contract
+
+Contextual FAQ rendering follows Geeklog's native `PLG_itemDisplay($id, $type)` contract.
+
+- **Automatic** returns the FAQ fragment to the host provider.
+- **Manual only** suppresses automatic output and leaves placement to FAQ autotags.
+- The host provider decides where the automatic fragment appears on its public item page.
+- FAQ does not invent generic before/after slots that the Geeklog API does not expose.
+
+Known provider implementations used during FAQ 1.3.0 development include Documents `documents_1.3.0`, Videos `videos_0.21.0`, and Maps `update/maps-1.7`.
+
+Older development rows containing `before` or `after` are interpreted as `automatic`.
