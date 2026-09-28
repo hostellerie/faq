@@ -49,7 +49,7 @@ jobs:
       - name: Validate modern editor contract
         if: matrix.php == '8.1'
         run: |
-          if grep -R --exclude-dir=dist --exclude-dir=.git --exclude='ROADMAP.md' --exclude='README.md' -n "editor_generate(" .; then
+          if grep -R --exclude-dir=dist --exclude-dir=.git --exclude-dir=.github --exclude='ROADMAP.md' --exclude='README.md' -n "editor_generate(" .; then
             echo "Legacy editor_generate dependency found."
             exit 1
           fi
