@@ -59,3 +59,13 @@ jobs:
           grep -q 'COM_setupAdvancedEditor' admin/index.php
           grep -q 'COM_checkHTML' admin/index.php
           grep -q 'data-mg-picker-url' admin/index.php
+
+
+      - name: Validate article relation fallback
+        if: matrix.php == '8.1'
+        run: |
+          grep -q 'function plugin_templatesetvars_faq' modern.inc
+          grep -q "faq_renderContextual('article'" modern.inc
+          grep -q "story_text_no_br" modern.inc
+          grep -q "story_introtext" modern.inc
+          grep -q "faq-context-block" modern.inc
