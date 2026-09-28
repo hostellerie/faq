@@ -1,0 +1,177 @@
+(function () {
+    'use strict';
+
+    function byId(id) {
+        return document.getElementById(id);
+    }
+
+    function setManual(input, wrapper, enabled) {
+        if (wrapper) {
+            wrapper.style.display = enabled ? '' : 'none';
+        }
+        if (input) {
+            input.required = enabled;
+            if (!enabled) {
+                input.value = '';
+            }
+        }
+    }
+
+    function resetItems(select, note, text) {
+        if (!select) {
+            return;
+        }
+        select.innerHTML = '';
+        var option = document.createElement('option');
+        option.value = '';
+        option.textContent = text || 'Select content';
+        select.appendChild(option);
+        select.disabled = true;
+        if (note) {
+            note.textContent = '';
+        }
+    }
+
+    function init() {
+        var provider = byId('faq-relation-provider');
+        var itemSelect = byId('faq-relation-item');
+        var itemManual = byId('faq-relation-item-manual');
+        var itemManualWrap = byId('faq-relation-item-manual-wrap');
+        var itemWrap = byId('faq-relation-item-wrap');
+        var subtype = byId('faq-relation-subtype');
+        var subtypeManual = byId('faq-relation-subtype-manual');
+        var note = byId('faq-relation-note');
+        var endpoint;
+
+        if (!provider || !itemSelect) {
+            return;
+        }
+
+        endpoint = provider.getAttribute('data-items-url') || 'relations.php';
+
+        function showManual(message) {
+            if (itemWrap) {
+                itemWrap.style.display = 'none';
+            }
+            setManual(itemManual, itemManualWrap, true);
+            if (note) {
+                note.textContent = message || '';
+            }
+            if (subtype) {
+                subtype.value = '';
+            }
+        }
+
+        function loadItems() {
+            var type = provider.value;
+
+            resetItems(itemSelect, note, 'Loading…');
+            setManual(itemManual, itemManualWrap, false);
+            if (itemWrap) {
+                itemWrap.style.display = '';
+            }
+            if (subtype) {
+                subtype.value = '';
+            }
+            if (subtypeManual) {
+                subtypeManual.value = '';
+            }
+
+            if (!type) {
+                resetItems(itemSelect, note, 'Select a provider first');
+                return;
+            }
+
+            fetch(endpoint + '?faq_ajax=items&provider=' + encodeURIComponent(type), {
+                credentials: 'same-origin'
+            })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(function (data) {
+                    var first;
+                    var manual;
+                    var i;
+                    var row;
+                    var option;
+
+                    itemSelect.innerHTML = '';
+
+                    if (!data || !data.supported) {
+                        showManual(data && data.message ? data.message : 'Collection unavailable; enter the content ID manually.');
+                        return;
+                    }
+
+                    if (itemWrap) {
+                        itemWrap.style.display = '';
+                    }
+
+                    first = document.createElement('option');
+                    first.value = '';
+                    first.textContent = data.items && data.items.length ? 'Select content' : 'No selectable content';
+                    itemSelect.appendChild(first);
+
+                    if (data.items) {
+                        for (i = 0; i < data.items.length; i += 1) {
+                            row = data.items[i];
+                            option = document.createElement('option');
+                            option.value = row.id;
+                            option.textContent = (row.title || row.id) + ' [' + row.id + ']';
+                            option.setAttribute('data-subtype', row.subtype || '');
+                            itemSelect.appendChild(option);
+                        }
+                    }
+
+                    manual = document.createElement('option');
+                    manual.value = '__manual__';
+                    manual.textContent = 'Enter ID manually…';
+                    itemSelect.appendChild(manual);
+                    itemSelect.disabled = false;
+
+                    if (note) {
+                        note.textContent = data.message || '';
+                    }
+                })
+                .catch(function () {
+                    showManual('Unable to load the provider collection; enter the content ID manually.');
+                });
+        }
+
+        provider.addEventListener('change', loadItems);
+
+        itemSelect.addEventListener('change', function () {
+            var manual = itemSelect.value === '__manual__';
+            var selected = itemSelect.options[itemSelect.selectedIndex];
+            var detectedSubtype = selected ? selected.getAttribute('data-subtype') : '';
+
+            setManual(itemManual, itemManualWrap, manual);
+
+            if (subtype) {
+                subtype.value = manual ? '' : (detectedSubtype || '');
+            }
+
+            if (subtypeManual) {
+                subtypeManual.value = '';
+            }
+
+            if (note && manual) {
+                note.textContent = 'Manual fallback: enter the content ID. Subtype remains optional.';
+            }
+
+            if (manual && itemManual) {
+                itemManual.focus();
+            }
+        });
+
+        loadItems();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+}());
