@@ -639,7 +639,7 @@ function plugin_upgrade_faq()
                             provider varchar(40) NOT NULL,
                             item_id varchar(128) NOT NULL,
                             item_subtype varchar(64) NOT NULL DEFAULT '',
-                            placement varchar(16) NOT NULL DEFAULT 'after',
+                            placement varchar(16) NOT NULL DEFAULT 'automatic',
                             sort_order int(11) NOT NULL DEFAULT 0,
                             enabled tinyint(1) unsigned NOT NULL DEFAULT 1,
                             created datetime DEFAULT NULL,
