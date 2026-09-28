@@ -30,7 +30,7 @@ function plugin_initconfig_faq()
     $c->add('tab_context', null, 'tab', 0, 0, null, 0, true, 'faq', 1);
     $c->add('fs_context', null, 'fieldset', 0, 0, null, 0, true, 'faq', 1);
     $c->add('contextual_enabled', 1, 'select', 0, 0, 0, 10, true, 'faq', 1);
-    $c->add('contextual_default_placement', 'after', 'select', 0, 0, 1, 20, true, 'faq', 1);
+    $c->add('contextual_default_placement', 'automatic', 'select', 0, 0, 1, 20, true, 'faq', 1);
     $c->add('structured_data', 1, 'select', 0, 0, 0, 30, true, 'faq', 1);
     $c->add('coverage_limit', 100, 'text', 0, 0, null, 40, true, 'faq', 1);
 
