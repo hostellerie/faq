@@ -56,6 +56,90 @@ if ( $no_access ) {
 }
 
 /**
+ * Return whether FAQ can safely enable Geeklog's visual Advanced Editor.
+ *
+ * FAQ deliberately uses the Core Advanced Editor API. The current Geeklog
+ * 2.1.1-2.2.2 bundled adapter is CKEditor, whose dirty/change events let FAQ
+ * preserve historical HTML byte-for-byte when the content itself was not edited.
+ */
+function faq_editorCanUseVisual()
+{
+    global $_CONF, $_USER;
+
+    if (empty($_CONF['advanced_editor']) || empty($_USER['advanced_editor'])) {
+        return false;
+    }
+    if (!function_exists('COM_setupAdvancedEditor')) {
+        return false;
+    }
+
+    $editor = isset($_CONF['advanced_editor_name']) ? strtolower(trim($_CONF['advanced_editor_name'])) : '';
+    if ($editor !== 'ckeditor') {
+        return false;
+    }
+
+    return !empty($_CONF['path_editors'])
+        && file_exists($_CONF['path_editors'] . $editor . '/functions.php');
+}
+
+function faq_editorEscapeContent($content)
+{
+    return htmlspecialchars((string) $content, ENT_NOQUOTES, COM_getCharset());
+}
+
+function faq_setupContentEditor($tpl, $permission)
+{
+    global $_CONF, $_PLUGINS, $_SCRIPTS, $LANG_FAQ_ADMIN, $LANG24;
+
+    $_SCRIPTS->setCSSFile('faq_admin_editor', '/faq/faq-admin.css');
+
+    $visual = faq_editorCanUseVisual();
+    if ($visual) {
+        COM_setupAdvancedEditor('/faq/adveditor.js', $permission);
+        $tpl->set_var('show_adveditor', '');
+        $tpl->set_var('show_htmleditor', 'none');
+        $tpl->set_var('editor_mode_options',
+            '<option value="html">' . htmlspecialchars($LANG_FAQ_ADMIN['html_source'], ENT_QUOTES, COM_getCharset()) . '</option>'
+            . '<option value="adveditor" selected="selected">'
+            . htmlspecialchars($LANG_FAQ_ADMIN['visual_editor'], ENT_QUOTES, COM_getCharset()) . '</option>');
+        $tpl->set_var('lang_toolbar', isset($LANG24[70]) ? $LANG24[70] : 'Toolbar');
+        $tpl->set_var('toolbar1', isset($LANG24[71]) ? $LANG24[71] : 'Basic');
+        $tpl->set_var('toolbar2', isset($LANG24[72]) ? $LANG24[72] : 'Standard');
+        $tpl->set_var('toolbar3', isset($LANG24[73]) ? $LANG24[73] : 'Advanced');
+        $tpl->set_var('toolbar_full', isset($LANG24[75]) ? $LANG24[75] : 'Full');
+    } else {
+        $tpl->set_var('show_adveditor', 'none');
+        $tpl->set_var('show_htmleditor', '');
+        $tpl->set_var('editor_mode_options',
+            '<option value="html" selected="selected">'
+            . htmlspecialchars($LANG_FAQ_ADMIN['html_source'], ENT_QUOTES, COM_getCharset()) . '</option>');
+        $tpl->set_var('lang_toolbar', '');
+        $tpl->set_var('toolbar1', '');
+        $tpl->set_var('toolbar2', '');
+        $tpl->set_var('toolbar3', '');
+        $tpl->set_var('toolbar_full', '');
+    }
+
+    $tpl->set_var('lang_editor_mode', $LANG_FAQ_ADMIN['editor_mode']);
+
+    $pickerButton = '';
+    if (in_array('mediagallery', $_PLUGINS, true)
+        && file_exists($_CONF['path_html'] . 'mediagallery/js/media-picker.js')
+        && file_exists($_CONF['path_html'] . 'mediagallery/picker.php')) {
+        $_SCRIPTS->setJavaScriptFile('faq_mediagallery_picker', '/mediagallery/js/media-picker.js', true, 220);
+        $pickerUrl = $_CONF['site_url'] . '/mediagallery/picker.php?target=%23faq_desc_source';
+        $pickerButton = '<button type="button" class="faq-editor-media" data-mg-picker-url="'
+            . htmlspecialchars($pickerUrl, ENT_QUOTES, COM_getCharset()) . '">'
+            . htmlspecialchars($LANG_FAQ_ADMIN['insert_media'], ENT_QUOTES, COM_getCharset()) . '</button>';
+    }
+
+    $tpl->set_var('media_picker_button', $pickerButton);
+    $tpl->set_var('media_picker_button_source', $pickerButton);
+
+    return $visual;
+}
+
+/**
 * Shows the FAQ editor
 *
 * @param  string  $id    ID of FAQ to edit
@@ -132,7 +216,8 @@ function editfaq ($id = '')
     $tpl->set_var('faq_category_options', faq_getCategoryList ($A['category']));
     $tpl->set_var('faq_category', $A['category']);
     $tpl->set_var('faq_hits', $A['hits']);
-    $tpl->set_var('faq_desc', stripslashes($A['description']));
+    $tpl->set_var('faq_desc', faq_editorEscapeContent($A['description']));
+    faq_setupContentEditor($tpl, 'faq.edit');
     $thetime = COM_getUserDateTimeFormat($A['unixdate']);
     $tpl->set_var('faq_date', $thetime[0]);
     $tpl->set_var('lang_save', $LANG_FAQ_ADMIN['save']);
@@ -236,7 +321,8 @@ function editcat ($id = '')
     $tpl->set_var('faq_lang_id', $LANG_FAQ_ADMIN['id']);
     $tpl->set_var('faq_id', $A['id']);
     $tpl->set_var('faq_lang_desc', $LANG_FAQ_ADMIN['description']);
-    $tpl->set_var('faq_desc', stripslashes($A['description']));
+    $tpl->set_var('faq_desc', faq_editorEscapeContent($A['description']));
+    faq_setupContentEditor($tpl, 'faq.admin');
     $tpl->set_var('lang_save', $LANG_FAQ_ADMIN['save']);
     $tpl->set_var('lang_cancel', $LANG_FAQ_ADMIN['cancel']);
     
@@ -289,7 +375,7 @@ function editcat ($id = '')
 * @return   string                  HTML redirect or error message
 * 
 */
-function savefaq ($id, $old_id, $category, $description, $title, $hits, $date, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon)
+function savefaq ($id, $old_id, $category, $description, $description_edited, $title, $hits, $date, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon)
 {
     global $_CONF, $_GROUPS, $_TABLES, $_USER, $MESSAGE, $LANG_FAQ_ADMIN, $_FAQ_CONF;
 
@@ -315,10 +401,24 @@ function savefaq ($id, $old_id, $category, $description, $title, $hits, $date, $
                 perm_anon = $perm_anon";
     return $retval;*/
 
-    // clean 'em up 
-    $description = addslashes (COM_checkHTML (COM_checkWords ($description)));
-    $title = addslashes (COM_checkHTML (COM_checkWords ($title)));
-    $id = addslashes ($id);
+    // Preserve historical HTML unless the content itself was explicitly edited.
+    $existing_description = null;
+    if (!empty($old_id) && DB_count($_TABLES['faq'], 'id', DB_escapeString($old_id)) > 0) {
+        $existing_description = DB_getItem(
+            $_TABLES['faq'],
+            'description',
+            "id = '" . DB_escapeString($old_id) . "'"
+        );
+    }
+
+    if ($existing_description !== null && (int) $description_edited !== 1) {
+        $description = DB_escapeString($existing_description);
+    } else {
+        $description = DB_escapeString(COM_checkHTML(COM_checkWords($description)));
+    }
+
+    $title = DB_escapeString(COM_checkHTML(COM_checkWords($title)));
+    $id = DB_escapeString($id);
     
     if (empty ($owner_id)) {
         // this is new link from admin, set default values
@@ -430,7 +530,7 @@ function savefaq ($id, $old_id, $category, $description, $title, $hits, $date, $
     }
 }
 
-function savecat ($id, $old_id, $description, $title, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon)
+function savecat ($id, $old_id, $description, $description_edited, $title, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon)
 {
     global $_CONF, $_GROUPS, $_TABLES, $_USER, $MESSAGE, $LANG_FAQ_ADMIN, $_FAQ_CONF;
 
@@ -453,10 +553,24 @@ function savecat ($id, $old_id, $description, $title, $owner_id, $group_id, $per
                 perm_anon = $perm_anon";
     return $retval;*/
 
-    // clean 'em up 
-    $description = addslashes (COM_checkHTML (COM_checkWords ($description)));
-    $title = addslashes (COM_checkHTML (COM_checkWords ($title)));
-    $id = addslashes ($id);
+    // Preserve historical HTML unless the category description itself was edited.
+    $existing_description = null;
+    if (!empty($old_id) && DB_count($_TABLES['faq_category'], 'id', DB_escapeString($old_id)) > 0) {
+        $existing_description = DB_getItem(
+            $_TABLES['faq_category'],
+            'description',
+            "id = '" . DB_escapeString($old_id) . "'"
+        );
+    }
+
+    if ($existing_description !== null && (int) $description_edited !== 1) {
+        $description = DB_escapeString($existing_description);
+    } else {
+        $description = DB_escapeString(COM_checkHTML(COM_checkWords($description)));
+    }
+
+    $title = DB_escapeString(COM_checkHTML(COM_checkWords($title)));
+    $id = DB_escapeString($id);
     
     if (empty ($owner_id)) {
         // this is new link from admin, set default values
@@ -741,6 +855,7 @@ if (($action == $LANG_FAQ_ADMIN['delete']) && !empty ($LANG_FAQ_ADMIN['delete'])
                             UTIL_getParamStr('faq_old_id'),
                             UTIL_getParamStr('faq_category'),
                             UTIL_getParamStr('faq_desc'),
+                            UTIL_getParamInt('faq_desc_edited'),
                             UTIL_getParamStr('faq_title'),
                             UTIL_getParamInt('faq_hits'),
                             UTIL_getParamInt('faq_date'),
@@ -755,6 +870,7 @@ if (($action == $LANG_FAQ_ADMIN['delete']) && !empty ($LANG_FAQ_ADMIN['delete'])
         $display .= savecat(UTIL_getParamStr('faq_id'),
                             UTIL_getParamStr('faq_old_id'),
                             UTIL_getParamStr('faq_desc'),
+                            UTIL_getParamInt('faq_desc_edited'),
                             UTIL_getParamStr('faq_title'),
                             UTIL_getParam('owner_id'),
                             UTIL_getParam('group_id'),
