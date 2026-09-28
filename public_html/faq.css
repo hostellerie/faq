@@ -107,3 +107,59 @@
         flex-direction: column;
     }
 }
+
+/* Contextual FAQ fragments injected through PLG_itemDisplay().
+ * Theme-neutral and visually aligned with Hub contextual blocks.
+ */
+.faq-context-block{
+    margin:1.25rem 0;
+    padding:.9rem 1rem;
+    border-left:3px solid rgba(127,127,127,.35);
+    background:rgba(127,127,127,.035);
+    line-height:1.55;
+}
+
+.faq-context-title{
+    margin:0 0 .45rem;
+    font-size:1rem;
+    font-weight:700;
+    line-height:1.3;
+}
+
+.faq-contextual-item{
+    margin:.2rem 0;
+}
+
+.faq-contextual-question{
+    cursor:pointer;
+    font-weight:600;
+    line-height:1.4;
+}
+
+.faq-contextual-answer{
+    margin:.55rem 0 0;
+}
+
+.faq-contextual-answer > :first-child{
+    margin-top:0;
+}
+
+.faq-contextual-answer > :last-child{
+    margin-bottom:0;
+}
+
+.faq-contextual-permalink{
+    margin:.55rem 0 0;
+    font-size:.88em;
+    opacity:.78;
+}
+
+.faq-context-block a{
+    text-underline-offset:.14em;
+}
+
+@media (max-width:640px){
+    .faq-context-block{
+        padding:.8rem .85rem;
+    }
+}
