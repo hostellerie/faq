@@ -84,13 +84,6 @@
 
         FAQEditor.bindCkeditorDirty();
 
-        AdvancedEditor.newEditor({
-            TextareaId: [
-                {plain: FAQEditor.plainId, advanced: FAQEditor.advancedId}
-            ],
-            toolbar: 1
-        });
-
         AdvancedEditor.onchange_editmode = function () {
             var advanced = AdvancedEditor.isAdvancedMode();
             var visual = get('faq_advanced_editarea');
@@ -117,6 +110,18 @@
             }, 0);
         };
 
+        if (window.CKEDITOR) {
+            CKEDITOR.config.enterMode = CKEDITOR.ENTER_P;
+            CKEDITOR.config.shiftEnterMode = CKEDITOR.ENTER_BR;
+        }
+
+        AdvancedEditor.newEditor({
+            TextareaId: [
+                {plain: FAQEditor.plainId, advanced: FAQEditor.advancedId}
+            ],
+            toolbar: 1
+        });
+
         AdvancedEditor.set_postcontent = function () {
             var dirty = get(FAQEditor.dirtyId);
             if (!dirty || dirty.value !== '1') {
@@ -140,3 +145,11 @@
         FAQEditor.init();
     }
 }());
+
+
+window.faqEditorPrepareSubmit = function () {
+    if (window.AdvancedEditor && typeof AdvancedEditor.set_postcontent === 'function') {
+        AdvancedEditor.set_postcontent();
+    }
+    return true;
+};
