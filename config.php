@@ -14,7 +14,7 @@ $_FAQ_CONF = array(
     'cat_sort_order' => 'hits DESC',
     'faq_sort_order' => 'hits DESC',
     'contextual_enabled' => true,
-    'contextual_default_placement' => 'after',
+    'contextual_default_placement' => 'automatic',
     'structured_data' => true,
     'coverage_limit' => 100
 );
