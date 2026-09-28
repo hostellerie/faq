@@ -263,4 +263,31 @@ function faq_adminNavigation($active = '')
     return $html;
 }
 
+
+/**
+ * Load FAQ public styles independently from the active theme.
+ *
+ * This is required for contextual FAQ fragments injected into other providers
+ * such as Documents, Videos or Maps through PLG_itemDisplay().
+ *
+ * @return string
+ */
+function plugin_getheadercode_faq()
+{
+    global $_CONF;
+
+    $cssFile = $_CONF['path'] . 'plugins/faq/public_html/faq.css';
+    $version = '1.3.0';
+
+    if (is_file($cssFile)) {
+        $version .= '-' . (string) filemtime($cssFile);
+    }
+
+    $href = rtrim($_CONF['site_url'], '/') . '/faq/faq.css?v=' . rawurlencode($version);
+
+    return '<link rel="stylesheet" type="text/css" href="'
+        . htmlspecialchars($href, ENT_QUOTES, 'UTF-8')
+        . '">' . PHP_EOL;
+}
+
 ?>
