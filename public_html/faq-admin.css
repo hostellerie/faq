@@ -1,0 +1,30 @@
+.faq-content-editor {
+    width: 100%;
+    max-width: 100%;
+}
+.faq-content-editor textarea {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-height: 20rem;
+}
+.faq-editor-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1rem;
+    align-items: center;
+    margin: .5rem 0;
+}
+.faq-editor-media {
+    margin: .5rem 0;
+}
+.faq-editor-note {
+    margin-top: .5rem;
+    font-size: .9em;
+}
+@media (max-width: 640px) {
+    .faq-editor-controls {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
