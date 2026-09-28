@@ -44,3 +44,18 @@ jobs:
           if zipinfo -1 dist/faq_1.3.0.zip | grep -E '(^|/)\.[^/]*($|/)'; then
             exit 1
           fi
+
+
+      - name: Validate modern editor contract
+        if: matrix.php == '8.1'
+        run: |
+          if grep -R --exclude-dir=dist --exclude-dir=.git --exclude='ROADMAP.md' --exclude='README.md' -n "editor_generate(" .; then
+            echo "Legacy editor_generate dependency found."
+            exit 1
+          fi
+          grep -q 'name="faq_desc"' templates/default/admin/faqedit.thtml
+          grep -q 'name="faq_desc"' templates/default/admin/catedit.thtml
+          grep -q 'name="faq_desc_edited"' templates/default/admin/faqedit.thtml
+          grep -q 'COM_setupAdvancedEditor' admin/index.php
+          grep -q 'COM_checkHTML' admin/index.php
+          grep -q 'data-mg-picker-url' admin/index.php
