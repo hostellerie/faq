@@ -9,6 +9,8 @@ if (!SEC_hasRights('faq.admin,faq.edit', 'OR')) {
 }
 
 $display = '';
+$_SCRIPTS->setCSSFile('faq_admin', '/faq/faq-admin.css');
+$display .= faq_adminNavigation('relations');
 $msg = '';
 
 if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
@@ -38,8 +40,6 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
 $token = SEC_createToken();
 
 $display .= COM_startBlock('FAQ Associations');
-$display .= '<p><a href="' . $_CONF['site_admin_url'] . '/plugins/faq/index.php">FAQ administration</a> | ';
-$display .= '<a href="' . $_CONF['site_admin_url'] . '/plugins/faq/coverage.php">Coverage</a></p>';
 
 if ($msg !== '') {
     $display .= COM_showMessageText($msg, 'FAQ');
