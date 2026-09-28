@@ -156,12 +156,17 @@ function plugin_itemdisplay_faq($id, $type)
         return array(true);
     }
 
-    $placement = !empty($_FAQ_CONF['contextual_default_placement']) ? $_FAQ_CONF['contextual_default_placement'] : 'after';
+    $placement = !empty($_FAQ_CONF['contextual_default_placement']) ? $_FAQ_CONF['contextual_default_placement'] : 'automatic';
     if ($placement === 'manual') {
         return array(true);
     }
 
-    $html = faq_renderContextual($type, (string) $id, '', $placement);
+    /*
+     * Geeklog PLG_itemDisplay() exposes one provider-defined insertion point.
+     * It has no generic before/after argument. Therefore every non-manual FAQ
+     * relation is rendered at the provider's item-display insertion point.
+     */
+    $html = faq_renderContextual($type, (string) $id, '', 'automatic');
     if ($html === '') {
         return array(true);
     }
