@@ -58,7 +58,7 @@ if ( $no_access ) {
     exit;
 }
 
-$_SCRIPTS->setCSSFile('faq_admin', '/faq/faq-admin.css');
+$_SCRIPTS->setCSSFile('faq_admin', faq_assetPath('faq-admin.css'));
 
 /**
  * Return whether FAQ can safely enable Geeklog's visual Advanced Editor.
@@ -96,11 +96,11 @@ function faq_setupContentEditor($tpl, $permission)
 {
     global $_CONF, $_PLUGINS, $_SCRIPTS, $LANG_FAQ_ADMIN, $LANG24;
 
-    $_SCRIPTS->setCSSFile('faq_admin_editor', '/faq/faq-admin.css');
+    $_SCRIPTS->setCSSFile('faq_admin_editor', faq_assetPath('faq-admin.css'));
 
     $visual = faq_editorCanUseVisual();
     if ($visual) {
-        COM_setupAdvancedEditor('/faq/adveditor.js', $permission);
+        COM_setupAdvancedEditor(faq_assetPath('adveditor.js'), $permission);
         $tpl->set_var('show_adveditor', '');
         $tpl->set_var('show_htmleditor', 'none');
         $tpl->set_var('editor_mode_options',
@@ -114,7 +114,7 @@ function faq_setupContentEditor($tpl, $permission)
         $tpl->set_var('toolbar3', isset($LANG24[73]) ? $LANG24[73] : 'Advanced');
         $tpl->set_var('toolbar_full', isset($LANG24[75]) ? $LANG24[75] : 'Full');
     } else {
-        $_SCRIPTS->setJavaScriptFile('faq_editor_safe_submit', '/faq/adveditor.js', true, 219);
+        $_SCRIPTS->setJavaScriptFile('faq_editor_safe_submit', faq_assetPath('adveditor.js'), true, 219);
         $tpl->set_var('show_adveditor', 'none');
         $tpl->set_var('show_htmleditor', '');
         $tpl->set_var('editor_mode_options',
@@ -134,7 +134,12 @@ function faq_setupContentEditor($tpl, $permission)
     if (in_array('mediagallery', $_PLUGINS, true)
         && file_exists($_CONF['path_html'] . 'mediagallery/js/media-picker.js')
         && file_exists($_CONF['path_html'] . 'mediagallery/picker.php')) {
-        $_SCRIPTS->setJavaScriptFile('faq_mediagallery_picker', '/mediagallery/js/media-picker.js', true, 220);
+        $mgPickerJs = '/mediagallery/js/media-picker.js';
+        $mgPickerPath = $_CONF['path_html'] . 'mediagallery/js/media-picker.js';
+        if (file_exists($mgPickerPath)) {
+            $mgPickerJs .= '?v=' . filemtime($mgPickerPath);
+        }
+        $_SCRIPTS->setJavaScriptFile('faq_mediagallery_picker', $mgPickerJs, true, 220);
         $pickerUrl = $_CONF['site_url'] . '/mediagallery/picker.php?target=%23faq_desc_source';
         $pickerButton = '<button type="button" class="faq-editor-media" data-mg-picker-url="'
             . htmlspecialchars($pickerUrl, ENT_QUOTES, COM_getCharset()) . '">'
@@ -704,9 +709,12 @@ function listfaq ($cat = '')
                     array('text' => $LANG_FAQ_ADMIN['hits'], 'field' => 'hits'),
                     array('text' => $LANG_FAQ_ADMIN['access'], 'field' => 'access'));
 
-    $menu_arr = array ( array('url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=faq&action=edit', 'text' => $LANG_ADMIN['create_new']) );
-    if (SEC_hasRights ('faq.admin'))
-        $menu_arr[] = array('url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=cat', 'text' => $LANG_FAQ_ADMIN['Cat Editor']);
+    $menu_arr = array(
+        array(
+            'url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=faq&action=edit',
+            'text' => $LANG_ADMIN['create_new']
+        )
+    );
 
     $tpl->parse('output', 'list');
     $text_arr = array('has_menu' => true,
@@ -756,9 +764,12 @@ function listcat ()
                     array('text' => $LANG_FAQ_ADMIN['hits'], 'field' => 'hits'),
                     array('text' => $LANG_FAQ_ADMIN['access'], 'field' => 'access'));
 
-    $menu_arr = array ( array('url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=cat&action=edit', 'text' => $LANG_ADMIN['create_new']),
-                        array('url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=faq', 'text' => $LANG_FAQ_ADMIN['FAQ Editor'])
-                       );
+    $menu_arr = array(
+        array(
+            'url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=cat&action=edit',
+            'text' => $LANG_ADMIN['create_new']
+        )
+    );
 
     $text_arr = array('has_menu' =>  true,
     //                  'title' => $LANG_FAQ_ADMIN['Cat Editor'],
