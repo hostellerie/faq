@@ -175,8 +175,7 @@ $LANG_configselects['faq'][0] = array(
 );
 
 $LANG_configselects['faq'][1] = array(
-    'After content' => 'after',
-    'Before content' => 'before',
+    'Automatic (provider item display point)' => 'automatic',
     'Manual only' => 'manual'
 );
 
