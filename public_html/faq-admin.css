@@ -1,60 +1,115 @@
-.faq-content-editor {
-    width: 100%;
-    max-width: 100%;
-}
-.faq-content-editor textarea {
+.faq-content-editor,
+.faq-content-editor textarea,
+.faq-content-editor .cke {
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
+}
+
+.faq-content-editor textarea {
     min-height: 20rem;
 }
-.faq-editor-controls {
+
+.faq-editor-controls,
+.faq-admin-toolbar {
     display: flex;
     flex-wrap: wrap;
-    gap: .5rem 1rem;
+    gap: .6rem;
     align-items: center;
-    margin: .5rem 0;
+    margin: .75rem 0;
 }
+
+.faq-editor-controls select,
+.faq-admin-toolbar select,
+.faq-admin-toolbar input[type="text"],
+.faq-admin-toolbar input[type="search"] {
+    max-width: 100%;
+}
+
 .faq-editor-media {
-    margin: .5rem 0;
+    margin: 0;
 }
+
 .faq-editor-note {
-    margin-top: .5rem;
+    margin-top: .6rem;
     font-size: .9em;
-}
-@media (max-width: 640px) {
-    .faq-editor-controls {
-        align-items: stretch;
-        flex-direction: column;
-    }
+    opacity: .8;
 }
 
 .faq-admin-nav {
     margin: 0 0 1rem;
 }
+
 .faq-admin-nav ul {
     display: flex;
     flex-wrap: wrap;
-    gap: .4rem;
+    gap: .45rem;
     margin: 0;
     padding: 0;
     list-style: none;
 }
+
 .faq-admin-nav a {
-    display: inline-block;
-    padding: .45rem .7rem;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding: .45rem .75rem;
     border: 1px solid currentColor;
-    border-radius: .25rem;
+    border-radius: .35rem;
     text-decoration: none;
 }
+
 .faq-admin-nav .active a {
     font-weight: 700;
+    box-shadow: inset 0 -2px 0 currentColor;
 }
+
+.faq-admin-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem 1.25rem;
+    margin: .75rem 0 1rem;
+    padding: .75rem 1rem;
+    border: 1px solid rgba(127, 127, 127, .28);
+    border-radius: .45rem;
+}
+
+.faq-admin-summary strong {
+    display: block;
+}
+
+.faq-admin-table {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.faq-admin-table table {
+    width: 100%;
+}
+
+.faq-admin-help {
+    margin: .75rem 0;
+    opacity: .85;
+}
+
 @media (max-width: 640px) {
+    .faq-editor-controls,
+    .faq-admin-toolbar,
     .faq-admin-nav ul {
+        align-items: stretch;
         flex-direction: column;
     }
-    .faq-admin-nav a {
-        display: block;
+
+    .faq-admin-nav a,
+    .faq-editor-controls select,
+    .faq-admin-toolbar select,
+    .faq-admin-toolbar input,
+    .faq-admin-toolbar button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .faq-content-editor textarea {
+        min-height: 16rem;
     }
 }
