@@ -383,7 +383,9 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
                AND rel.item_id = '{$item_id}'
                AND (rel.item_subtype = '' OR rel.item_subtype = '{$subtype}')";
 
-    if ($placement !== '') {
+    if ($placement === 'automatic') {
+        $sql .= " AND rel.placement <> 'manual'";
+    } elseif ($placement !== '') {
         $placement = DB_escapeString($placement);
         $sql .= " AND rel.placement = '{$placement}'";
     }
