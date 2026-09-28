@@ -271,40 +271,28 @@ function plugin_cclabel_faq()
 */
 function plugin_getadminoption_faq()
 {
-    global $_CONF, $_TABLES, $LANG_FAQ_ADMIN;
-    
-    $result = array();
-    
-    if (SEC_hasRights ('faq.admin')) {
-        $sql = "SELECT COUNT(*) AS cnt
-                  FROM {$_TABLES['faq_category']} AS cat" 
-             . COM_getPermSQL( 'WHERE', 0, 3, 'cat' );
-    
-        $r = DB_query($sql);
-        $A = DB_fetchArray($r);
+    global $_CONF, $_TABLES, $LANG_FAQ_COMMON;
 
-        $result[] = array($LANG_FAQ_ADMIN['FAQ_Cat'],
-						  $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=cat',
-						  $A['cnt']);
+    if (!SEC_hasRights('faq.admin,faq.edit', 'OR')) {
+        return array();
     }
 
-    if (SEC_hasRights ('faq.admin,faq.edit','OR')) {
-        $sql = "SELECT COUNT(*) AS cnt
-                  FROM {$_TABLES['faq']} AS faq, 
-                       {$_TABLES['faq_category']} AS cat 
-                 WHERE faq.category = cat.id" 
-             . COM_getPermSQL( 'AND', 0, 3, 'faq' ) 
-             . COM_getPermSQL( 'AND', 0, 3, 'cat' );
-    
-        $r = DB_query($sql);
-        $A = DB_fetchArray($r);
+    $sql = "SELECT COUNT(*) AS cnt
+              FROM {$_TABLES['faq']} AS faq,
+                   {$_TABLES['faq_category']} AS cat
+             WHERE faq.category = cat.id"
+         . COM_getPermSQL('AND', 0, 3, 'faq')
+         . COM_getPermSQL('AND', 0, 3, 'cat');
 
-        $result[] = array($LANG_FAQ_ADMIN['FAQ_Entry'],
-                          $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=faq',
-						  $A['cnt']);
-    }
-    
-    return $result;
+    $r = DB_query($sql);
+    $A = DB_fetchArray($r);
+    $count = isset($A['cnt']) ? (int) $A['cnt'] : 0;
+
+    return array(
+        $LANG_FAQ_COMMON['FAQ'],
+        $_CONF['site_admin_url'] . '/plugins/faq/index.php',
+        $count
+    );
 }
 
 /**
