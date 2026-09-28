@@ -316,8 +316,6 @@ function savefaq ($id, $old_id, $category, $description, $title, $hits, $date, $
     return $retval;*/
 
     // clean 'em up 
-    $description = faq_normalizeContentHtml($description);
-    $description = faq_normalizeContentHtml($description);
     $description = addslashes (COM_checkHTML (COM_checkWords ($description)));
     $title = addslashes (COM_checkHTML (COM_checkWords ($title)));
     $id = addslashes ($id);
