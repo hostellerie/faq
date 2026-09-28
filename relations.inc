@@ -34,6 +34,242 @@ function faq_normalizeProvider($provider)
     return $provider;
 }
 
+
+function faq_relationNormalizeInfoRecord($record, $fallbackId = '')
+{
+    $item = array(
+        'id' => (string) $fallbackId,
+        'title' => (string) $fallbackId,
+        'url' => '',
+        'subtype' => ''
+    );
+
+    if (!is_array($record)) {
+        return $item;
+    }
+
+    if (isset($record['id']) || isset($record['title']) || isset($record['url']) || isset($record['subtype'])) {
+        if (isset($record['id']) && (string) $record['id'] !== '') {
+            $item['id'] = (string) $record['id'];
+        }
+        if (isset($record['title']) && (string) $record['title'] !== '') {
+            $item['title'] = (string) $record['title'];
+        }
+        if (isset($record['url'])) {
+            $item['url'] = (string) $record['url'];
+        }
+        if (isset($record['subtype'])) {
+            $item['subtype'] = (string) $record['subtype'];
+        }
+        if ($item['subtype'] === '' && isset($record['type']) && (string) $record['type'] !== '') {
+            $item['subtype'] = (string) $record['type'];
+        }
+
+        return $item;
+    }
+
+    if (isset($record[0])) {
+        $item['id'] = (string) $record[0];
+    }
+    if (isset($record[1]) && (string) $record[1] !== '') {
+        $item['title'] = (string) $record[1];
+    }
+    if (isset($record[2])) {
+        $item['url'] = (string) $record[2];
+    }
+
+    return $item;
+}
+
+function faq_relationProviderTypes()
+{
+    global $_PLUGINS;
+
+    $types = array(
+        'article' => true,
+        'staticpages' => true
+    );
+
+    if (is_array($_PLUGINS)) {
+        foreach ($_PLUGINS as $plugin) {
+            $plugin = faq_normalizeProvider($plugin);
+            if ($plugin === '' || $plugin === 'faq') {
+                continue;
+            }
+
+            if (function_exists('plugin_getiteminfo_' . $plugin)) {
+                $types[$plugin] = true;
+            }
+        }
+    }
+
+    $types = array_keys($types);
+    sort($types, SORT_STRING);
+
+    return $types;
+}
+
+function faq_relationCoreArticleOptions($limit)
+{
+    global $_TABLES;
+
+    $rows = array();
+    $limit = max(1, min(200, (int) $limit));
+
+    if (empty($_TABLES['stories'])) {
+        return $rows;
+    }
+
+    $sql = "SELECT s.sid AS id, s.title AS title
+              FROM {$_TABLES['stories']} AS s
+             WHERE s.draft_flag = 0
+               AND s.date <= NOW()"
+         . COM_getPermSQL('AND', 0, 2, 's');
+
+    if (function_exists('COM_getLangSQL')) {
+        $sql .= COM_getLangSQL('sid', 'AND', 's');
+    }
+
+    $sql .= " ORDER BY s.date DESC, s.title ASC LIMIT " . $limit;
+
+    $result = DB_query($sql, 1);
+    if ($result === false) {
+        return $rows;
+    }
+
+    while ($row = DB_fetchArray($result)) {
+        $rows[] = array(
+            'id' => (string) $row['id'],
+            'title' => (string) $row['title'],
+            'url' => '',
+            'subtype' => ''
+        );
+    }
+
+    return $rows;
+}
+
+function faq_relationCoreStaticPageOptions($limit)
+{
+    global $_TABLES;
+
+    $rows = array();
+    $limit = max(1, min(200, (int) $limit));
+
+    if (empty($_TABLES['staticpage'])) {
+        return $rows;
+    }
+
+    $sql = "SELECT sp.sp_id AS id, sp.sp_title AS title
+              FROM {$_TABLES['staticpage']} AS sp"
+         . COM_getPermSQL('WHERE', 0, 2, 'sp')
+         . " ORDER BY sp.sp_title ASC, sp.sp_id ASC LIMIT " . $limit;
+
+    $result = DB_query($sql, 1);
+    if ($result === false) {
+        return $rows;
+    }
+
+    while ($row = DB_fetchArray($result)) {
+        $rows[] = array(
+            'id' => (string) $row['id'],
+            'title' => (string) $row['title'],
+            'url' => '',
+            'subtype' => ''
+        );
+    }
+
+    return $rows;
+}
+
+function faq_relationObjectOptions($provider, $limit = 100)
+{
+    $provider = faq_normalizeProvider($provider);
+    $limit = max(1, min(200, (int) $limit));
+
+    if ($provider === 'article') {
+        return array(
+            'supported' => true,
+            'items' => faq_relationCoreArticleOptions($limit),
+            'message' => ''
+        );
+    }
+
+    if ($provider === 'staticpages') {
+        $items = array();
+
+        if (function_exists('PLG_getItemInfo') && function_exists('plugin_getiteminfo_staticpages')) {
+            try {
+                $items = PLG_getItemInfo(
+                    'staticpages',
+                    '*',
+                    'id,title,url,subtype,type',
+                    0,
+                    array('limit' => $limit, 'order' => 'modified-desc')
+                );
+            } catch (Exception $e) {
+                $items = array();
+            }
+        }
+
+        if (!is_array($items) || empty($items)) {
+            $items = faq_relationCoreStaticPageOptions($limit);
+        }
+    } else {
+        if (!function_exists('PLG_getItemInfo') || !function_exists('plugin_getiteminfo_' . $provider)) {
+            return array(
+                'supported' => false,
+                'items' => array(),
+                'message' => 'This provider does not expose Geeklog Item Info.'
+            );
+        }
+
+        try {
+            $items = PLG_getItemInfo(
+                $provider,
+                '*',
+                'id,title,url,subtype,type',
+                0,
+                array('limit' => $limit, 'order' => 'modified-desc')
+            );
+        } catch (Exception $e) {
+            $items = array();
+        }
+    }
+
+    if (!is_array($items)) {
+        $items = array();
+    }
+
+    $normalized = array();
+    foreach ($items as $record) {
+        $item = faq_relationNormalizeInfoRecord($record);
+        $item['id'] = substr(trim((string) $item['id']), 0, 128);
+        $item['subtype'] = substr(trim((string) $item['subtype']), 0, 64);
+
+        if ($item['id'] === '') {
+            continue;
+        }
+        if ($item['title'] === '') {
+            $item['title'] = $item['id'];
+        }
+
+        $normalized[$item['id']] = $item;
+    }
+
+    uasort($normalized, function ($left, $right) {
+        return strcasecmp((string) $left['title'], (string) $right['title']);
+    });
+
+    return array(
+        'supported' => true,
+        'items' => array_values($normalized),
+        'message' => empty($normalized)
+            ? 'The provider returned no selectable content.'
+            : count($normalized) . ' selectable item(s).'
+    );
+}
+
 function faq_relationItemAllowed($item_id)
 {
     return is_string($item_id) && $item_id !== '' && strlen($item_id) <= 128;
