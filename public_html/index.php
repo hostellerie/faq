@@ -33,6 +33,8 @@
 
 require_once ('../lib-common.php');
 
+$_SCRIPTS->setCSSFile('faq_public', faq_assetPath('faq.css'));
+
 // MAIN
 //
 // Parameters are handled in the following order (first matching):
@@ -89,8 +91,13 @@ if ( ! empty($faq_id)) {
         $thetime = COM_getUserDateTimeFormat($A['unixdate']);
 	$tpl->set_var( 'faq_updated', $thetime[0] );
 	$tpl->set_var( 'faq_edit', '' );
-	if (1 == DB_numRows($e) && SEC_hasRights ('faq.edit'))
-	    $tpl->set_var( 'faq_edit', ' | <a href="' . $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=faq&amp;action=edit&amp;id=' . $faq_id . '">' . $LANG_FAQ_ADMIN['Edit'] . '</a>' );
+    if (1 == DB_numRows($e) && SEC_hasRights('faq.edit')) {
+        $tpl->set_var(
+            'faq_edit',
+            '<a href="' . $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=faq&amp;action=edit&amp;id='
+            . rawurlencode($faq_id) . '">' . $LANG_FAQ_ADMIN['Edit'] . '</a>'
+        );
+    }
 	    
     $tpl->set_var('block_end', COM_endBlock());    
         
@@ -114,46 +121,61 @@ if ( ! empty($faq_id)) {
     $A = DB_fetchArray($r);
 
     $pagetitle = $LANG_FAQ_COMMON['FAQ'] . ' Category: ' . $A['title'];
-    
-    require_once( $_CONF['path_system'] . 'lib-admin.php' );
-    $header_arr = array(
-                        array('text' => $LANG_FAQ_COMMON['Question'], 'field' => 'title', 'sort' => false),
-                        array('text' => $LANG_FAQ_COMMON['Updated'], 'field' => 'unixdate', 'sort' => false),
-                        array('text' => $LANG_FAQ_COMMON['Hits'], 'field' => 'hits', 'sort' => false)
-                       );
 
-    $menu_arr = array ( array('url'=>$_CONF['site_url'] . '/faq/index.php', 'text'=>$LANG_FAQ_COMMON['Categories']));
-    if (SEC_hasRights ('faq.admin') &&
-        3 <= SEC_hasAccess($A['owner_id'], $A['group_id'], $A['perm_owner'], $A['perm_group'], $A['perm_members'], $A['perm_anon']))
-        $menu_arr[] = array('url'=>$_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=cat&amp;action=edit&amp;id=' . $cat_id, 'text'=>$LANG_FAQ_ADMIN['Edit']);
+    $cat = $A;
 
-    $text_arr = array('has_menu' =>  true,
-    //                  'title' => $A['title'], 
-                      'instructions' => PLG_replaceTags($A['description']),
-                      'icon' => $_CONF['site_url'] . '/faq/images/category-questions.png');
+    $tpl = COM_newTemplate(CTL_plugin_templatePath('faq'));
+    $tpl->set_file(array('category' => 'category.thtml'));
+    $tpl->set_block('category', 'faq_question_list_item');
 
-    $data_arr = array();
+    $tpl->set_var('block_start', COM_startBlock($pagetitle));
+    $tpl->set_var('block_end', COM_endBlock());
+    $tpl->set_var('faq_lang_cats', $LANG_FAQ_COMMON['Categories']);
+    $tpl->set_var('faq_cats_url', $_CONF['site_url'] . '/faq/index.php');
+    $tpl->set_var('faq_cat_title', $cat['title']);
+    $tpl->set_var('faq_cat_desc', PLG_replaceTags($cat['description']));
+    $tpl->set_var('faq_updated_label', $LANG_FAQ_COMMON['Updated']);
+    $tpl->set_var('faq_hits_label', $LANG_FAQ_COMMON['Hits']);
+    $tpl->set_var('faq_cat_edit', '');
 
-    $r = DB_query("SELECT faq.id AS id, faq.title AS title, faq.description AS description, 
-                          faq.hits AS hits, faq.date AS date, UNIX_TIMESTAMP(faq.date) AS unixdate
-                     FROM {$_TABLES['faq']} AS faq, 
-                          {$_TABLES['faq_category']} AS cat 
-                    WHERE faq.category = cat.id
-                      AND cat.id = '{$cat_id}'" 
-                . COM_getPermSQL( 'AND', 0, 2, 'faq' ) 
-                . COM_getPermSQL( 'AND', 0, 2, 'cat' )
-                . " ORDER BY {$_FAQ_CONF['faq_sort_order']}");
-    $numRows = DB_numRows ($r);
-    for ($i = 0; $i < $numRows; $i++) {
-        $A = DB_fetchArray($r);
-        
-        $data_arr[] = $A;
+    if (SEC_hasRights('faq.admin')
+        && 3 <= SEC_hasAccess(
+            $cat['owner_id'],
+            $cat['group_id'],
+            $cat['perm_owner'],
+            $cat['perm_group'],
+            $cat['perm_members'],
+            $cat['perm_anon']
+        )) {
+        $tpl->set_var(
+            'faq_cat_edit',
+            '<div class="faq-actions"><a href="' . $_CONF['site_admin_url']
+            . '/plugins/faq/index.php?mode=cat&amp;action=edit&amp;id=' . rawurlencode($cat_id)
+            . '">' . $LANG_FAQ_ADMIN['Edit'] . '</a></div>'
+        );
     }
 
-    $display .= COM_startBlock($pagetitle, '',  COM_getBlockTemplate('_admin_block', 'header'));    
-    $display .= ADMIN_createMenu($menu_arr, $text_arr['instructions'], $text_arr['icon']);
-    $display .= ADMIN_simpleList ("faq_getListField_faq", $header_arr, $text_arr, $data_arr);
-    $display .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));    
+    $r = DB_query("SELECT faq.id AS id, faq.title AS title,
+                          faq.hits AS hits, UNIX_TIMESTAMP(faq.date) AS unixdate
+                     FROM {$_TABLES['faq']} AS faq,
+                          {$_TABLES['faq_category']} AS cat
+                    WHERE faq.category = cat.id
+                      AND cat.id = '{$cat_id}'"
+                . COM_getPermSQL('AND', 0, 2, 'faq')
+                . COM_getPermSQL('AND', 0, 2, 'cat')
+                . " ORDER BY {$_FAQ_CONF['faq_sort_order']}");
+
+    while ($faq = DB_fetchArray($r)) {
+        $thetime = COM_getUserDateTimeFormat($faq['unixdate']);
+        $tpl->set_var('faq_url', $_CONF['site_url'] . '/faq/index.php?faq=' . rawurlencode($faq['id']));
+        $tpl->set_var('faq_title', $faq['title']);
+        $tpl->set_var('faq_updated', $thetime[0]);
+        $tpl->set_var('faq_hits', COM_numberFormat($faq['hits']));
+        $tpl->parse('faq_question_list', 'faq_question_list_item', true);
+    }
+
+    $tpl->parse('output', 'category');
+    $display .= $tpl->finish($tpl->get_var('output'));
 }
 else {
     $pagetitle = $LANG_FAQ_COMMON['FAQ'];
@@ -183,7 +205,9 @@ else {
         $tpl->set_var('faq_cat_title', $A['title']);
         $tpl->set_var('faq_cat_desc', PLG_replaceTags($A['description']));
         $tpl->set_var('faq_cat_faqs', $A['cnt']);
-        $tpl->set_var('faq_cat_hits', $A['hits']);
+        $tpl->set_var('faq_cat_hits', COM_numberFormat($A['hits']));
+        $tpl->set_var('faq_cat_faqs_label', $LANG_FAQ_COMMON['FAQs']);
+        $tpl->set_var('faq_hits_label', $LANG_FAQ_COMMON['Hits']);
         
         $tpl->parse('faq_cat_list_item', 'cat_list_item', true);
     }
