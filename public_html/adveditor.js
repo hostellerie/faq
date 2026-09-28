@@ -5,7 +5,8 @@
         plainId: 'faq_desc_source',
         advancedId: 'faq_desc_advanced',
         dirtyId: 'faq_desc_edited',
-        suppressDirty: true
+        suppressDirty: true,
+        visualBaseline: null
     };
 
     function get(id) {
@@ -46,8 +47,8 @@
 
             event.editor.resetDirty();
             window.setTimeout(function () {
+                FAQEditor.visualBaseline = event.editor.getData();
                 FAQEditor.suppressDirty = false;
-                event.editor.on('change', FAQEditor.markDirty);
             }, 0);
         });
     };
@@ -124,12 +125,24 @@
 
         AdvancedEditor.set_postcontent = function () {
             var dirty = get(FAQEditor.dirtyId);
-            if (!dirty || dirty.value !== '1') {
+            var current;
+
+            if (!dirty) {
                 return;
             }
+
             if (AdvancedEditor.isAdvancedMode()) {
-                get(FAQEditor.plainId).value =
-                    AdvancedEditor.api[AdvancedEditor.editor].getContent(FAQEditor.advancedId);
+                current = AdvancedEditor.api[AdvancedEditor.editor].getContent(FAQEditor.advancedId);
+
+                if (dirty.value !== '1'
+                    && FAQEditor.visualBaseline !== null
+                    && current !== FAQEditor.visualBaseline) {
+                    dirty.value = '1';
+                }
+
+                if (dirty.value === '1') {
+                    get(FAQEditor.plainId).value = current;
+                }
             }
         };
 
