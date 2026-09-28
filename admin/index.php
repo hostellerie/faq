@@ -92,6 +92,7 @@ function faq_setupContentEditor($tpl, $permission)
     global $_CONF, $_PLUGINS, $_SCRIPTS, $LANG_FAQ_ADMIN, $LANG24;
 
     $_SCRIPTS->setCSSFile('faq_admin_editor', '/faq/faq-admin.css');
+    $_SCRIPTS->setJavaScriptFile('faq_editor_safe_submit', '/faq/adveditor.js', true, 219);
 
     $visual = faq_editorCanUseVisual();
     if ($visual) {
