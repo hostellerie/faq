@@ -42,12 +42,14 @@
         var subtypeManual = byId('faq-relation-subtype-manual');
         var note = byId('faq-relation-note');
         var endpoint;
+        var selectedItem;
 
         if (!provider || !itemSelect) {
             return;
         }
 
         endpoint = provider.getAttribute('data-items-url') || 'relations.php';
+        selectedItem = itemSelect.getAttribute('data-selected-item') || '';
 
         function showManual(message) {
             if (itemWrap) {
@@ -130,6 +132,17 @@
                     manual.textContent = 'Enter ID manually…';
                     itemSelect.appendChild(manual);
                     itemSelect.disabled = false;
+
+                    if (selectedItem) {
+                        for (i = 0; i < itemSelect.options.length; i += 1) {
+                            if (itemSelect.options[i].value === selectedItem) {
+                                itemSelect.selectedIndex = i;
+                                subtype.value = itemSelect.options[i].getAttribute('data-subtype') || '';
+                                selectedItem = '';
+                                break;
+                            }
+                        }
+                    }
 
                     if (note) {
                         note.textContent = data.message || '';
