@@ -92,7 +92,6 @@ function faq_setupContentEditor($tpl, $permission)
     global $_CONF, $_PLUGINS, $_SCRIPTS, $LANG_FAQ_ADMIN, $LANG24;
 
     $_SCRIPTS->setCSSFile('faq_admin_editor', '/faq/faq-admin.css');
-    $_SCRIPTS->setJavaScriptFile('faq_editor_safe_submit', '/faq/adveditor.js', true, 219);
 
     $visual = faq_editorCanUseVisual();
     if ($visual) {
@@ -109,6 +108,7 @@ function faq_setupContentEditor($tpl, $permission)
         $tpl->set_var('toolbar3', isset($LANG24[73]) ? $LANG24[73] : 'Advanced');
         $tpl->set_var('toolbar_full', isset($LANG24[75]) ? $LANG24[75] : 'Full');
     } else {
+        $_SCRIPTS->setJavaScriptFile('faq_editor_safe_submit', '/faq/adveditor.js', true, 219);
         $tpl->set_var('show_adveditor', 'none');
         $tpl->set_var('show_htmleditor', '');
         $tpl->set_var('editor_mode_options',
