@@ -80,7 +80,7 @@ if ( ! empty($faq_id)) {
 	$tpl->set_var( 'site_url', $_CONF['site_url']  );
 	$tpl->set_var( 'faq_cats_url', $_CONF['site_url'] . '/faq/index.php' );
 	$tpl->set_var( 'faq_title', $A['title'] );
-	$tpl->set_var( 'faq_desc', PLG_replaceTags(faq_normalizeContentHtml($A['description'])) );
+	$tpl->set_var( 'faq_desc', PLG_replaceTags($A['description']) );
 	$tpl->set_var( 'faq_cat_url', $_CONF['site_url'] . '/faq/index.php?cat=' . $A['cat_id'] );
 	$tpl->set_var( 'faq_cat_title', $A['cat'] );
 	$tpl->set_var( 'faq_lang_hits', $LANG_FAQ_COMMON['Hits'] );
@@ -129,7 +129,7 @@ if ( ! empty($faq_id)) {
 
     $text_arr = array('has_menu' =>  true,
     //                  'title' => $A['title'], 
-                      'instructions' => PLG_replaceTags(faq_normalizeContentHtml($A['description'])),
+                      'instructions' => PLG_replaceTags($A['description']),
                       'icon' => $_CONF['site_url'] . '/faq/images/category-questions.png');
 
     $data_arr = array();
@@ -181,7 +181,7 @@ else {
         $A = DB_fetchArray($r);
         $tpl->set_var('faq_cat_url', $_CONF['site_url'] . '/faq/index.php?cat=' . $A['id']);
         $tpl->set_var('faq_cat_title', $A['title']);
-        $tpl->set_var('faq_cat_desc', PLG_replaceTags(faq_normalizeContentHtml($A['description'])));
+        $tpl->set_var('faq_cat_desc', PLG_replaceTags($A['description']));
         $tpl->set_var('faq_cat_faqs', $A['cnt']);
         $tpl->set_var('faq_cat_hits', $A['hits']);
         
