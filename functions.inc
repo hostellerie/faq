@@ -172,6 +172,34 @@ function faq_getCategoryList($selected = '')
 }
 
 
+
+function faq_assetUrl($relative)
+{
+    global $_CONF;
+
+    $relative = ltrim((string) $relative, '/');
+    $path = $_CONF['path_html'] . 'faq/' . $relative;
+    $url = $_CONF['site_url'] . '/faq/' . $relative;
+
+    if (file_exists($path)) {
+        $url .= '?v=' . filemtime($path);
+    }
+
+    return $url;
+}
+
+function faq_assetPath($relative)
+{
+    $url = faq_assetUrl($relative);
+    $site = isset($GLOBALS['_CONF']['site_url']) ? rtrim($GLOBALS['_CONF']['site_url'], '/') : '';
+
+    if ($site !== '' && strpos($url, $site) === 0) {
+        return substr($url, strlen($site));
+    }
+
+    return $url;
+}
+
 function faq_adminNavigation($active = '')
 {
     global $_CONF;
