@@ -23,9 +23,9 @@ $items = faq_providerCollection($provider, 'id,title,url,date-modified', array(
     'order' => 'modified-desc'
 ));
 
-$display = COM_startBlock('FAQ Coverage');
-$display .= '<p><a href="' . $_CONF['site_admin_url'] . '/plugins/faq/index.php">FAQ administration</a> | ';
-$display .= '<a href="' . $_CONF['site_admin_url'] . '/plugins/faq/relations.php">Associations</a></p>';
+$_SCRIPTS->setCSSFile('faq_admin', '/faq/faq-admin.css');
+$display = faq_adminNavigation('coverage');
+$display .= COM_startBlock('FAQ Coverage');
 $display .= '<form method="get" action="' . $_CONF['site_admin_url'] . '/plugins/faq/coverage.php">';
 $display .= '<label>Provider <select name="provider">';
 foreach (array('article' => 'Articles', 'staticpages' => 'Static Pages', 'videos' => 'Videos', 'documents' => 'Documents', 'maps' => 'Maps', 'mediagallery' => 'Media Gallery') as $key => $label) {
