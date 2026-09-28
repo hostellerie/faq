@@ -102,6 +102,7 @@ function faq_setupContentEditor($tpl, $permission)
             '<option value="html">' . htmlspecialchars($LANG_FAQ_ADMIN['html_source'], ENT_QUOTES, COM_getCharset()) . '</option>'
             . '<option value="adveditor" selected="selected">'
             . htmlspecialchars($LANG_FAQ_ADMIN['visual_editor'], ENT_QUOTES, COM_getCharset()) . '</option>');
+        $tpl->set_var('change_editormode', 'onchange="change_editmode(this);"');
         $tpl->set_var('lang_toolbar', isset($LANG24[70]) ? $LANG24[70] : 'Toolbar');
         $tpl->set_var('toolbar1', isset($LANG24[71]) ? $LANG24[71] : 'Basic');
         $tpl->set_var('toolbar2', isset($LANG24[72]) ? $LANG24[72] : 'Standard');
@@ -114,6 +115,7 @@ function faq_setupContentEditor($tpl, $permission)
         $tpl->set_var('editor_mode_options',
             '<option value="html" selected="selected">'
             . htmlspecialchars($LANG_FAQ_ADMIN['html_source'], ENT_QUOTES, COM_getCharset()) . '</option>');
+        $tpl->set_var('change_editormode', '');
         $tpl->set_var('lang_toolbar', '');
         $tpl->set_var('toolbar1', '');
         $tpl->set_var('toolbar2', '');
