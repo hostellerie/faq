@@ -148,11 +148,114 @@ function plugin_idtourl_faq($sub_type, $item_id)
     return faq_getItemUrl($item_id);
 }
 
+
+/**
+ * Inject contextual FAQ relations into full Geeklog article pages.
+ *
+ * Core stories use PLG_templateSetVars() reliably across Geeklog 2.1.1-2.2.x,
+ * while they do not provide the same generic PLG_itemDisplay() surface as
+ * modern content-provider plugins. This mirrors the compatibility strategy
+ * used by Hub without changing the stored article content.
+ *
+ * @param string $templatename
+ * @param object $template
+ * @return void
+ */
+function plugin_templatesetvars_faq($templatename, &$template)
+{
+    global $_FAQ_CONF;
+
+    if (empty($_FAQ_CONF['contextual_enabled'])
+        || !is_object($template)
+        || !method_exists($template, 'get_var')
+        || !method_exists($template, 'set_var')
+    ) {
+        return;
+    }
+
+    $placement = !empty($_FAQ_CONF['contextual_default_placement'])
+        ? $_FAQ_CONF['contextual_default_placement']
+        : 'automatic';
+
+    if ($placement === 'manual') {
+        return;
+    }
+
+    $articleTemplates = array(
+        'storytext',
+        'featuredstorytext',
+        'archivestorytext',
+        'article',
+        'featuredarticle',
+        'archivearticle'
+    );
+
+    if (!in_array($templatename, $articleTemplates, true)) {
+        return;
+    }
+
+    $storyId = (string) $template->get_var('story_id');
+    if ($storyId === '' && isset($_GET['story'])) {
+        $storyId = trim((string) $_GET['story']);
+    }
+
+    if ($storyId === '') {
+        return;
+    }
+
+    $displayType = (string) $template->get_var('story_display_type');
+    if ($displayType === '') {
+        $displayType = (string) $template->get_var('display_type');
+    }
+
+    $script = isset($_SERVER['PHP_SELF'])
+        ? basename((string) $_SERVER['PHP_SELF'])
+        : '';
+
+    $isFullArticle = ($displayType === 'n')
+        || ($displayType === '' && $script === 'article.php');
+
+    if (!$isFullArticle) {
+        return;
+    }
+
+    $html = faq_renderContextual('article', $storyId, '', 'automatic');
+    if ($html === '') {
+        return;
+    }
+
+    /*
+     * Geeklog themes do not all use the same story variable. Update both
+     * standard full-story variables when present, while guarding against
+     * duplicate execution through multiple story template-hook families.
+     */
+    $storyText = (string) $template->get_var('story_text_no_br');
+    if ($storyText !== '' && strpos($storyText, 'faq-context-block') === false) {
+        $template->set_var('story_text_no_br', $storyText . "\n" . $html);
+    }
+
+    $storyIntro = (string) $template->get_var('story_introtext');
+    if ($storyIntro !== '' && strpos($storyIntro, 'faq-context-block') === false) {
+        $template->set_var('story_introtext', $storyIntro . "\n" . $html);
+    }
+}
+
 function plugin_itemdisplay_faq($id, $type)
 {
     global $_FAQ_CONF;
 
     if (empty($_FAQ_CONF['contextual_enabled'])) {
+        return array(true);
+    }
+
+    $normalizedType = faq_normalizeProvider($type);
+
+    /*
+     * Articles use plugin_templatesetvars_faq() for Geeklog 2.1.1-2.2.x
+     * compatibility. Do not emit a second copy if a theme/core path also
+     * happens to expose PLG_itemDisplay() for stories.
+     */
+    if ($normalizedType === 'article') {
         return array(true);
     }
 
