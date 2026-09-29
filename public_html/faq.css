@@ -113,6 +113,8 @@
  * with Hub contextual blocks.
  */
 .faq-context-block {
+    width: 100%;
+    max-width: var(--eclipse-reading, 72ch);
     margin: 1.25rem 0;
     padding: .8rem 1rem .85rem;
     border-left: 3px solid rgba(127, 127, 127, .28);
