@@ -431,6 +431,14 @@ function plugin_itemsaved_faq($id, $type, $old_id = '', $sub_type = '')
                      SET item_id = '{$id_sql}', modified = NOW()
                    WHERE provider = '{$provider_sql}'
                      AND item_id = '{$old_id_sql}'");
+
+        if (faq_categoryRelationTableExists()) {
+            DB_query("UPDATE {$_TABLES['faq_category_relations']}
+                         SET item_id = '{$id_sql}', modified = NOW()
+                       WHERE provider = '{$provider_sql}'
+                         AND item_id = '{$old_id_sql}'");
+        }
+
         faq_clearLocalCache();
     }
 }
@@ -461,5 +469,16 @@ function plugin_itemdeleted_faq($id, $type, $sub_type = '')
     }
 
     DB_query($sql);
+
+    if (faq_categoryRelationTableExists()) {
+        $categorySql = "DELETE FROM {$_TABLES['faq_category_relations']}
+                         WHERE provider = '{$provider_sql}'
+                           AND item_id = '{$id_sql}'";
+        if ($subtype_sql !== '') {
+            $categorySql .= " AND (item_subtype = '' OR item_subtype = '{$subtype_sql}')";
+        }
+        DB_query($categorySql);
+    }
+
     faq_clearLocalCache();
 }
