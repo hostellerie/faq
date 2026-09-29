@@ -17,13 +17,3 @@
   </ul>
 </div>
 {block_end}
-
-<!-- BEGIN faq_question_list_item -->
-<li class="faq-question-card">
-  <h2><a href="{faq_url}">{faq_title}</a></h2>
-  <div class="faq-card-meta">
-    <span>{faq_updated_label}: {faq_updated}</span>
-    <span>{faq_hits_label}: {faq_hits}</span>
-  </div>
-</li>
-<!-- END faq_question_list_item -->
