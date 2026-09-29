@@ -206,3 +206,12 @@
     margin-top: 0;
     margin-bottom: .85rem;
 }
+
+
+.faq-admin-audit-note {
+    margin: .9rem 0 1rem;
+    padding: .75rem .9rem;
+    border-left: 3px solid var(--eclipse-primary, #3157d5);
+    background: rgba(49, 87, 213, .06);
+    line-height: 1.45;
+}
