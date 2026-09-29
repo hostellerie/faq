@@ -195,7 +195,11 @@
 
 
 .faq-relation-actions {
-    margin: 1rem 0 1.35rem;
+    margin: 1rem 0 0;
+}
+
+.faq-admin-form {
+    margin-bottom: 2.4rem;
 }
 
 .faq-relation-actions input[type="submit"] {
@@ -203,8 +207,12 @@
 }
 
 .faq-relation-current-title {
-    margin-top: 0;
+    margin-top: 1.75rem;
     margin-bottom: .85rem;
+}
+
+.faq-admin-form + .faq-relation-current-title {
+    margin-top: 0;
 }
 
 
