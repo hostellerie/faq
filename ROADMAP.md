@@ -18,7 +18,7 @@ Legend:
 - FAQ/category CRUD preservation and historical autotags.
 - Native Advanced Editor integration with HTML-source fallback and MediaGallery picker support.
 - Item Info, collection retrieval, URL resolution, lifecycle callbacks, sitemap, metadata and capability declaration.
-- `faq_relations` and relation CRUD.
+- `faq_relations` for individual FAQ associations and `faq_category_relations` for dynamic whole-category associations.
 - Associations administration with provider/item selection.
 - Coverage administration with managed/external/both/none status, including a read-only Core audit for Articles and Static Pages when normalized collection/content capabilities are unavailable.
 - Contextual FAQ rendering, automatic/manual placement model and article compatibility fallback.
@@ -554,11 +554,29 @@ Requirements:
 
 - search/select provider;
 - search/select content item through provider-owned contracts;
-- attach existing FAQ;
-- detach FAQ;
-- reorder FAQs for one host item;
+- attach an existing individual FAQ;
+- attach an entire FAQ category dynamically;
+- detach FAQ/category associations;
+- reorder FAQ/category sources for one host item;
 - enable/disable one association;
-- show where a FAQ is currently used.
+- show where a FAQ or category is currently used.
+
+### Whole-category associations
+
+FAQ 1.3.0 supports a dedicated `faq_category_relations` table.
+
+A category relation stores only:
+
+`category_id + provider + item_id + optional subtype + placement + sort order`.
+
+It does **not** copy one relation row per FAQ. At render time FAQ resolves the current readable members of the category dynamically. Therefore:
+
+- adding a FAQ to the category makes it available to every linked content item automatically;
+- moving a FAQ out of the category removes it from those category-driven blocks;
+- ACL is still checked for every FAQ and for the category;
+- an FAQ linked individually and also inherited through a category is rendered once, with the individual relation taking precedence;
+- deleting a category removes its category relations;
+- renaming a category keeps its category relations attached.
 
 Avoid direct SQL queries into Story, Static Pages or third-party plugin tables when a normalized provider interface is available.
 
@@ -984,7 +1002,7 @@ FAQ 1.3.0 is ready when:
 4. FAQ entries expose normalized Item Info;
 5. FAQ emits lifecycle notifications through the best API available;
 6. existing FAQ and FAQ-category autotags still work;
-7. FAQ entries can be associated with at least Stories and Static Pages without storing FAQ data in those providers;
+7. FAQ entries and whole FAQ categories can be associated with at least Stories and Static Pages without storing FAQ data in those providers;
 8. contextual FAQ rendering works where the host exposes a placement point;
 9. manual/autotag fallback exists when automatic placement is unavailable;
 10. Coverage can identify supported content with/without FAQ without private-table coupling;
