@@ -286,19 +286,14 @@ function faq_adminNavigation($active = '')
  */
 function plugin_getconfigtooltip_faq($id)
 {
-    $help = array(
-        'hidenewfaq' => 'Hide FAQ entries from the Geeklog What\'s New block.',
-        'hidefaqmenu' => 'Hide the FAQ item from the site menu while keeping public FAQ URLs available.',
-        'newfaqinterval' => 'Number of seconds during which a recently updated FAQ is considered new.',
-        'no_hit_rights' => 'Comma-separated FAQ rights whose users should not increment FAQ hit counters.',
-        'contextual_enabled' => 'Allow FAQ associations to be rendered inside supported content providers such as articles, Documents, Maps and Videos.',
-        'contextual_default_placement' => 'Automatic lets the content provider choose its native item-display position. Manual only disables automatic contextual output.',
-        'structured_data' => 'Output FAQPage structured data on standalone FAQ pages when appropriate.',
-        'coverage_limit' => 'Maximum number of provider items inspected and displayed on the Coverage administration page.',
-        'default_permissions' => 'Default owner, group, member and anonymous permissions assigned to newly created FAQ content.'
-    );
+    global $LANG_configtooltips;
 
-    return isset($help[$id]) ? $help[$id] : '';
+    if (isset($LANG_configtooltips['faq'])
+        && isset($LANG_configtooltips['faq'][$id])) {
+        return $LANG_configtooltips['faq'][$id];
+    }
+
+    return '';
 }
 
 
