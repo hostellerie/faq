@@ -61,7 +61,8 @@ function plugin_autoinstall_faq($pi_name)
     $tables = array(
         'faq',
         'faq_category',
-        'faq_relations'
+        'faq_relations',
+        'faq_category_relations'
     );
     
     $requires = array(
