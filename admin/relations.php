@@ -11,6 +11,45 @@ if (!SEC_hasRights('faq.admin,faq.edit', 'OR')) {
 faq_categoryRelationEnsureTable();
 
 /**
+ * Read one Item Info field across the historical Geeklog return shapes.
+ *
+ * Providers may return a scalar, an associative array, or a numeric array
+ * for concrete-item requests. Normalize those forms here so consumers do not
+ * need provider-specific knowledge.
+ *
+ * @param string $provider
+ * @param string $itemId
+ * @param string $field
+ * @return string
+ */
+function faq_adminItemInfoValue($provider, $itemId, $field)
+{
+    if (!function_exists('PLG_getItemInfo')) {
+        return '';
+    }
+
+    $info = PLG_getItemInfo($provider, $itemId, $field, 0);
+
+    if (is_scalar($info)) {
+        return trim((string) $info);
+    }
+
+    if (!is_array($info)) {
+        return '';
+    }
+
+    if (isset($info[$field]) && is_scalar($info[$field])) {
+        return trim((string) $info[$field]);
+    }
+
+    if (isset($info[0]) && is_scalar($info[0])) {
+        return trim((string) $info[0]);
+    }
+
+    return '';
+}
+
+/**
  * Resolve an administration association target for display.
  *
  * Prefer the provider-owned canonical URL callback documented by Memorandum,
@@ -44,14 +83,10 @@ function faq_adminResolveAssociationTarget($provider, $itemId, $subType = '')
         }
     }
 
-    if (function_exists('PLG_getItemInfo')) {
-        $info = PLG_getItemInfo($provider, $itemId, 'title,url', 0);
-        if (is_array($info)) {
-            $resolved['title'] = isset($info['title']) ? (string) $info['title'] : '';
-            if ($resolved['url'] === '' && isset($info['url'])) {
-                $resolved['url'] = (string) $info['url'];
-            }
-        }
+    $resolved['title'] = faq_adminItemInfoValue($provider, $itemId, 'title');
+
+    if ($resolved['url'] === '') {
+        $resolved['url'] = faq_adminItemInfoValue($provider, $itemId, 'url');
     }
 
     if ($provider === 'article') {
