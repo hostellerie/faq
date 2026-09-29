@@ -1,21 +1,18 @@
-{# begin {templatelocation} #}
-
 {block_start}
-
-<dl>
-{faq_cat_list_item}
-</dl>
-
+<div class="faq-public faq-categories">
+  <ul class="faq-category-list">
+    {faq_cat_list_item}
+  </ul>
+</div>
 {block_end}
 
-
 <!-- BEGIN cat_list_item -->
-
-<dt><a href="{faq_cat_url}"><img src="{site_url}/faq/images/category.png" alt="{faq_cat_title}" style="padding-right:5px; border:none; float:left;"> 
-{faq_cat_title}</a><br><b>Number of Topics:</b> {faq_cat_faqs} <b>Hits:</b> {faq_cat_hits}</dt>
-<dd>{faq_cat_desc}</dd>
-<br><br>
-
+<li class="faq-category-card">
+  <h2><a href="{faq_cat_url}">{faq_cat_title}</a></h2>
+  <div class="faq-category-description">{faq_cat_desc}</div>
+  <div class="faq-card-meta">
+    <span>{faq_cat_faqs_label}: {faq_cat_faqs}</span>
+    <span>{faq_hits_label}: {faq_cat_hits}</span>
+  </div>
+</li>
 <!-- END cat_list_item -->
-
-{# end {templatelocation} #}
