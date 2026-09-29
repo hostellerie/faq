@@ -134,6 +134,10 @@
     border: 0;
 }
 
+.faq-contextual-item + .faq-contextual-item {
+    margin-top: .8rem;
+}
+
 .faq-contextual-question {
     position: relative;
     display: block;
@@ -180,7 +184,7 @@
 }
 
 .faq-contextual-answer {
-    margin: .55rem 0 0 1.15rem;
+    margin: .55rem 0 .35rem 1.15rem;
 }
 
 .faq-contextual-answer > :first-child {
