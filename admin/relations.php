@@ -13,30 +13,44 @@ faq_categoryRelationEnsureTable();
 /**
  * Resolve an administration association target for display.
  *
- * Prefer provider-owned Item Info. Core Articles and Static Pages receive the
- * same small native fallback used elsewhere in FAQ while their providers do
- * not expose complete Item Info URL data.
+ * Prefer the provider-owned canonical URL callback documented by Memorandum,
+ * then fall back to Item Info. Core Articles and Static Pages keep the same
+ * small native fallback while their providers do not expose both surfaces.
  *
  * @param string $provider
  * @param string $itemId
+ * @param string $subType
  * @return array
  */
-function faq_adminResolveAssociationTarget($provider, $itemId)
+function faq_adminResolveAssociationTarget($provider, $itemId, $subType = '')
 {
     global $_CONF, $_TABLES;
 
     $provider = faq_normalizeProvider($provider);
     $itemId = (string) $itemId;
+    $subType = (string) $subType;
     $resolved = array(
         'title' => '',
         'url' => ''
     );
 
+    // Memorandum content interoperability contract:
+    // content.url.resolve -> plugin_idtourl_PLUGIN($sub_type, $item_id)
+    $urlCallback = 'plugin_idtourl_' . $provider;
+    if (function_exists($urlCallback)) {
+        $providerUrl = $urlCallback($subType, $itemId);
+        if (is_string($providerUrl) && trim($providerUrl) !== '') {
+            $resolved['url'] = trim($providerUrl);
+        }
+    }
+
     if (function_exists('PLG_getItemInfo')) {
         $info = PLG_getItemInfo($provider, $itemId, 'title,url', 0);
         if (is_array($info)) {
             $resolved['title'] = isset($info['title']) ? (string) $info['title'] : '';
-            $resolved['url'] = isset($info['url']) ? (string) $info['url'] : '';
+            if ($resolved['url'] === '' && isset($info['url'])) {
+                $resolved['url'] = (string) $info['url'];
+            }
         }
     }
 
@@ -273,7 +287,7 @@ if (!faq_relationTableExists()) {
             $target .= ' (' . $row['item_subtype'] . ')';
         }
 
-        $resolved = faq_adminResolveAssociationTarget($row['provider'], $row['item_id']);
+        $resolved = faq_adminResolveAssociationTarget($row['provider'], $row['item_id'], $row['item_subtype']);
         $resolvedTitle = $resolved['title'];
         $resolvedUrl = $resolved['url'];
 
@@ -336,7 +350,7 @@ if (!faq_categoryRelationTableExists()) {
             $target .= ' (' . $row['item_subtype'] . ')';
         }
 
-        $resolved = faq_adminResolveAssociationTarget($row['provider'], $row['item_id']);
+        $resolved = faq_adminResolveAssociationTarget($row['provider'], $row['item_id'], $row['item_subtype']);
         $resolvedTitle = $resolved['title'];
         $resolvedUrl = $resolved['url'];
 
