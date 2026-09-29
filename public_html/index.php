@@ -89,8 +89,16 @@ if ( ! empty($faq_id)) {
     $headerCode = '<link rel="canonical" href="'
                 . htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8') . '">' . PHP_EOL;
     if ($metaDescription !== '') {
-        $headerCode .= '<meta name="description" content="'
-                    . htmlspecialchars($metaDescription, ENT_QUOTES, 'UTF-8') . '">' . PHP_EOL;
+        $headerCode .= PLG_getMetaTags(
+            'faq',
+            $faq_id,
+            array(
+                array(
+                    'name' => 'description',
+                    'content' => $metaDescription
+                )
+            )
+        );
     }
     $documentOptions = array(
         'pagetitle' => $pagetitle,
