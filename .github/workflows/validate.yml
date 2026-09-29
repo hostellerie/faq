@@ -98,3 +98,5 @@ jobs:
             echo "FAQ administration navigation must not depend on UIkit button classes."
             exit 1
           fi
+          grep -q "var(--eclipse-primary, #3157d5)" public_html/faq-admin.css
+          grep -q "var(--eclipse-link, #2448bd)" public_html/faq-admin.css
