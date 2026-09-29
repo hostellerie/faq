@@ -184,3 +184,16 @@ $LANG_configselects['faq'][12] = array(
     'Read-Only' => 2,
     'Read-Write' => 3
 );
+
+
+$LANG_configtooltips['faq'] = array(
+    'hidenewfaq' => 'Hide FAQ entries from the Geeklog What\'s New block.',
+    'hidefaqmenu' => 'Hide the FAQ item from the site menu while keeping public FAQ URLs available.',
+    'newfaqinterval' => 'Number of seconds during which a recently updated FAQ is considered new.',
+    'no_hit_rights' => 'Comma-separated FAQ rights whose users should not increment FAQ hit counters.',
+    'contextual_enabled' => 'Allow FAQ associations to be rendered inside supported content providers such as articles, Documents, Maps and Videos.',
+    'contextual_default_placement' => 'Automatic lets the content provider choose its native item-display position. Manual only disables automatic contextual output.',
+    'structured_data' => 'Output FAQPage structured data on standalone FAQ pages when appropriate.',
+    'coverage_limit' => 'Maximum number of provider items inspected and displayed on the Coverage administration page.',
+    'default_permissions' => 'Default owner, group, member and anonymous permissions assigned to newly created FAQ content.'
+);
