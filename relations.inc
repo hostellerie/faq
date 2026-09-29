@@ -658,7 +658,8 @@ function faq_coverageCoreCollection($provider, $limit = 100)
 
         // Older Static Pages schemas do not consistently expose a modified
         // timestamp. Coverage does not require one for the semantic audit.
-        $sql .= " FROM {$_TABLES['staticpage']} AS sp WHERE 1=1";
+        $sql .= " FROM {$_TABLES['staticpage']} AS sp"
+              . " WHERE sp.draft_flag = 0 AND sp.template_flag = 0";
 
         if (function_exists('COM_getPermSQL')) {
             $sql .= COM_getPermSQL('AND', 0, 2, 'sp');
