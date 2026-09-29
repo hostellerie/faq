@@ -33,6 +33,11 @@
     }
 
     function init() {
+        var targetType = byId('faq-relation-target-type');
+        var faqSelect = byId('faq-relation-faq');
+        var categorySelect = byId('faq-relation-category');
+        var faqWrap = byId('faq-relation-faq-wrap');
+        var categoryWrap = byId('faq-relation-category-wrap');
         var provider = byId('faq-relation-provider');
         var itemSelect = byId('faq-relation-item');
         var itemManual = byId('faq-relation-item-manual');
@@ -50,6 +55,28 @@
 
         endpoint = provider.getAttribute('data-items-url') || 'relations.php';
         selectedItem = itemSelect.getAttribute('data-selected-item') || '';
+
+        function updateTargetSource() {
+            var categoryMode = targetType && targetType.value === 'category';
+
+            if (faqWrap) {
+                faqWrap.style.display = categoryMode ? 'none' : '';
+            }
+            if (categoryWrap) {
+                categoryWrap.style.display = categoryMode ? '' : 'none';
+            }
+            if (faqSelect) {
+                faqSelect.required = !categoryMode;
+            }
+            if (categorySelect) {
+                categorySelect.required = categoryMode;
+            }
+        }
+
+        if (targetType) {
+            targetType.addEventListener('change', updateTargetSource);
+            updateTargetSource();
+        }
 
         function showManual(message) {
             if (itemWrap) {
