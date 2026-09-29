@@ -362,23 +362,6 @@ function faq_notifyDeleted($id)
 }
 
 
-function plugin_getconfigtooltip_faq($id)
-{
-    $tips = array(
-        'hidenewfaq' => 'Hide FAQ entries from the Geeklog What\'s New block.',
-        'hidefaqmenu' => 'Hide the FAQ entry from the site menu.',
-        'newfaqinterval' => 'Number of seconds during which a FAQ is considered new.',
-        'no_hit_rights' => 'Comma-separated rights whose users should not increment FAQ hit counters.',
-        'contextual_enabled' => 'Render FAQ associations when a content provider exposes PLG_itemDisplay().',
-        'contextual_default_placement' => 'Placement consumed by the contextual FAQ renderer. Manual disables automatic output.',
-        'structured_data' => 'Emit machine-readable Question/Answer JSON-LD for visible FAQ content.',
-        'coverage_limit' => 'Maximum number of provider items inspected on one Coverage request.',
-        'default_permissions' => 'Geeklog ACL applied to newly created FAQ entries and categories.'
-    );
-
-    return isset($tips[$id]) ? $tips[$id] : '';
-}
-
 function faq_structuredQuestions($items, $asFaqPage)
 {
     global $_FAQ_CONF;
