@@ -57,10 +57,28 @@ The release should preserve the historical standalone FAQ features while adding 
 The plugin must remain provider-owned:
 
 - FAQ owns FAQ questions, answers, categories, permissions, rendering and FAQ-specific associations.
+- FAQ associations are **functional attachments**, not a generic editorial relationship graph. Their purpose is to decide which FAQ entries or FAQ categories are rendered with a host content item, including FAQ-specific placement, ordering, ACL and de-duplication rules.
+- FAQ must not grow a parallel generic relationship system for Article↔Document, Map↔Video, pillar membership, related-content navigation, relationship roles or cross-provider context. Those generic editorial/context relationships belong to Hub.
 - Other plugins must not need to query FAQ SQL tables directly.
 - FAQ must not query private tables of other plugins when a public Geeklog/plugin contract is available.
-- Hub may consume and orchestrate FAQ relationships, but FAQ must remain usable without Hub.
+- Hub may observe or consume FAQ-owned attachment context where a public contract exists, but it must not become required for FAQ rendering or persistence.
 - Optional modern capabilities must degrade gracefully when the running Geeklog version does not expose them.
+
+### Boundary with Hub
+
+The ownership boundary is intentional:
+
+```text
+Hub
+= generic editorial relationships and context between content objects
+
+FAQ
+= FAQ-specific attachment/rendering rules for a host content object
+```
+
+A relation such as `article -> document`, pillar membership, bidirectional related-content navigation or cross-plugin context belongs to Hub. A relation such as `FAQ -> article` or `FAQ category -> static page` belongs to FAQ because the relation directly drives FAQ-specific rendering and behavior.
+
+Hub may later expose these FAQ attachments as observed context or diagnostics, but it should not own, mutate or duplicate the underlying FAQ association records.
 
 This roadmap follows the interoperability and modernization guidance in the `hostellerie/memorandum` repository.
 
