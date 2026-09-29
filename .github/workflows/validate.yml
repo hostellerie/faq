@@ -81,5 +81,9 @@ jobs:
       - name: Validate native administration hooks
         if: matrix.php == '8.1'
         run: |
-          grep -q 'function plugin_getadminoption_faq' functions.inc
-          grep -q 'function plugin_cclabel_faq' functions.inc
+          getadmin_count=$(grep -R --exclude-dir=dist --exclude-dir=.git --include='*.php' --include='*.inc' -h "function plugin_getadminoption_faq" . | wc -l | tr -d ' ')
+          cclabel_count=$(grep -R --exclude-dir=dist --exclude-dir=.git --include='*.php' --include='*.inc' -h "function plugin_cclabel_faq" . | wc -l | tr -d ' ')
+          test "$getadmin_count" = "1"
+          test "$cclabel_count" = "1"
+          grep -q 'function plugin_getadminoption_faq' api.inc
+          grep -q 'function plugin_cclabel_faq' api.inc
