@@ -8,6 +8,8 @@ if (!SEC_hasRights('faq.admin,faq.edit', 'OR')) {
     exit;
 }
 
+faq_categoryRelationEnsureTable();
+
 if (isset($_GET['faq_ajax']) && $_GET['faq_ajax'] === 'items') {
     $provider = isset($_GET['provider']) ? COM_applyFilter($_GET['provider']) : '';
     $payload = faq_relationObjectOptions($provider, 100);
@@ -31,7 +33,9 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
     $action = isset($_POST['faq_relation_action']) ? $_POST['faq_relation_action'] : '';
 
     if ($action === 'add') {
+        $target_type = isset($_POST['target_type']) && $_POST['target_type'] === 'category' ? 'category' : 'faq';
         $faq_id = COM_applyFilter(isset($_POST['faq_id']) ? $_POST['faq_id'] : '');
+        $category_id = COM_applyFilter(isset($_POST['category_id']) ? $_POST['category_id'] : '');
         $provider = COM_applyFilter(isset($_POST['provider']) ? $_POST['provider'] : '');
 
         $itemChoice = isset($_POST['item_id_choice']) ? trim((string) $_POST['item_id_choice']) : '';
@@ -52,14 +56,23 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
         $placement = COM_applyFilter(isset($_POST['placement']) ? $_POST['placement'] : 'automatic');
         $sort_order = isset($_POST['sort_order']) ? (int) $_POST['sort_order'] : 0;
 
-        if (faq_relationAdd($faq_id, $provider, $item_id, $subtype, $placement, $sort_order)) {
-            $msg = 'Association saved.';
+        $saved = $target_type === 'category'
+            ? faq_categoryRelationAdd($category_id, $provider, $item_id, $subtype, $placement, $sort_order)
+            : faq_relationAdd($faq_id, $provider, $item_id, $subtype, $placement, $sort_order);
+
+        if ($saved) {
+            $msg = $target_type === 'category'
+                ? 'Category association saved. New FAQs added to this category will be included automatically.'
+                : 'Association saved.';
         } else {
-            $msg = 'The association could not be saved. Check the FAQ and selected content.';
+            $msg = 'The association could not be saved. Check the selected FAQ/category and content.';
         }
-    } elseif ($action === 'delete') {
+    } elseif ($action === 'delete' || $action === 'delete_category') {
         $relation_id = isset($_POST['relation_id']) ? (int) $_POST['relation_id'] : 0;
-        if (faq_relationDelete($relation_id)) {
+        $deleted = $action === 'delete_category'
+            ? faq_categoryRelationDelete($relation_id)
+            : faq_relationDelete($relation_id);
+        if ($deleted) {
             $msg = 'Association deleted.';
         }
     }
@@ -85,16 +98,21 @@ if ($msg !== '') {
 }
 
 $display .= '<p class="faq-admin-help">'
-          . 'Associate an existing FAQ with content exposed by Geeklog providers. '
-          . 'Providers and selectable content are discovered automatically through the shared Item Info contract. '
-          . 'Manual ID entry is only offered as a fallback when a provider cannot enumerate its content.'
+          . 'Associate either one FAQ or an entire FAQ category with content exposed by Geeklog providers. '
+          . 'A category association is dynamic: newly added FAQs in that category are included automatically. '
+          . 'Providers and selectable content are discovered automatically when possible; manual ID remains a fallback.'
           . '</p>';
 
 $display .= '<h2>Add association</h2>';
 $display .= '<form method="post" action="' . $_CONF['site_admin_url'] . '/plugins/faq/relations.php" class="faq-admin-form">';
 $display .= '<div class="faq-relation-grid">';
 
-$display .= '<label>FAQ<select name="faq_id" required>';
+$display .= '<label>Association source<select name="target_type">'
+          . '<option value="faq">Individual FAQ</option>'
+          . '<option value="category">Whole category</option>'
+          . '</select></label>';
+
+$display .= '<label>FAQ<select name="faq_id">';
 $result = DB_query("SELECT faq.id, faq.title
                       FROM {$_TABLES['faq']} faq
                       JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category"
@@ -104,6 +122,17 @@ $result = DB_query("SELECT faq.id, faq.title
 while ($row = DB_fetchArray($result)) {
     $display .= '<option value="' . htmlspecialchars($row['id'], ENT_QUOTES, 'UTF-8') . '">'
               . htmlspecialchars($row['title'] . ' [' . $row['id'] . ']', ENT_QUOTES, 'UTF-8') . '</option>';
+}
+$display .= '</select></label>';
+
+$display .= '<label>FAQ category<select name="category_id"><option value="">Select a category</option>';
+$categoryResult = DB_query("SELECT cat.id, cat.title
+                              FROM {$_TABLES['faq_category']} cat"
+                          . COM_getPermSQL('WHERE', 0, 3, 'cat')
+                          . ' ORDER BY cat.title');
+while ($categoryRow = DB_fetchArray($categoryResult)) {
+    $display .= '<option value="' . htmlspecialchars($categoryRow['id'], ENT_QUOTES, 'UTF-8') . '">'
+              . htmlspecialchars($categoryRow['title'] . ' [' . $categoryRow['id'] . ']', ENT_QUOTES, 'UTF-8') . '</option>';
 }
 $display .= '</select></label>';
 
@@ -150,7 +179,7 @@ $display .= '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . $token . 
 $display .= '<div class="faq-relation-actions"><input type="submit" value="Save association"></div>';
 $display .= '</form>';
 
-$display .= '<h2 class="faq-relation-current-title">Current associations</h2>';
+$display .= '<h2 class="faq-relation-current-title">Current individual FAQ associations</h2>';
 
 if ($filterProvider !== '' && $filterItem !== '') {
     $display .= '<div class="faq-admin-filter-context"><strong>Filtered content:</strong> <code>'
@@ -221,6 +250,72 @@ if (!faq_relationTableExists()) {
         $display .= '<input type="hidden" name="relation_id" value="' . (int) $row['relation_id'] . '">';
         $display .= '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . SEC_createToken() . '">';
         $display .= '<input type="submit" value="Delete"></form></td></tr>';
+    }
+
+    $display .= '</tbody></table></div>';
+}
+
+$display .= '<h2 class="faq-relation-current-title">Current category associations</h2>';
+if (!faq_categoryRelationTableExists()) {
+    $display .= '<p>The FAQ category relation table is not installed yet.</p>';
+} else {
+    $sql = "SELECT rel.relation_id, rel.category_id, rel.provider, rel.item_id, rel.item_subtype,
+                   rel.placement, rel.sort_order, rel.enabled, cat.title
+              FROM {$_TABLES['faq_category_relations']} rel
+              JOIN {$_TABLES['faq_category']} cat ON cat.id = rel.category_id";
+
+    if ($filterProvider !== '' && $filterItem !== '') {
+        $sql .= " WHERE rel.provider = '" . DB_escapeString($filterProvider) . "'"
+              . " AND rel.item_id = '" . DB_escapeString($filterItem) . "'";
+    }
+
+    $sql .= " ORDER BY rel.provider, rel.item_id, rel.sort_order, cat.title";
+    $result = DB_query($sql);
+
+    $display .= '<div class="faq-admin-table"><table class="admin-list"><thead><tr>'
+              . '<th>Category</th><th>Content</th><th>Placement</th><th>Order</th><th>Action</th>'
+              . '</tr></thead><tbody>';
+
+    while ($row = DB_fetchArray($result)) {
+        $target = $row['provider'] . ':' . $row['item_id'];
+        if ($row['item_subtype'] !== '') {
+            $target .= ' (' . $row['item_subtype'] . ')';
+        }
+
+        $resolvedTitle = '';
+        $resolvedUrl = '';
+        if (function_exists('PLG_getItemInfo')) {
+            $info = PLG_getItemInfo($row['provider'], $row['item_id'], 'title,url', 0);
+            if (is_array($info)) {
+                $resolvedTitle = isset($info['title']) ? (string) $info['title'] : '';
+                $resolvedUrl = isset($info['url']) ? (string) $info['url'] : '';
+            }
+        }
+
+        $display .= '<tr><td><strong>' . htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8') . '</strong><br><small>'
+                  . htmlspecialchars($row['category_id'], ENT_QUOTES, 'UTF-8') . '</small></td><td>';
+        if ($resolvedTitle !== '') {
+            $display .= '<strong>' . htmlspecialchars($resolvedTitle, ENT_QUOTES, 'UTF-8') . '</strong><br>';
+        }
+        $display .= '<code>' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</code>';
+        if ($resolvedUrl !== '') {
+            $display .= '<br><a href="' . htmlspecialchars($resolvedUrl, ENT_QUOTES, 'UTF-8') . '">View content</a>';
+        }
+        $display .= '</td>';
+
+        $placementLabel = $row['placement'] === 'manual' ? 'Manual only' : 'Automatic';
+        $display .= '<td>' . htmlspecialchars($placementLabel, ENT_QUOTES, 'UTF-8') . '</td>';
+        $display .= '<td>' . (int) $row['sort_order'] . '</td><td>';
+
+        $deleteAction = $_CONF['site_admin_url'] . '/plugins/faq/relations.php';
+        if ($filterProvider !== '' && $filterItem !== '') {
+            $deleteAction .= '?provider=' . rawurlencode($filterProvider) . '&item_id=' . rawurlencode($filterItem);
+        }
+        $display .= '<form method="post" action="' . htmlspecialchars($deleteAction, ENT_QUOTES, 'UTF-8') . '" style="display:inline">'
+                  . '<input type="hidden" name="faq_relation_action" value="delete_category">'
+                  . '<input type="hidden" name="relation_id" value="' . (int) $row['relation_id'] . '">'
+                  . '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . SEC_createToken() . '">'
+                  . '<input type="submit" value="Delete"></form></td></tr>';
     }
 
     $display .= '</tbody></table></div>';
