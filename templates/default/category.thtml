@@ -13,7 +13,7 @@
   </header>
 
   <ul class="faq-question-list">
-    {faq_question_list_item}
+    {faq_question_list}
   </ul>
 </div>
 {block_end}
