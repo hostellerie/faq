@@ -89,6 +89,16 @@ jobs:
           grep -q 'function plugin_cclabel_faq' api.inc
 
 
+      - name: Validate core coverage audit contract
+        if: matrix.php == '8.1'
+        run: |
+          grep -q 'function faq_coverageCoreCollection' relations.inc
+          grep -q 'function faq_coverageExternalSignals' relations.inc
+          grep -q "in_array(\$provider, array('article', 'staticpages')" admin/coverage.php
+          grep -q 'External FAQ signal only' admin/coverage.php
+          grep -q 'FAQPage JSON-LD' relations.inc
+          grep -q 'Repeated details/summary Q&A' relations.inc
+
       - name: Validate administration navigation contract
         if: matrix.php == '8.1'
         run: |
