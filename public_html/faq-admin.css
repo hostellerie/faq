@@ -37,103 +37,38 @@
 }
 
 .faq-admin-nav {
-    margin: 0 0 1rem;
+    margin: 0 0 20px;
 }
 
-.faq-admin-nav ul {
+.faq-admin-nav__primary {
     display: flex;
     flex-wrap: wrap;
-    gap: .45rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    gap: 8px;
+    align-items: center;
 }
 
-.faq-admin-nav a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.25rem;
-    padding: .45rem .75rem;
-    border: 1px solid currentColor;
-    border-radius: .35rem;
+.faq-admin-nav__button {
     text-decoration: none;
 }
 
-.faq-admin-nav .active a {
-    font-weight: 700;
-    box-shadow: inset 0 -2px 0 currentColor;
-}
-
-.faq-admin-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .75rem 1.25rem;
-    margin: .75rem 0 1rem;
-    padding: .75rem 1rem;
-    border: 1px solid rgba(127, 127, 127, .28);
-    border-radius: .45rem;
-}
-
-.faq-admin-summary strong {
-    display: block;
-}
-
-.faq-admin-table {
-    width: 100%;
-    overflow-x: auto;
-}
-
-.faq-admin-table table {
-    width: 100%;
-}
-
-.faq-admin-help {
-    margin: .75rem 0;
-    opacity: .85;
-}
-
-@media (max-width: 640px) {
-    .faq-editor-controls,
-    .faq-admin-toolbar,
-    .faq-admin-nav ul {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .faq-admin-nav a,
-    .faq-editor-controls select,
-    .faq-admin-toolbar select,
-    .faq-admin-toolbar input,
-    .faq-admin-toolbar button {
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .faq-content-editor textarea {
-        min-height: 16rem;
-    }
-}
-
 .faq-admin-config-form {
+    display: inline-block;
     margin: 0;
 }
 
-.faq-admin-config-form button {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.25rem;
-    padding: .45rem .75rem;
-    border: 1px solid currentColor;
-    border-radius: .35rem;
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-}
+@media (max-width: 640px) {
+    .faq-admin-nav__primary {
+        align-items: stretch;
+    }
 
-.faq-admin-nav .active .faq-admin-config-form button {
-    font-weight: 700;
-    box-shadow: inset 0 -2px 0 currentColor;
+    .faq-admin-nav__primary .uk-button,
+    .faq-admin-nav__primary form {
+        width: 100%;
+    }
+
+    .faq-admin-nav__primary form .uk-button {
+        width: 100%;
+    }
 }
 
 .faq-relation-grid {
@@ -216,4 +151,18 @@
 
 .faq-admin-summary-link strong {
     font-size: 1.15em;
+}
+
+
+.faq-relation-actions {
+    margin: 1rem 0 1.35rem;
+}
+
+.faq-relation-actions input[type="submit"] {
+    margin: 0;
+}
+
+.faq-relation-current-title {
+    margin-top: 0;
+    margin-bottom: .85rem;
 }
