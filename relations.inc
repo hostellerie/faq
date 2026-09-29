@@ -460,15 +460,55 @@ function faq_relationCountForItem($provider, $item_id, $subtype = '')
  * @param string $description
  * @return string
  */
-function faq_contextualAnswerSource($description)
+function faq_splitAnswerNavigation($description)
 {
     $description = (string) $description;
-
-    return preg_replace(
-        '~<p\b[^>]*>\s*<(?:b|strong)\b[^>]*>\s*See also:\s*</(?:b|strong)>\s*(?:\[faq:[^\]]+\]\s*)+$~i',
-        '',
-        $description
+    $result = array(
+        'answer' => $description,
+        'related' => ''
     );
+
+    if (preg_match(
+        '~<p\b[^>]*>\s*<(?:b|strong)\b[^>]*>\s*See also:\s*</(?:b|strong)>\s*((?:\[faq:[^\]]+\]\s*)+)(?:</p>)?\s*$~i',
+        $description,
+        $match,
+        PREG_OFFSET_CAPTURE
+    )) {
+        $full = $match[0];
+        $related = isset($match[1][0]) ? trim((string) $match[1][0]) : '';
+        $offset = isset($full[1]) ? (int) $full[1] : -1;
+
+        if ($offset >= 0) {
+            $result['answer'] = rtrim(substr($description, 0, $offset));
+            $result['related'] = $related;
+        }
+    }
+
+    return $result;
+}
+
+function faq_contextualAnswerSource($description)
+{
+    $parts = faq_splitAnswerNavigation($description);
+    return $parts['answer'];
+}
+
+function faq_plainTextExcerpt($description, $limit = 155)
+{
+    $parts = faq_splitAnswerNavigation($description);
+    $text = PLG_replaceTags($parts['answer']);
+    $text = html_entity_decode(strip_tags($text), ENT_QUOTES, 'UTF-8');
+    $text = preg_replace('/\s+/u', ' ', trim($text));
+
+    if (function_exists('MBYTE_strlen') && function_exists('MBYTE_substr')) {
+        if (MBYTE_strlen($text) > $limit) {
+            $text = rtrim(MBYTE_substr($text, 0, max(1, $limit - 1))) . '…';
+        }
+    } elseif (strlen($text) > $limit) {
+        $text = rtrim(substr($text, 0, max(1, $limit - 3))) . '...';
+    }
+
+    return $text;
 }
 
 function faq_renderFaqItems($items, $css_class, $asFaqPage)
