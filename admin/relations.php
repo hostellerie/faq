@@ -290,9 +290,6 @@ if (!faq_relationTableExists()) {
             }
         }
         $display .= '<code>' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</code>';
-        if ($resolvedUrl !== '') {
-            $display .= '<br><a href="' . htmlspecialchars($resolvedUrl, ENT_QUOTES, 'UTF-8') . '">View content</a>';
-        }
         $display .= '</td>';
 
                 $placementLabel = $row['placement'] === 'manual' ? 'Manual only' : 'Automatic';
@@ -354,9 +351,6 @@ if (!faq_categoryRelationTableExists()) {
             }
         }
         $display .= '<code>' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</code>';
-        if ($resolvedUrl !== '') {
-            $display .= '<br><a href="' . htmlspecialchars($resolvedUrl, ENT_QUOTES, 'UTF-8') . '">View content</a>';
-        }
         $display .= '</td>';
 
         $placementLabel = $row['placement'] === 'manual' ? 'Manual only' : 'Automatic';
