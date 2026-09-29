@@ -112,6 +112,8 @@ rocket-stove-draft -> staticpages:rocket-stove
 
 One FAQ may be reused on several items and one item may contain several FAQs.
 
+A whole FAQ category can also be linked to a content item. Category links are dynamic: FAQ stores one category relation, then resolves the category's current readable FAQs at render time. New FAQs added to that category therefore appear automatically. Individual FAQ links are de-duplicated against category-derived FAQs.
+
 The administration pages are:
 
 ```text
