@@ -89,6 +89,20 @@ jobs:
           grep -q 'function plugin_cclabel_faq' api.inc
 
 
+      - name: Validate category association contract
+        if: matrix.php == '8.1'
+        run: |
+          grep -q "faq_category_relations" functions.inc
+          grep -q "faq_category_relations" autoinstall.php
+          grep -q "faq_category_relations" sql/mysql_install.php
+          grep -q "function faq_categoryRelationAdd" relations.inc
+          grep -q "function faq_categoryRelationGetForItem" relations.inc
+          grep -q "function faq_categoryRelationDeleteForCategory" relations.inc
+          grep -q "Whole category" admin/relations.php
+          grep -q "faq-relation-target-type" public_html/relations-admin.js
+          grep -q "faq_category_relations" modern.inc
+          grep -q "faq_category_relations" admin/index.php
+
       - name: Validate core coverage audit contract
         if: matrix.php == '8.1'
         run: |
