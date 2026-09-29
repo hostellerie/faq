@@ -108,7 +108,7 @@ if ( ! empty($faq_id)) {
     $tpl = COM_newTemplate(CTL_plugin_templatePath('faq'));
     $tpl->set_file( array('faq' => 'faq.thtml'));
     
-    $tpl->set_var('block_start', '');
+    $tpl->set_var('block_start', COM_startBlock($LANG_FAQ_COMMON['FAQ']));
     
 	$tpl->set_var( 'faq_lang_cats' , $LANG_FAQ_COMMON['Categories'] );
 	$tpl->set_var( 'site_url', $_CONF['site_url']  );
@@ -132,7 +132,7 @@ if ( ! empty($faq_id)) {
         );
     }
 	    
-    $tpl->set_var('block_end', '');    
+    $tpl->set_var('block_end', COM_endBlock());    
         
 	$tpl->parse('output', 'faq');
     $display .= $tpl->finish($tpl->get_var('output'));
@@ -160,7 +160,7 @@ if ( ! empty($faq_id)) {
     $tpl = COM_newTemplate(CTL_plugin_templatePath('faq'));
     $tpl->set_file(array('category' => 'category.thtml'));
 
-    $tpl->set_var('block_start', COM_startBlock($pagetitle));
+    $tpl->set_var('block_start', COM_startBlock($LANG_FAQ_COMMON['FAQ']));
     $tpl->set_var('block_end', COM_endBlock());
     $tpl->set_var('faq_lang_cats', $LANG_FAQ_COMMON['Categories']);
     $tpl->set_var('faq_cats_url', $_CONF['site_url'] . '/faq/index.php');
