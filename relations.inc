@@ -450,6 +450,27 @@ function faq_relationCountForItem($provider, $item_id, $subtype = '')
     return count(faq_relationGetForItem($provider, $item_id, $subtype));
 }
 
+/**
+ * Remove standalone-FAQ navigation helpers from contextual answers.
+ *
+ * Historical FAQ content may end with a "See also:" paragraph containing
+ * FAQ autotags. Keep that navigation on the canonical FAQ page, but omit it
+ * when the answer is embedded into another provider.
+ *
+ * @param string $description
+ * @return string
+ */
+function faq_contextualAnswerSource($description)
+{
+    $description = (string) $description;
+
+    return preg_replace(
+        '~<p\b[^>]*>\s*<(?:b|strong)\b[^>]*>\s*See also:\s*</(?:b|strong)>\s*(?:\[faq:[^\]]+\]\s*)+$~i',
+        '',
+        $description
+    );
+}
+
 function faq_renderFaqItems($items, $css_class, $asFaqPage)
 {
     global $_CONF, $LANG_FAQ_COMMON;
@@ -472,13 +493,16 @@ function faq_renderFaqItems($items, $css_class, $asFaqPage)
 
         $faq_id = isset($item['faq_id']) ? $item['faq_id'] : (isset($item['id']) ? $item['id'] : '');
         $question = htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8');
-        $answer = PLG_replaceTags($item['description']);
+        $answerSource = $asFaqPage
+            ? (string) $item['description']
+            : faq_contextualAnswerSource($item['description']);
+        $answer = PLG_replaceTags($answerSource);
 
         $html .= '<details class="faq-contextual-item">';
         $html .= '<summary class="faq-contextual-question">' . $question . '</summary>';
         $html .= '<div class="faq-contextual-answer">' . $answer;
 
-        if ($faq_id !== '') {
+        if ($asFaqPage && $faq_id !== '') {
             $url = $_CONF['site_url'] . '/faq/index.php?faq=' . rawurlencode($faq_id);
             $html .= '<p class="faq-contextual-permalink"><a href="'
                   . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">'
