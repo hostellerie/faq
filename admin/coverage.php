@@ -13,6 +13,11 @@ if (!faq_relationProviderAllowed($provider)) {
     $provider = 'article';
 }
 
+$status = isset($_GET['status']) ? COM_applyFilter($_GET['status']) : 'all';
+if (!in_array($status, array('all', 'with', 'without'), true)) {
+    $status = 'all';
+}
+
 $limit = isset($_FAQ_CONF['coverage_limit']) ? (int) $_FAQ_CONF['coverage_limit'] : 100;
 if ($limit < 1 || $limit > 200) {
     $limit = 100;
@@ -32,7 +37,12 @@ foreach (array('article' => 'Articles', 'staticpages' => 'Static Pages', 'videos
     $selected = $provider === $key ? ' selected' : '';
     $display .= '<option value="' . $key . '"' . $selected . '>' . $label . '</option>';
 }
-$display .= '</select><input type="submit" value="Show"></form>';
+$display .= '</select>';
+$display .= '<label for="faq-coverage-status">FAQ status</label><select id="faq-coverage-status" name="status">'
+          . '<option value="all"' . ($status === 'all' ? ' selected' : '') . '>All</option>'
+          . '<option value="with"' . ($status === 'with' ? ' selected' : '') . '>With FAQ</option>'
+          . '<option value="without"' . ($status === 'without' ? ' selected' : '') . '>Without FAQ</option>'
+          . '</select><input type="submit" value="Show"></form>';
 
 if ($items === false) {
     $display .= '<p>This provider does not expose an enumerable Item Info collection on this installation. FAQ will not query its private SQL tables. Manual associations remain available.</p>';
@@ -53,6 +63,12 @@ if ($items === false) {
             $without++;
         }
 
+        if (($status === 'with' && $count < 1)
+            || ($status === 'without' && $count > 0)
+        ) {
+            continue;
+        }
+
         $title = isset($item['title']) ? $item['title'] : $item['id'];
         $url = isset($item['url']) ? $item['url'] : '';
         $titleHtml = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
@@ -66,7 +82,12 @@ if ($items === false) {
               . rawurlencode($provider) . '&amp;item_id=' . rawurlencode((string) $item['id']) . '">Manage</a></td></tr>';
     }
 
-    $display .= '<div class="faq-admin-summary"><span><strong>' . $with . '</strong>With FAQ</span><span><strong>' . $without . '</strong>Without FAQ</span></div>';
+    $baseCoverageUrl = $_CONF['site_admin_url'] . '/plugins/faq/coverage.php?provider=' . rawurlencode($provider);
+    $display .= '<div class="faq-admin-summary">'
+              . '<a class="faq-admin-summary-link' . ($status === 'with' ? ' active' : '') . '" href="' . htmlspecialchars($baseCoverageUrl . '&status=with', ENT_QUOTES, 'UTF-8') . '"><strong>' . $with . '</strong>With FAQ</a>'
+              . '<a class="faq-admin-summary-link' . ($status === 'without' ? ' active' : '') . '" href="' . htmlspecialchars($baseCoverageUrl . '&status=without', ENT_QUOTES, 'UTF-8') . '"><strong>' . $without . '</strong>Without FAQ</a>'
+              . '<a class="faq-admin-summary-link' . ($status === 'all' ? ' active' : '') . '" href="' . htmlspecialchars($baseCoverageUrl . '&status=all', ENT_QUOTES, 'UTF-8') . '"><strong>' . ($with + $without) . '</strong>All</a>'
+              . '</div>';
     $display .= '<div class="faq-admin-table"><table class="admin-list"><thead><tr><th>Content</th><th>FAQ</th><th>Action</th></tr></thead><tbody>' . $rows . '</tbody></table></div>';
 }
 
