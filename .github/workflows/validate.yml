@@ -69,3 +69,10 @@ jobs:
           grep -q "story_text_no_br" modern.inc
           grep -q "story_introtext" modern.inc
           grep -q "faq-context-block" modern.inc
+
+
+      - name: Ensure unique plugin callbacks
+        if: matrix.php == '8.1'
+        run: |
+          count=$(grep -R --include='*.php' --include='*.inc' -h "function plugin_getconfigtooltip_faq" . | wc -l | tr -d ' ')
+          test "$count" = "1"
