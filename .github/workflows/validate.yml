@@ -107,6 +107,7 @@ jobs:
         if: matrix.php == '8.1'
         run: |
           grep -q 'function faq_adminResolveAssociationTarget' admin/relations.php
+          grep -q "plugin_idtourl_" admin/relations.php
           grep -q "/article.php?story=" admin/relations.php
           grep -q "/staticpages/index.php?page=" admin/relations.php
           if grep -q '>View content<' admin/relations.php; then
