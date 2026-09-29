@@ -278,69 +278,6 @@ function faq_adminNavigation($active = '')
 
 
 /**
- * Return the FAQ entry for Geeklog's native Command & Control page.
- *
- * @return array|false
- */
-function plugin_cclabel_faq()
-{
-    global $_CONF, $LANG_FAQ_COMMON;
-
-    if (!SEC_hasRights('faq.admin,faq.edit', 'OR')) {
-        return false;
-    }
-
-    $label = isset($LANG_FAQ_COMMON['FAQ']) ? $LANG_FAQ_COMMON['FAQ'] : 'FAQ';
-
-    return array(
-        $label,
-        $_CONF['site_admin_url'] . '/plugins/faq/index.php',
-        $_CONF['site_url'] . '/faq/images/faqplugin.png'
-    );
-}
-
-
-/**
- * Return the FAQ administration entry for Geeklog's native admin menu.
- *
- * Geeklog and themes such as Eclipse discover plugin administration links
- * through plugin_getadminoption_<plugin>() rather than theme-specific logic.
- *
- * @return array
- */
-function plugin_getadminoption_faq()
-{
-    global $_CONF, $_TABLES, $LANG_FAQ_COMMON;
-
-    if (!SEC_hasRights('faq.admin,faq.edit', 'OR')) {
-        return array();
-    }
-
-    $count = 0;
-    if (!empty($_TABLES['faq'])) {
-        $result = DB_query(
-            "SELECT COUNT(*) AS cnt FROM {$_TABLES['faq']} AS faq"
-            . COM_getPermSQL('WHERE', 0, 2, 'faq')
-        );
-        if ($result) {
-            $row = DB_fetchArray($result);
-            if (isset($row['cnt'])) {
-                $count = (int) $row['cnt'];
-            }
-        }
-    }
-
-    $label = isset($LANG_FAQ_COMMON['FAQ']) ? $LANG_FAQ_COMMON['FAQ'] : 'FAQ';
-
-    return array(
-        $label,
-        $_CONF['site_admin_url'] . '/plugins/faq/index.php',
-        $count
-    );
-}
-
-
-/**
  * Provide native Geeklog Configuration tooltips.
  *
  * Returning text lets configuration.php render the standard "?" tooltip
