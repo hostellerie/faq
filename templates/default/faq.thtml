@@ -1,33 +1,35 @@
 {block_start}
-<div class="faq-public faq-entry">
+<div class="faq-public faq-view faq-entry-view">
   <nav class="faq-breadcrumbs" aria-label="FAQ breadcrumb">
     <a href="{faq_cats_url}">{faq_lang_cats}</a>
     <span aria-hidden="true">›</span>
     <a href="{faq_cat_url}">{faq_cat_title}</a>
   </nav>
 
-  <article class="faq-entry-article">
+  <article class="faq-view-card faq-entry-article">
     <header class="faq-entry-header">
       <h1 class="faq-entry-title">{faq_title}</h1>
     </header>
 
-    <div class="faq-entry-answer">
-      {faq_desc}
-    </div>
-
-    {faq_related}
-
-    <footer class="faq-entry-footer">
-      <div class="faq-meta">
-        <span><strong>{faq_lang_updated}:</strong> {faq_updated}</span>
-        <span><strong>{faq_lang_hits}:</strong> {faq_hits}</span>
+    <div class="faq-entry-reading">
+      <div class="faq-entry-answer">
+        {faq_desc}
       </div>
 
-      <nav class="faq-actions" aria-label="FAQ actions">
-        <a href="{faq_cat_url}">Back to {faq_cat_title}</a>
-        {faq_edit}
-      </nav>
-    </footer>
+      {faq_related}
+
+      <footer class="faq-entry-footer">
+        <div class="faq-meta">
+          <span><strong>{faq_lang_updated}:</strong> {faq_updated}</span>
+          <span><strong>{faq_lang_hits}:</strong> {faq_hits}</span>
+        </div>
+
+        <nav class="faq-actions" aria-label="FAQ actions">
+          <a href="{faq_cat_url}">Back to {faq_cat_title}</a>
+          {faq_edit}
+        </nav>
+      </footer>
+    </div>
   </article>
 </div>
 {block_end}
