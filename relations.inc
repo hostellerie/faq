@@ -17,6 +17,19 @@ function faq_relationTableExists()
     return DB_numRows($result) > 0;
 }
 
+function faq_categoryRelationTableExists()
+{
+    global $_TABLES;
+
+    if (empty($_TABLES['faq_category_relations'])) {
+        return false;
+    }
+
+    $table = str_replace(array('\\', '%', '_'), array('\\\\', '\\%', '\\_'), $_TABLES['faq_category_relations']);
+    $result = DB_query("SHOW TABLES LIKE '" . DB_escapeString($table) . "'");
+    return DB_numRows($result) > 0;
+}
+
 function faq_relationProviderAllowed($provider)
 {
     return (bool) preg_match('/^[a-z0-9_-]{1,40}$/i', $provider);
@@ -291,6 +304,145 @@ function faq_relationFaqExists($faq_id, $access = 2)
     return DB_numRows($result) === 1;
 }
 
+function faq_relationCategoryExists($category_id, $access = 2)
+{
+    global $_TABLES;
+
+    $category_id = DB_escapeString($category_id);
+    $sql = "SELECT cat.id
+              FROM {$_TABLES['faq_category']} cat
+             WHERE cat.id = '{$category_id}'"
+         . COM_getPermSQL('AND', 0, $access, 'cat');
+
+    $result = DB_query($sql);
+    return DB_numRows($result) === 1;
+}
+
+function faq_categoryRelationAdd($category_id, $provider, $item_id, $subtype = '', $placement = 'automatic', $sort_order = 0)
+{
+    global $_TABLES;
+
+    if (!faq_categoryRelationTableExists() || !faq_relationCategoryExists($category_id, 3)) {
+        return false;
+    }
+
+    $provider = faq_normalizeProvider($provider);
+    if (!faq_relationProviderAllowed($provider) || !faq_relationItemAllowed($item_id)) {
+        return false;
+    }
+
+    $category_id = DB_escapeString($category_id);
+    $provider = DB_escapeString($provider);
+    $item_id = DB_escapeString($item_id);
+    $subtype = DB_escapeString(substr((string) $subtype, 0, 64));
+    $placement = strtolower(trim((string) $placement));
+    if ($placement === 'before' || $placement === 'after') {
+        $placement = 'automatic';
+    }
+    $placement = in_array($placement, array('automatic', 'manual'), true)
+        ? $placement : 'automatic';
+    $sort_order = (int) $sort_order;
+
+    $sql = "INSERT INTO {$_TABLES['faq_category_relations']}
+                (category_id, provider, item_id, item_subtype, placement, sort_order, enabled, created, modified)
+            VALUES
+                ('{$category_id}', '{$provider}', '{$item_id}', '{$subtype}', '{$placement}', {$sort_order}, 1, NOW(), NOW())
+            ON DUPLICATE KEY UPDATE
+                placement = VALUES(placement),
+                sort_order = VALUES(sort_order),
+                enabled = 1,
+                modified = NOW()";
+
+    DB_query($sql);
+    faq_clearLocalCache();
+
+    return true;
+}
+
+function faq_categoryRelationDelete($relation_id)
+{
+    global $_TABLES;
+
+    if (!faq_categoryRelationTableExists()) {
+        return false;
+    }
+
+    $relation_id = (int) $relation_id;
+    if ($relation_id < 1) {
+        return false;
+    }
+
+    DB_query("DELETE FROM {$_TABLES['faq_category_relations']} WHERE relation_id = {$relation_id}");
+    faq_clearLocalCache();
+
+    return true;
+}
+
+function faq_categoryRelationDeleteForCategory($category_id)
+{
+    global $_TABLES;
+
+    if (!faq_categoryRelationTableExists()) {
+        return;
+    }
+
+    $category_id = DB_escapeString($category_id);
+    DB_query("DELETE FROM {$_TABLES['faq_category_relations']} WHERE category_id = '{$category_id}'");
+    faq_clearLocalCache();
+}
+
+function faq_categoryRelationGetForItem($provider, $item_id, $subtype = '', $placement = '')
+{
+    global $_TABLES;
+
+    $items = array();
+    $provider = faq_normalizeProvider($provider);
+    if (!faq_categoryRelationTableExists()
+        || !faq_relationProviderAllowed($provider)
+        || !faq_relationItemAllowed($item_id)
+    ) {
+        return $items;
+    }
+
+    $provider = DB_escapeString($provider);
+    $item_id = DB_escapeString($item_id);
+    $subtype = DB_escapeString(substr((string) $subtype, 0, 64));
+
+    $sql = "SELECT cr.relation_id AS category_relation_id,
+                   cr.category_id, cr.provider, cr.item_id, cr.item_subtype,
+                   cr.placement, cr.sort_order,
+                   faq.id AS faq_id, faq.title, faq.description, faq.category,
+                   faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
+              FROM {$_TABLES['faq_category_relations']} cr
+              JOIN {$_TABLES['faq_category']} cat ON cat.id = cr.category_id
+              JOIN {$_TABLES['faq']} faq ON faq.category = cat.id
+             WHERE cr.enabled = 1
+               AND cr.provider = '{$provider}'
+               AND cr.item_id = '{$item_id}'";
+
+    if ($subtype !== '') {
+        $sql .= " AND (cr.item_subtype = '' OR cr.item_subtype = '{$subtype}')";
+    }
+
+    if ($placement === 'automatic') {
+        $sql .= " AND cr.placement <> 'manual'";
+    } elseif ($placement !== '') {
+        $placement = DB_escapeString($placement);
+        $sql .= " AND cr.placement = '{$placement}'";
+    }
+
+    $sql .= COM_getPermSQL('AND', 0, 2, 'faq')
+          . COM_getPermSQL('AND', 0, 2, 'cat')
+          . ' ORDER BY cr.sort_order ASC, faq.title ASC';
+
+    $result = DB_query($sql);
+    while ($row = DB_fetchArray($result)) {
+        $items[] = $row;
+    }
+
+    return $items;
+}
+
 function faq_relationAdd($faq_id, $provider, $item_id, $subtype = '', $placement = 'automatic', $sort_order = 0)
 {
     global $_TABLES;
@@ -411,9 +563,37 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
           . ' ORDER BY rel.sort_order ASC, faq.title ASC';
 
     $result = DB_query($sql);
+    $seen = array();
     while ($row = DB_fetchArray($result)) {
+        $faqKey = isset($row['faq_id']) ? (string) $row['faq_id'] : '';
+        if ($faqKey !== '') {
+            $seen[$faqKey] = true;
+        }
         $items[] = $row;
     }
+
+    foreach (faq_categoryRelationGetForItem($provider, $item_id, $subtype, $placement) as $row) {
+        $faqKey = isset($row['faq_id']) ? (string) $row['faq_id'] : '';
+        if ($faqKey !== '' && isset($seen[$faqKey])) {
+            continue;
+        }
+        if ($faqKey !== '') {
+            $seen[$faqKey] = true;
+        }
+        $items[] = $row;
+    }
+
+    usort($items, function ($left, $right) {
+        $leftOrder = isset($left['sort_order']) ? (int) $left['sort_order'] : 0;
+        $rightOrder = isset($right['sort_order']) ? (int) $right['sort_order'] : 0;
+        if ($leftOrder === $rightOrder) {
+            return strcasecmp(
+                isset($left['title']) ? (string) $left['title'] : '',
+                isset($right['title']) ? (string) $right['title'] : ''
+            );
+        }
+        return ($leftOrder < $rightOrder) ? -1 : 1;
+    });
 
     return $items;
 }
