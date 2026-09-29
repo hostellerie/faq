@@ -657,7 +657,15 @@ function savecat ($id, $old_id, $description, $description_edited, $title, $owne
             DB_query("UPDATE {$_TABLES['faq']}
                          SET category = '{$id}'
                        WHERE category = '{$old_id}'");
+
+            if (faq_categoryRelationTableExists()) {
+                DB_query("UPDATE {$_TABLES['faq_category_relations']}
+                             SET category_id = '" . DB_escapeString($id) . "', modified = NOW()
+                           WHERE category_id = '" . DB_escapeString($old_id) . "'");
+            }
         }
+
+        faq_clearLocalCache();
         
         return COM_refresh ($_CONF['site_admin_url'] . '/plugins/faq/index.php?msg=4&mode=cat');
     } else { // missing fields
@@ -844,6 +852,7 @@ function deletecat ($id)
         faq_notifyDeleted($faq_row['id']);
     }
 
+    faq_categoryRelationDeleteForCategory($id);
     DB_delete ($_TABLES['faq'], 'category', $id);
     DB_delete ($_TABLES['faq_category'], 'id', $id);
     faq_clearLocalCache();
