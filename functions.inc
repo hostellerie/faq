@@ -54,9 +54,10 @@ require_once ($_CONF['path'] . 'plugins/faq/api.inc');
 require_once ($_CONF['path'] . 'plugins/faq/util.inc');
 
 // database table names - don't change
-$_TABLES['faq']               = $_DB_table_prefix . 'faq';
-$_TABLES['faq_category']      = $_DB_table_prefix . 'faq_category';
-$_TABLES['faq_relations']     = $_DB_table_prefix . 'faq_relations';
+$_TABLES['faq']                    = $_DB_table_prefix . 'faq';
+$_TABLES['faq_category']           = $_DB_table_prefix . 'faq_category';
+$_TABLES['faq_relations']          = $_DB_table_prefix . 'faq_relations';
+$_TABLES['faq_category_relations'] = $_DB_table_prefix . 'faq_category_relations';
 
 require_once ($_CONF['path'] . 'plugins/faq/relations.inc');
 require_once ($_CONF['path'] . 'plugins/faq/modern.inc');
