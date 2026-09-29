@@ -76,3 +76,10 @@ jobs:
         run: |
           count=$(grep -R --include='*.php' --include='*.inc' -h "function plugin_getconfigtooltip_faq" . | wc -l | tr -d ' ')
           test "$count" = "1"
+
+
+      - name: Validate native administration hooks
+        if: matrix.php == '8.1'
+        run: |
+          grep -q 'function plugin_getadminoption_faq' functions.inc
+          grep -q 'function plugin_cclabel_faq' functions.inc
