@@ -253,16 +253,18 @@ function faq_adminNavigation($active = '')
     }
 
     if (SEC_inGroup('Root')) {
-        $classes = 'uk-button faq-admin-nav__button';
+        $classes = 'plugin-admin-nav__item faq-admin-nav__button';
+        $ariaCurrent = '';
         if ($active === 'config') {
-            $classes .= ' uk-button-primary active';
+            $classes .= ' is-active';
+            $ariaCurrent = ' aria-current="page"';
         }
 
         $html .= '<form method="post" action="'
               . htmlspecialchars($_CONF['site_admin_url'] . '/configuration.php', ENT_QUOTES, 'UTF-8')
-              . '" class="faq-admin-config-form">'
+              . '" class="plugin-admin-nav__form faq-admin-config-form">'
               . '<input type="hidden" name="conf_group" value="faq">'
-              . '<button type="submit" class="' . $classes . '">'
+              . '<button type="submit" class="' . $classes . '"' . $ariaCurrent . '>'
               . htmlspecialchars(
                     isset($LANG_FAQ_ADMIN['configuration']) ? $LANG_FAQ_ADMIN['configuration'] : 'Configuration',
                     ENT_QUOTES,
