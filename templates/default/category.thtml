@@ -1,19 +1,23 @@
 {block_start}
-<div class="faq-public faq-category">
+<div class="faq-public faq-view faq-category-view">
   <nav class="faq-breadcrumbs" aria-label="FAQ breadcrumb">
     <a href="{faq_cats_url}">{faq_lang_cats}</a>
     <span aria-hidden="true">›</span>
     <span>{faq_cat_title}</span>
   </nav>
 
-  <header class="faq-category-header">
-    <h1 class="faq-category-title">{faq_cat_title}</h1>
-    <div class="faq-category-description">{faq_cat_desc}</div>
-    {faq_cat_edit}
-  </header>
+  <section class="faq-view-card">
+    <header class="faq-category-header">
+      <div class="faq-category-heading">
+        <h1 class="faq-category-title">{faq_cat_title}</h1>
+        <div class="faq-category-description">{faq_cat_desc}</div>
+      </div>
+      {faq_cat_edit}
+    </header>
 
-  <ul class="faq-question-list">
-    {faq_question_list}
-  </ul>
+    <ul class="faq-question-list">
+      {faq_question_list}
+    </ul>
+  </section>
 </div>
 {block_end}
