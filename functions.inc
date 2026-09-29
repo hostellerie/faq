@@ -236,16 +236,18 @@ function faq_adminNavigation($active = '')
         'url' => $_CONF['site_admin_url'] . '/plugins/faq/coverage.php'
     );
 
-    $html = '<nav class="faq-admin-nav" aria-label="FAQ administration">'
-          . '<div class="faq-admin-nav__primary">';
+    $html = '<nav class="plugin-admin-nav faq-admin-nav" aria-label="FAQ administration">'
+          . '<div class="plugin-admin-nav__primary faq-admin-nav__primary">';
 
     foreach ($items as $item) {
-        $classes = 'uk-button faq-admin-nav__button';
+        $classes = 'plugin-admin-nav__item faq-admin-nav__button';
+        $ariaCurrent = '';
         if ($active === $item['key']) {
-            $classes .= ' uk-button-primary active';
+            $classes .= ' is-active';
+            $ariaCurrent = ' aria-current="page"';
         }
 
-        $html .= '<a class="' . $classes . '" href="'
+        $html .= '<a class="' . $classes . '"' . $ariaCurrent . ' href="'
               . htmlspecialchars($item['url'], ENT_QUOTES, 'UTF-8') . '">'
               . htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') . '</a>';
     }
