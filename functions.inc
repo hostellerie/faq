@@ -236,31 +236,69 @@ function faq_adminNavigation($active = '')
         'url' => $_CONF['site_admin_url'] . '/plugins/faq/coverage.php'
     );
 
-    $html = '<nav class="faq-admin-nav" aria-label="FAQ administration"><ul>';
+    $html = '<nav class="faq-admin-nav" aria-label="FAQ administration">'
+          . '<div class="faq-admin-nav__primary">';
+
     foreach ($items as $item) {
-        $class = $active === $item['key'] ? ' class="active"' : '';
-        $html .= '<li' . $class . '><a href="' . htmlspecialchars($item['url'], ENT_QUOTES, 'UTF-8') . '">'
-              . htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') . '</a></li>';
+        $classes = 'uk-button faq-admin-nav__button';
+        if ($active === $item['key']) {
+            $classes .= ' uk-button-primary active';
+        }
+
+        $html .= '<a class="' . $classes . '" href="'
+              . htmlspecialchars($item['url'], ENT_QUOTES, 'UTF-8') . '">'
+              . htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') . '</a>';
     }
 
     if (SEC_inGroup('Root')) {
-        $class = $active === 'config' ? ' class="active"' : '';
-        $html .= '<li' . $class . '><form method="post" action="'
+        $classes = 'uk-button faq-admin-nav__button';
+        if ($active === 'config') {
+            $classes .= ' uk-button-primary active';
+        }
+
+        $html .= '<form method="post" action="'
               . htmlspecialchars($_CONF['site_admin_url'] . '/configuration.php', ENT_QUOTES, 'UTF-8')
               . '" class="faq-admin-config-form">'
               . '<input type="hidden" name="conf_group" value="faq">'
-              . '<button type="submit">'
+              . '<button type="submit" class="' . $classes . '">'
               . htmlspecialchars(
                     isset($LANG_FAQ_ADMIN['configuration']) ? $LANG_FAQ_ADMIN['configuration'] : 'Configuration',
                     ENT_QUOTES,
                     'UTF-8'
                 )
-              . '</button></form></li>';
+              . '</button></form>';
     }
 
-    $html .= '</ul></nav>';
+    $html .= '</div></nav>';
 
     return $html;
+}
+
+
+/**
+ * Provide native Geeklog Configuration tooltips.
+ *
+ * Returning text lets configuration.php render the standard "?" tooltip
+ * used by Core plugins, rather than relying on ad-hoc help markup.
+ *
+ * @param string $id Configuration option id.
+ * @return string
+ */
+function plugin_getconfigtooltip_faq($id)
+{
+    $help = array(
+        'hidenewfaq' => 'Hide FAQ entries from the Geeklog What\'s New block.',
+        'hidefaqmenu' => 'Hide the FAQ item from the site menu while keeping public FAQ URLs available.',
+        'newfaqinterval' => 'Number of seconds during which a recently updated FAQ is considered new.',
+        'no_hit_rights' => 'Comma-separated FAQ rights whose users should not increment FAQ hit counters.',
+        'contextual_enabled' => 'Allow FAQ associations to be rendered inside supported content providers such as articles, Documents, Maps and Videos.',
+        'contextual_default_placement' => 'Automatic lets the content provider choose its native item-display position. Manual only disables automatic contextual output.',
+        'structured_data' => 'Output FAQPage structured data on standalone FAQ pages when appropriate.',
+        'coverage_limit' => 'Maximum number of provider items inspected and displayed on the Coverage administration page.',
+        'default_permissions' => 'Default owner, group, member and anonymous permissions assigned to newly created FAQ content.'
+    );
+
+    return isset($help[$id]) ? $help[$id] : '';
 }
 
 
