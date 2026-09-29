@@ -580,3 +580,168 @@ function faq_providerCollection($provider, $fields, $options)
     $items = PLG_getItemInfo($provider, '*', $fields, 0, $options);
     return is_array($items) ? $items : false;
 }
+
+
+/**
+ * Enumerate native Geeklog content for Coverage when Core/Static Pages do not
+ * expose the shared Item Info collection contract.
+ *
+ * This exception is deliberately limited to Geeklog-owned tables, following
+ * the same read-only audit strategy used by Hub. Third-party plugin tables
+ * must never be inspected here.
+ *
+ * @param string $provider
+ * @param int    $limit
+ * @return array|false
+ */
+function faq_coverageCoreCollection($provider, $limit = 100)
+{
+    global $_CONF, $_TABLES;
+
+    $provider = faq_normalizeProvider($provider);
+    $limit = max(1, min(200, (int) $limit));
+    $items = array();
+
+    if ($provider === 'article') {
+        if (empty($_TABLES['stories'])) {
+            return false;
+        }
+
+        $sql = "SELECT s.sid AS id, s.title, s.introtext, s.bodytext, UNIX_TIMESTAMP(s.date) AS modified
+                  FROM {$_TABLES['stories']} AS s
+                 WHERE s.draft_flag = 0
+                   AND s.date <= NOW()";
+
+        if (function_exists('COM_getPermSQL')) {
+            $sql .= COM_getPermSQL('AND', 0, 2, 's');
+        }
+        if (function_exists('COM_getLangSQL')) {
+            $sql .= COM_getLangSQL('sid', 'AND', 's');
+        }
+
+        $sql .= " ORDER BY s.date DESC, s.title ASC LIMIT " . $limit;
+        $result = DB_query($sql, 1);
+        if ($result === false) {
+            return false;
+        }
+
+        while ($row = DB_fetchArray($result)) {
+            $id = isset($row['id']) ? (string) $row['id'] : '';
+            if ($id === '') {
+                continue;
+            }
+            $url = rtrim($_CONF['site_url'], '/') . '/article.php?story=' . rawurlencode($id);
+            if (function_exists('COM_buildUrl')) {
+                $url = COM_buildUrl($url);
+            }
+
+            $items[] = array(
+                'id' => $id,
+                'title' => isset($row['title']) ? (string) $row['title'] : $id,
+                'url' => $url,
+                'date-modified' => isset($row['modified']) ? (int) $row['modified'] : 0,
+                '_audit_content' => (isset($row['introtext']) ? (string) $row['introtext'] : '')
+                    . "\n"
+                    . (isset($row['bodytext']) ? (string) $row['bodytext'] : ''),
+            );
+        }
+
+        return $items;
+    }
+
+    if ($provider === 'staticpages') {
+        if (empty($_TABLES['staticpage'])) {
+            return false;
+        }
+
+        $sql = "SELECT sp.sp_id AS id, sp.sp_title AS title, sp.sp_content AS content";
+
+        // Older Static Pages schemas do not consistently expose a modified
+        // timestamp. Coverage does not require one for the semantic audit.
+        $sql .= " FROM {$_TABLES['staticpage']} AS sp WHERE 1=1";
+
+        if (function_exists('COM_getPermSQL')) {
+            $sql .= COM_getPermSQL('AND', 0, 2, 'sp');
+        }
+        if (function_exists('COM_getLangSQL')) {
+            $sql .= COM_getLangSQL('sp_id', 'AND', 'sp');
+        }
+
+        $sql .= " ORDER BY sp.sp_title ASC, sp.sp_id ASC LIMIT " . $limit;
+        $result = DB_query($sql, 1);
+        if ($result === false) {
+            return false;
+        }
+
+        while ($row = DB_fetchArray($result)) {
+            $id = isset($row['id']) ? (string) $row['id'] : '';
+            if ($id === '') {
+                continue;
+            }
+            $url = rtrim($_CONF['site_url'], '/') . '/staticpages/index.php?page=' . rawurlencode($id);
+            if (function_exists('COM_buildUrl')) {
+                $url = COM_buildUrl($url);
+            }
+
+            $items[] = array(
+                'id' => $id,
+                'title' => isset($row['title']) ? (string) $row['title'] : $id,
+                'url' => $url,
+                'date-modified' => 0,
+                '_audit_content' => isset($row['content']) ? (string) $row['content'] : '',
+            );
+        }
+
+        return $items;
+    }
+
+    return false;
+}
+
+/**
+ * Detect strong FAQ/Q&A signals in stored provider content that is not owned
+ * by the FAQ plugin. This is an editorial audit signal, not a semantic proof.
+ *
+ * @param string $content
+ * @return array
+ */
+function faq_coverageExternalSignals($content)
+{
+    $content = (string) $content;
+    $signals = array();
+
+    if ($content === '') {
+        return $signals;
+    }
+
+    if (preg_match('/["\']@type["\']\s*:\s*["\']FAQPage["\']/i', $content)) {
+        $signals[] = 'FAQPage JSON-LD';
+    }
+
+    if (preg_match('~itemtype\s*=\s*["\'][^"\']*schema\\.org/FAQPage[^"\']*["\']~i', $content)) {
+        $signals[] = 'FAQPage microdata';
+    }
+
+    $hasQuestionSchema = preg_match('/["\']@type["\']\s*:\s*["\']Question["\']/i', $content)
+        || preg_match('~itemtype\s*=\s*["\'][^"\']*schema\\.org/Question[^"\']*["\']~i', $content);
+    $hasAnswerSchema = preg_match('/["\']@type["\']\s*:\s*["\']Answer["\']/i', $content)
+        || preg_match('~itemtype\s*=\s*["\'][^"\']*schema\\.org/Answer[^"\']*["\']~i', $content);
+    if ($hasQuestionSchema && $hasAnswerSchema) {
+        $signals[] = 'Question/Answer schema';
+    }
+
+    $detailsCount = preg_match_all('~<details\b[^>]*>.*?<summary\b[^>]*>.*?</summary>.*?</details>~is', $content, $detailsMatches);
+    if ($detailsCount >= 2) {
+        $signals[] = 'Repeated details/summary Q&A';
+    }
+
+    $hasFaqHeading = preg_match(
+        '~<h[1-6]\b[^>]*>\s*(?:FAQ|Foire\s+aux\s+questions|Questions\s+fr[ée]quentes|Frequently\s+Asked\s+Questions)\b~iu',
+        $content
+    );
+    if ($hasFaqHeading) {
+        $signals[] = 'FAQ heading';
+    }
+
+    return array_values(array_unique($signals));
+}
