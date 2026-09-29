@@ -276,7 +276,7 @@ function plugin_getheadercode_faq()
 {
     global $_CONF;
 
-    $cssFile = $_CONF['path'] . 'plugins/faq/public_html/faq.css';
+    $cssFile = rtrim($_CONF['path_html'], '/\\') . DIRECTORY_SEPARATOR . 'faq' . DIRECTORY_SEPARATOR . 'faq.css';
     $version = '1.3.0';
 
     if (is_file($cssFile)) {
