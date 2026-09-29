@@ -6,15 +6,16 @@
     <a href="{faq_cat_url}">{faq_cat_title}</a>
   </nav>
 
-  <article class="faq-entry-card">
+  <article class="faq-entry-article">
     <header class="faq-entry-header">
-      <p class="faq-entry-kicker">{faq_cat_title}</p>
       <h1 class="faq-entry-title">{faq_title}</h1>
     </header>
 
     <div class="faq-entry-answer">
       {faq_desc}
     </div>
+
+    {faq_related}
 
     <footer class="faq-entry-footer">
       <div class="faq-meta">
@@ -23,8 +24,7 @@
       </div>
 
       <nav class="faq-actions" aria-label="FAQ actions">
-        <a href="{faq_cats_url}">{faq_lang_cats}</a>
-        <a href="{faq_cat_url}">{faq_cat_title}</a>
+        <a href="{faq_cat_url}">Back to {faq_cat_title}</a>
         {faq_edit}
       </nav>
     </footer>
