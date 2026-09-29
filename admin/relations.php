@@ -303,7 +303,12 @@ if (!faq_relationTableExists()) {
                 $display .= '<strong>' . htmlspecialchars($resolvedTitle, ENT_QUOTES, 'UTF-8') . '</strong><br>';
             }
         }
-        $display .= '<code>' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</code>';
+        if ($resolvedTitle === '' && $resolvedUrl !== '') {
+            $display .= '<a href="' . htmlspecialchars($resolvedUrl, ENT_QUOTES, 'UTF-8') . '"><code>'
+                      . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</code></a>';
+        } else {
+            $display .= '<code>' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</code>';
+        }
         $display .= '</td>';
 
                 $placementLabel = $row['placement'] === 'manual' ? 'Manual only' : 'Automatic';
@@ -364,7 +369,12 @@ if (!faq_categoryRelationTableExists()) {
                 $display .= '<strong>' . htmlspecialchars($resolvedTitle, ENT_QUOTES, 'UTF-8') . '</strong><br>';
             }
         }
-        $display .= '<code>' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</code>';
+        if ($resolvedTitle === '' && $resolvedUrl !== '') {
+            $display .= '<a href="' . htmlspecialchars($resolvedUrl, ENT_QUOTES, 'UTF-8') . '"><code>'
+                      . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</code></a>';
+        } else {
+            $display .= '<code>' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</code>';
+        }
         $display .= '</td>';
 
         $placementLabel = $row['placement'] === 'manual' ? 'Manual only' : 'Automatic';
