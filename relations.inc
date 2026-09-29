@@ -30,6 +30,35 @@ function faq_categoryRelationTableExists()
     return DB_numRows($result) > 0;
 }
 
+function faq_categoryRelationEnsureTable()
+{
+    global $_TABLES;
+
+    if (faq_categoryRelationTableExists() || empty($_TABLES['faq_category_relations'])) {
+        return faq_categoryRelationTableExists();
+    }
+
+    $sql = "CREATE TABLE IF NOT EXISTS {$_TABLES['faq_category_relations']} (
+                relation_id int(11) unsigned NOT NULL AUTO_INCREMENT,
+                category_id varchar(40) NOT NULL,
+                provider varchar(40) NOT NULL,
+                item_id varchar(128) NOT NULL,
+                item_subtype varchar(64) NOT NULL DEFAULT '',
+                placement varchar(16) NOT NULL DEFAULT 'automatic',
+                sort_order int(11) NOT NULL DEFAULT 0,
+                enabled tinyint(1) unsigned NOT NULL DEFAULT 1,
+                created datetime DEFAULT NULL,
+                modified datetime DEFAULT NULL,
+                PRIMARY KEY (relation_id),
+                UNIQUE KEY category_target (category_id, provider, item_id, item_subtype),
+                KEY target_lookup (provider, item_id, item_subtype, enabled),
+                KEY category_lookup (category_id, enabled)
+            ) ENGINE=InnoDB";
+    DB_query($sql);
+
+    return faq_categoryRelationTableExists();
+}
+
 function faq_relationProviderAllowed($provider)
 {
     return (bool) preg_match('/^[a-z0-9_-]{1,40}$/i', $provider);
