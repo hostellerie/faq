@@ -556,6 +556,8 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
         return $items;
     }
 
+    $categoryItems = faq_categoryRelationGetForItem($provider, $item_id, $subtype, $placement);
+
     $provider = DB_escapeString($provider);
     $item_id = DB_escapeString($item_id);
     $subtype = DB_escapeString(substr((string) $subtype, 0, 64));
@@ -601,7 +603,7 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
         $items[] = $row;
     }
 
-    foreach (faq_categoryRelationGetForItem($provider, $item_id, $subtype, $placement) as $row) {
+    foreach ($categoryItems as $row) {
         $faqKey = isset($row['faq_id']) ? (string) $row['faq_id'] : '';
         if ($faqKey !== '' && isset($seen[$faqKey])) {
             continue;
