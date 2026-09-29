@@ -87,3 +87,14 @@ jobs:
           test "$cclabel_count" = "1"
           grep -q 'function plugin_getadminoption_faq' api.inc
           grep -q 'function plugin_cclabel_faq' api.inc
+
+
+      - name: Validate administration navigation contract
+        if: matrix.php == '8.1'
+        run: |
+          grep -q "plugin-admin-nav__form faq-admin-config-form" functions.inc
+          grep -q "plugin-admin-nav__item faq-admin-nav__button" functions.inc
+          if grep -n "uk-button.*faq-admin-nav__button\|faq-admin-nav__button.*uk-button" functions.inc; then
+            echo "FAQ administration navigation must not depend on UIkit button classes."
+            exit 1
+          fi
