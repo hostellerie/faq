@@ -69,6 +69,9 @@ $token = SEC_createToken();
 $prefillProvider = isset($_GET['provider']) ? faq_normalizeProvider($_GET['provider']) : 'article';
 $prefillItem = isset($_GET['item_id']) ? trim((string) $_GET['item_id']) : '';
 
+$filterProvider = $prefillItem !== '' ? $prefillProvider : '';
+$filterItem = $prefillItem;
+
 $providers = faq_relationProviderTypes();
 if ($prefillProvider !== '' && !in_array($prefillProvider, $providers, true)) {
     $providers[] = $prefillProvider;
@@ -149,14 +152,27 @@ $display .= '</form>';
 
 $display .= '<h2>Current associations</h2>';
 
+if ($filterProvider !== '' && $filterItem !== '') {
+    $display .= '<div class="faq-admin-filter-context"><strong>Filtered content:</strong> <code>'
+              . htmlspecialchars($filterProvider . ':' . $filterItem, ENT_QUOTES, 'UTF-8')
+              . '</code> <a href="' . htmlspecialchars($_CONF['site_admin_url'] . '/plugins/faq/relations.php', ENT_QUOTES, 'UTF-8')
+              . '">Show all associations</a></div>';
+}
+
 if (!faq_relationTableExists()) {
     $display .= '<p>The FAQ 1.3.0 relation table is not installed yet. Run the plugin upgrade.</p>';
 } else {
     $sql = "SELECT rel.relation_id, rel.faq_id, rel.provider, rel.item_id, rel.item_subtype,
                    rel.placement, rel.sort_order, rel.enabled, faq.title
               FROM {$_TABLES['faq_relations']} rel
-              JOIN {$_TABLES['faq']} faq ON faq.id = rel.faq_id
-             ORDER BY rel.provider, rel.item_id, rel.sort_order, faq.title";
+              JOIN {$_TABLES['faq']} faq ON faq.id = rel.faq_id";
+
+    if ($filterProvider !== '' && $filterItem !== '') {
+        $sql .= " WHERE rel.provider = '" . DB_escapeString($filterProvider) . "'"
+              . " AND rel.item_id = '" . DB_escapeString($filterItem) . "'";
+    }
+
+    $sql .= " ORDER BY rel.provider, rel.item_id, rel.sort_order, faq.title";
     $result = DB_query($sql);
 
     $display .= '<div class="faq-admin-table"><table class="admin-list"><thead><tr>'
@@ -196,7 +212,11 @@ if (!faq_relationTableExists()) {
                 $placementLabel = $row['placement'] === 'manual' ? 'Manual only' : 'Automatic';
         $display .= '<td>' . htmlspecialchars($placementLabel, ENT_QUOTES, 'UTF-8') . '</td>';
         $display .= '<td>' . (int) $row['sort_order'] . '</td><td>';
-        $display .= '<form method="post" action="' . $_CONF['site_admin_url'] . '/plugins/faq/relations.php" style="display:inline">';
+        $deleteAction = $_CONF['site_admin_url'] . '/plugins/faq/relations.php';
+        if ($filterProvider !== '' && $filterItem !== '') {
+            $deleteAction .= '?provider=' . rawurlencode($filterProvider) . '&item_id=' . rawurlencode($filterItem);
+        }
+        $display .= '<form method="post" action="' . htmlspecialchars($deleteAction, ENT_QUOTES, 'UTF-8') . '" style="display:inline">';
         $display .= '<input type="hidden" name="faq_relation_action" value="delete">';
         $display .= '<input type="hidden" name="relation_id" value="' . (int) $row['relation_id'] . '">';
         $display .= '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . SEC_createToken() . '">';
