@@ -24,11 +24,14 @@ faq_categoryRelationEnsureTable();
  */
 function faq_adminItemInfoValue($provider, $itemId, $field)
 {
+    global $_USER;
+
     if (!function_exists('PLG_getItemInfo')) {
         return '';
     }
 
-    $info = PLG_getItemInfo($provider, $itemId, $field, 0);
+    $uid = isset($_USER['uid']) ? (int) $_USER['uid'] : 0;
+    $info = PLG_getItemInfo($provider, $itemId, $field, $uid);
 
     if (is_scalar($info)) {
         return trim((string) $info);
