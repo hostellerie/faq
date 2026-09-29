@@ -36,37 +36,71 @@
     opacity: .8;
 }
 
+.plugin-admin-nav,
 .faq-admin-nav {
-    margin: 0 0 20px;
+    margin: 0 0 1.25rem;
 }
 
+.plugin-admin-nav__primary,
 .faq-admin-nav__primary {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: .5rem;
     align-items: center;
 }
 
+.plugin-admin-nav__item,
 .faq-admin-nav__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.4rem;
+    padding: .5rem .8rem;
+    border: 1px solid currentColor;
+    border-radius: .35rem;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 1.2;
     text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
 }
 
+.plugin-admin-nav__item:hover,
+.plugin-admin-nav__item:focus-visible,
+.faq-admin-nav__button:hover,
+.faq-admin-nav__button:focus-visible {
+    text-decoration: none;
+    background: rgba(127, 127, 127, .08);
+}
+
+.plugin-admin-nav__item.is-active,
+.faq-admin-nav__button.is-active {
+    font-weight: 700;
+    box-shadow: inset 0 -2px 0 currentColor;
+    background: rgba(127, 127, 127, .06);
+}
+
+.plugin-admin-nav__form,
 .faq-admin-config-form {
     display: inline-block;
     margin: 0;
 }
 
 @media (max-width: 640px) {
+    .plugin-admin-nav__primary,
     .faq-admin-nav__primary {
         align-items: stretch;
+        flex-direction: column;
     }
 
-    .faq-admin-nav__primary .uk-button,
-    .faq-admin-nav__primary form {
-        width: 100%;
-    }
-
-    .faq-admin-nav__primary form .uk-button {
+    .plugin-admin-nav__item,
+    .plugin-admin-nav__form,
+    .plugin-admin-nav__form .plugin-admin-nav__item,
+    .faq-admin-nav__button,
+    .faq-admin-config-form,
+    .faq-admin-config-form .faq-admin-nav__button {
         width: 100%;
     }
 }
