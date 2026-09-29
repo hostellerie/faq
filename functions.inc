@@ -296,7 +296,7 @@ function plugin_getadminoption_faq()
     $count = 0;
     if (!empty($_TABLES['faq'])) {
         $result = DB_query(
-            "SELECT COUNT(*) AS cnt FROM {$_TABLES['faq']}"
+            "SELECT COUNT(*) AS cnt FROM {$_TABLES['faq']} AS faq"
             . COM_getPermSQL('WHERE', 0, 2, 'faq')
         );
         if ($result) {
