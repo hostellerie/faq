@@ -107,12 +107,12 @@ $display .= '<h2>Add association</h2>';
 $display .= '<form method="post" action="' . $_CONF['site_admin_url'] . '/plugins/faq/relations.php" class="faq-admin-form">';
 $display .= '<div class="faq-relation-grid">';
 
-$display .= '<label>Association source<select name="target_type">'
+$display .= '<label>Association source<select id="faq-relation-target-type" name="target_type">'
           . '<option value="faq">Individual FAQ</option>'
           . '<option value="category">Whole category</option>'
           . '</select></label>';
 
-$display .= '<label>FAQ<select name="faq_id">';
+$display .= '<label id="faq-relation-faq-wrap">FAQ<select id="faq-relation-faq" name="faq_id">';
 $result = DB_query("SELECT faq.id, faq.title
                       FROM {$_TABLES['faq']} faq
                       JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category"
@@ -125,7 +125,7 @@ while ($row = DB_fetchArray($result)) {
 }
 $display .= '</select></label>';
 
-$display .= '<label>FAQ category<select name="category_id"><option value="">Select a category</option>';
+$display .= '<label id="faq-relation-category-wrap" style="display:none">FAQ category<select id="faq-relation-category" name="category_id"><option value="">Select a category</option>';
 $categoryResult = DB_query("SELECT cat.id, cat.title
                               FROM {$_TABLES['faq_category']} cat"
                           . COM_getPermSQL('WHERE', 0, 3, 'cat')
