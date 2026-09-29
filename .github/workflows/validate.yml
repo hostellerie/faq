@@ -103,6 +103,15 @@ jobs:
           grep -q "faq_category_relations" modern.inc
           grep -q "faq_category_relations" admin/index.php
 
+      - name: Validate association target navigation
+        if: matrix.php == '8.1'
+        run: |
+          grep -q 'function faq_adminResolveAssociationTarget' admin/relations.php
+          grep -q "/article.php?story=" admin/relations.php
+          grep -q "/staticpages/index.php?page=" admin/relations.php
+          grep -q '>View content<' admin/relations.php
+          grep -q 'faq-admin-form' public_html/faq-admin.css
+
       - name: Validate core coverage audit contract
         if: matrix.php == '8.1'
         run: |
