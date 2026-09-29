@@ -1,7 +1,53 @@
 # FAQ 1.3.0 Roadmap
 
-Status: **planned**
+Status: **release hardening**
 Branch: `develop-1.3.0`
+
+## Current implementation status
+
+Legend:
+
+- **Implemented** — code is present on `develop-1.3.0` and has been exercised during development.
+- **To validate** — implementation exists but still needs explicit release-level functional/upgrade verification.
+- **Deferred** — useful idea, but not required to ship a clean 1.3.0 unless testing reveals a dependency.
+
+### Implemented
+
+- Geeklog 2.1.1-2.2.2 compatibility target and PHP 5.6-8.1 syntax CI.
+- Modern installer/configuration metadata and `plugin.json`.
+- FAQ/category CRUD preservation and historical autotags.
+- Native Advanced Editor integration with HTML-source fallback and MediaGallery picker support.
+- Item Info, collection retrieval, URL resolution, lifecycle callbacks, sitemap, metadata and capability declaration.
+- `faq_relations` and relation CRUD.
+- Associations administration with provider/item selection.
+- Coverage administration with `all / with / without` relation status.
+- Contextual FAQ rendering, automatic/manual placement model and article compatibility fallback.
+- `faqembed` / `faqrelated` manual placement support.
+- Public semantic FAQ rendering and Question/Answer structured data.
+- Native Geeklog administration discovery through `plugin_getadminoption_faq()` and Command & Control discovery through `plugin_cclabel_faq()`.
+- Theme-neutral plugin administration navigation, with Eclipse-aware visual variables and no required UIkit contract.
+- Versioned FAQ CSS and automated installable archive generation.
+
+### To validate before release
+
+- Real upgrade from a populated 1.2.x installation to 1.3.0, including IDs, categories, permissions, autotags and stored HTML preservation.
+- Clean install / uninstall / reinstall on Geeklog 2.1.1 and 2.2.2.
+- Functional matrix on PHP 5.6 and PHP 8.1 beyond syntax linting.
+- Full disabled-plugin audit: menus, What's New, blocks, contextual output, structured data and other public contributions.
+- Final ACL/CSRF/input-validation audit for FAQ CRUD, Associations and Coverage.
+- Coverage behavior with enumerable and non-enumerable providers, including permission filtering.
+- Stale relation handling when a remote provider item disappears without a lifecycle callback.
+- Final Denim/Eclipse/mobile administration pass.
+- Final language fallback/translation audit for new 1.3.0 labels and configuration tooltips.
+- README, upgrade notes and release notes aligned with the final tested behavior.
+
+### Deferred unless testing makes them necessary
+
+- Heuristic/semantic suggestions for reusing existing FAQs.
+- Agent/LLM-assisted FAQ suggestions.
+- Additional caching beyond the current lightweight invalidation hooks unless profiling demonstrates a need.
+- Multilingual FAQ identity/schema redesign.
+- Automatic detection of FAQ-like question/answer content authored directly inside external providers and not managed by the FAQ plugin.
 
 ## 1. Goal
 
@@ -548,6 +594,21 @@ Display at minimum:
 
 Coverage must be permission-aware.
 
+### Current 1.3.0 coverage semantics
+
+The current Coverage implementation measures **FAQ-plugin coverage**, not generic question/answer semantics in arbitrary content.
+
+For each enumerable provider item it counts enabled relations stored by FAQ through `faq_relations` / `faq_relationCountForItem()`.
+
+Therefore, an Article or Static Page that contains manually authored FAQ-like HTML, schema.org FAQ markup, headings/questions, or other question/answer content **not represented by a FAQ plugin relation** is currently reported as **Without FAQ**.
+
+FAQ 1.3.0 must not silently inspect private provider tables to infer such content. Detecting externally authored FAQ-like content would require either:
+
+- a provider-owned normalized content/body field exposed through Item Info or another public contract; or
+- a future provider-neutral semantic capability that explicitly reports FAQ/Q&A content.
+
+This broader semantic-content detection is deferred and is not part of the 1.3.0 acceptance criteria.
+
 ### Graceful degradation
 
 If a provider cannot expose a collection through a supported contract:
@@ -882,15 +943,20 @@ Add release notes describing migrations and compatibility.
 - reuse/suggestion support;
 - stale relation diagnostics.
 
-### Phase E — integration and hardening
+### Phase E — integration and hardening — **current phase**
 
-- Hub feature-detected integration;
-- cache where justified;
-- disabled-state audit;
-- permissions/security audit;
-- compatibility matrix;
-- documentation;
-- release packaging.
+- [x] Hub feature-detected integration surface.
+- [x] Automated release archive generation.
+- [x] Native administration menu / Command & Control hooks.
+- [x] Theme-neutral administration navigation contract.
+- [ ] Real 1.2.x upgrade test with populated data.
+- [ ] Disabled-state audit.
+- [ ] Permissions/security/CSRF audit.
+- [ ] Compatibility matrix on Geeklog 2.1.1 and 2.2.2.
+- [ ] Denim/Eclipse/mobile visual regression pass.
+- [ ] Language fallback audit.
+- [ ] Final README / upgrade / release notes.
+- [ ] Cache profiling decision: add nothing unless justified.
 
 ---
 
