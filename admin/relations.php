@@ -282,7 +282,12 @@ if (!faq_relationTableExists()) {
 
         $display .= '<td>';
         if ($resolvedTitle !== '') {
-            $display .= '<strong>' . htmlspecialchars($resolvedTitle, ENT_QUOTES, 'UTF-8') . '</strong><br>';
+            if ($resolvedUrl !== '') {
+                $display .= '<strong><a href="' . htmlspecialchars($resolvedUrl, ENT_QUOTES, 'UTF-8') . '">'
+                          . htmlspecialchars($resolvedTitle, ENT_QUOTES, 'UTF-8') . '</a></strong><br>';
+            } else {
+                $display .= '<strong>' . htmlspecialchars($resolvedTitle, ENT_QUOTES, 'UTF-8') . '</strong><br>';
+            }
         }
         $display .= '<code>' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</code>';
         if ($resolvedUrl !== '') {
@@ -341,7 +346,12 @@ if (!faq_categoryRelationTableExists()) {
         $display .= '<tr><td><strong>' . htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8') . '</strong><br><small>'
                   . htmlspecialchars($row['category_id'], ENT_QUOTES, 'UTF-8') . '</small></td><td>';
         if ($resolvedTitle !== '') {
-            $display .= '<strong>' . htmlspecialchars($resolvedTitle, ENT_QUOTES, 'UTF-8') . '</strong><br>';
+            if ($resolvedUrl !== '') {
+                $display .= '<strong><a href="' . htmlspecialchars($resolvedUrl, ENT_QUOTES, 'UTF-8') . '">'
+                          . htmlspecialchars($resolvedTitle, ENT_QUOTES, 'UTF-8') . '</a></strong><br>';
+            } else {
+                $display .= '<strong>' . htmlspecialchars($resolvedTitle, ENT_QUOTES, 'UTF-8') . '</strong><br>';
+            }
         }
         $display .= '<code>' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '</code>';
         if ($resolvedUrl !== '') {
