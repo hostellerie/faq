@@ -278,6 +278,29 @@ function faq_adminNavigation($active = '')
 
 
 /**
+ * Return the FAQ entry for Geeklog's native Command & Control page.
+ *
+ * @return array|false
+ */
+function plugin_cclabel_faq()
+{
+    global $_CONF, $LANG_FAQ_COMMON;
+
+    if (!SEC_hasRights('faq.admin,faq.edit', 'OR')) {
+        return false;
+    }
+
+    $label = isset($LANG_FAQ_COMMON['FAQ']) ? $LANG_FAQ_COMMON['FAQ'] : 'FAQ';
+
+    return array(
+        $label,
+        $_CONF['site_admin_url'] . '/plugins/faq/index.php',
+        $_CONF['site_url'] . '/faq/images/faqplugin.png'
+    );
+}
+
+
+/**
  * Return the FAQ administration entry for Geeklog's native admin menu.
  *
  * Geeklog and themes such as Eclipse discover plugin administration links
