@@ -42,13 +42,14 @@ require_once ('../lib-common.php');
 // else list the categories.
 
 $display = '';
+$documentOptions = array();
 
 $faq_id = COM_applyFilter(UTIL_getParamStr('faq', ''));
 $cat_id = COM_applyFilter(UTIL_getParamStr('cat', ''));
 
 $pagetitle = '';
 if ( ! empty($faq_id)) {
-    $pagetitle = $LANG_FAQ_COMMON['FAQ'] . ' Entry';
+    $pagetitle = '';
     
     $e = DB_query("SELECT faq.id AS id, faq.title AS title, faq.description AS description, cat.id AS cat_id, cat.title AS cat
                      FROM {$_TABLES['faq']} AS faq, 
@@ -71,17 +72,42 @@ if ( ! empty($faq_id)) {
         COM_redirect($_CONF['site_url'] . '/index.php?msg=2&plugin=faq');
     }
     $A = DB_fetchArray($r);
-    
+    $pagetitle = $A['title'];
+
+    $answerParts = faq_splitAnswerNavigation($A['description']);
+    $faqAnswerHtml = PLG_replaceTags($answerParts['answer']);
+    $faqRelatedHtml = '';
+    if ($answerParts['related'] !== '') {
+        $faqRelatedHtml = '<aside class="faq-related" aria-label="Related questions">'
+                        . '<h2>Related questions</h2>'
+                        . '<div class="faq-related-links">' . PLG_replaceTags($answerParts['related']) . '</div>'
+                        . '</aside>';
+    }
+
+    $canonicalUrl = $_CONF['site_url'] . '/faq/index.php?faq=' . rawurlencode($faq_id);
+    $metaDescription = faq_plainTextExcerpt($A['description'], 155);
+    $headerCode = '<link rel="canonical" href="'
+                . htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8') . '">' . PHP_EOL;
+    if ($metaDescription !== '') {
+        $headerCode .= '<meta name="description" content="'
+                    . htmlspecialchars($metaDescription, ENT_QUOTES, 'UTF-8') . '">' . PHP_EOL;
+    }
+    $documentOptions = array(
+        'pagetitle' => $pagetitle,
+        'headercode' => $headerCode
+    );
+
     $tpl = COM_newTemplate(CTL_plugin_templatePath('faq'));
     $tpl->set_file( array('faq' => 'faq.thtml'));
     
-    $tpl->set_var('block_start', COM_startBlock($pagetitle));
+    $tpl->set_var('block_start', '');
     
 	$tpl->set_var( 'faq_lang_cats' , $LANG_FAQ_COMMON['Categories'] );
 	$tpl->set_var( 'site_url', $_CONF['site_url']  );
 	$tpl->set_var( 'faq_cats_url', $_CONF['site_url'] . '/faq/index.php' );
 	$tpl->set_var( 'faq_title', $A['title'] );
-	$tpl->set_var( 'faq_desc', PLG_replaceTags($A['description']) );
+	$tpl->set_var( 'faq_desc', $faqAnswerHtml );
+    $tpl->set_var('faq_related', $faqRelatedHtml);
 	$tpl->set_var( 'faq_cat_url', $_CONF['site_url'] . '/faq/index.php?cat=' . $A['cat_id'] );
 	$tpl->set_var( 'faq_cat_title', $A['cat'] );
 	$tpl->set_var( 'faq_lang_hits', $LANG_FAQ_COMMON['Hits'] );
@@ -98,11 +124,11 @@ if ( ! empty($faq_id)) {
         );
     }
 	    
-    $tpl->set_var('block_end', COM_endBlock());    
+    $tpl->set_var('block_end', '');    
         
 	$tpl->parse('output', 'faq');
     $display .= $tpl->finish($tpl->get_var('output'));
-    $display .= faq_structuredQuestions(array(array('title' => $A['title'], 'description' => $A['description'])), true);
+    $display .= faq_structuredQuestions(array(array('title' => $A['title'], 'description' => $answerParts['answer'])), true);
     
     if ( ! SEC_hasRights($_FAQ_CONF['no_hit_rights'], 'OR'))
         DB_query("UPDATE {$_TABLES['faq']} SET hits = hits + 1 WHERE id = '{$faq_id}'");
@@ -125,7 +151,6 @@ if ( ! empty($faq_id)) {
 
     $tpl = COM_newTemplate(CTL_plugin_templatePath('faq'));
     $tpl->set_file(array('category' => 'category.thtml'));
-    $tpl->set_block('category', 'faq_question_list_item');
 
     $tpl->set_var('block_start', COM_startBlock($pagetitle));
     $tpl->set_var('block_end', COM_endBlock());
@@ -164,14 +189,22 @@ if ( ! empty($faq_id)) {
                 . COM_getPermSQL('AND', 0, 2, 'cat')
                 . " ORDER BY {$_FAQ_CONF['faq_sort_order']}");
 
+    $questionList = '';
     while ($faq = DB_fetchArray($r)) {
         $thetime = COM_getUserDateTimeFormat($faq['unixdate']);
-        $tpl->set_var('faq_url', $_CONF['site_url'] . '/faq/index.php?faq=' . rawurlencode($faq['id']));
-        $tpl->set_var('faq_title', $faq['title']);
-        $tpl->set_var('faq_updated', $thetime[0]);
-        $tpl->set_var('faq_hits', COM_numberFormat($faq['hits']));
-        $tpl->parse('faq_question_list', 'faq_question_list_item', true);
+        $faqUrl = $_CONF['site_url'] . '/faq/index.php?faq=' . rawurlencode($faq['id']);
+
+        $questionList .= '<li class="faq-question-card">'
+                      . '<h2><a href="' . htmlspecialchars($faqUrl, ENT_QUOTES, 'UTF-8') . '">'
+                      . htmlspecialchars($faq['title'], ENT_QUOTES, 'UTF-8') . '</a></h2>'
+                      . '<div class="faq-card-meta">'
+                      . '<span>' . htmlspecialchars($LANG_FAQ_COMMON['Updated'], ENT_QUOTES, 'UTF-8') . ': '
+                      . htmlspecialchars($thetime[0], ENT_QUOTES, 'UTF-8') . '</span>'
+                      . '<span>' . htmlspecialchars($LANG_FAQ_COMMON['Hits'], ENT_QUOTES, 'UTF-8') . ': '
+                      . COM_numberFormat($faq['hits']) . '</span>'
+                      . '</div></li>';
     }
+    $tpl->set_var('faq_question_list', $questionList);
 
     $tpl->parse('output', 'category');
     $display .= $tpl->finish($tpl->get_var('output'));
@@ -217,7 +250,10 @@ else {
     $display .= $tpl->finish($tpl->get_var('output'));
 }
 
-$display = COM_createHTMLDocument($display, array('pagetitle' => $pagetitle));
+if (empty($documentOptions)) {
+    $documentOptions = array('pagetitle' => $pagetitle);
+}
+$display = COM_createHTMLDocument($display, $documentOptions);
 
 COM_output($display);
 
