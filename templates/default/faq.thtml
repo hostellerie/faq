@@ -6,23 +6,28 @@
     <a href="{faq_cat_url}">{faq_cat_title}</a>
   </nav>
 
-  <article>
-    <h1 class="faq-entry-title">{faq_title}</h1>
+  <article class="faq-entry-card">
+    <header class="faq-entry-header">
+      <p class="faq-entry-kicker">{faq_cat_title}</p>
+      <h1 class="faq-entry-title">{faq_title}</h1>
+    </header>
 
     <div class="faq-entry-answer">
       {faq_desc}
     </div>
 
-    <div class="faq-meta">
-      <span><strong>{faq_lang_hits}:</strong> {faq_hits}</span>
-      <span><strong>{faq_lang_updated}:</strong> {faq_updated}</span>
-    </div>
+    <footer class="faq-entry-footer">
+      <div class="faq-meta">
+        <span><strong>{faq_lang_updated}:</strong> {faq_updated}</span>
+        <span><strong>{faq_lang_hits}:</strong> {faq_hits}</span>
+      </div>
 
-    <div class="faq-actions">
-      <a href="{faq_cats_url}">{faq_lang_cats}</a>
-      <a href="{faq_cat_url}">{faq_cat_title}</a>
-      {faq_edit}
-    </div>
+      <nav class="faq-actions" aria-label="FAQ actions">
+        <a href="{faq_cats_url}">{faq_lang_cats}</a>
+        <a href="{faq_cat_url}">{faq_cat_title}</a>
+        {faq_edit}
+      </nav>
+    </footer>
   </article>
 </div>
 {block_end}
