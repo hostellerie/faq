@@ -109,7 +109,10 @@ jobs:
           grep -q 'function faq_adminResolveAssociationTarget' admin/relations.php
           grep -q "/article.php?story=" admin/relations.php
           grep -q "/staticpages/index.php?page=" admin/relations.php
-          grep -q '>View content<' admin/relations.php
+          if grep -q '>View content<' admin/relations.php; then
+            echo "Association listings must not duplicate the public target link below a linked title."
+            exit 1
+          fi
           grep -q 'faq-admin-form' public_html/faq-admin.css
 
       - name: Validate core coverage audit contract
