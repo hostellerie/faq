@@ -106,6 +106,7 @@ jobs:
       - name: Validate association target navigation
         if: matrix.php == '8.1'
         run: |
+          grep -q 'function faq_adminItemInfoValue' admin/relations.php
           grep -q 'function faq_adminResolveAssociationTarget' admin/relations.php
           grep -q "plugin_idtourl_" admin/relations.php
           grep -q "resolvedTitle === '' && \\$resolvedUrl !== ''" admin/relations.php
