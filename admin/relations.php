@@ -147,10 +147,10 @@ $display .= '<details class="faq-relation-advanced"><summary>Advanced fallback</
 $display .= '<div id="faq-relation-note" class="faq-admin-help"></div>';
 $display .= '<input type="hidden" name="faq_relation_action" value="add">';
 $display .= '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . $token . '">';
-$display .= '<p><input type="submit" value="Save association"></p>';
+$display .= '<div class="faq-relation-actions"><input type="submit" value="Save association"></div>';
 $display .= '</form>';
 
-$display .= '<h2>Current associations</h2>';
+$display .= '<h2 class="faq-relation-current-title">Current associations</h2>';
 
 if ($filterProvider !== '' && $filterItem !== '') {
     $display .= '<div class="faq-admin-filter-context"><strong>Filtered content:</strong> <code>'
