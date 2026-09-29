@@ -10,6 +10,65 @@ if (!SEC_hasRights('faq.admin,faq.edit', 'OR')) {
 
 faq_categoryRelationEnsureTable();
 
+/**
+ * Resolve an administration association target for display.
+ *
+ * Prefer provider-owned Item Info. Core Articles and Static Pages receive the
+ * same small native fallback used elsewhere in FAQ while their providers do
+ * not expose complete Item Info URL data.
+ *
+ * @param string $provider
+ * @param string $itemId
+ * @return array
+ */
+function faq_adminResolveAssociationTarget($provider, $itemId)
+{
+    global $_CONF, $_TABLES;
+
+    $provider = faq_normalizeProvider($provider);
+    $itemId = (string) $itemId;
+    $resolved = array(
+        'title' => '',
+        'url' => ''
+    );
+
+    if (function_exists('PLG_getItemInfo')) {
+        $info = PLG_getItemInfo($provider, $itemId, 'title,url', 0);
+        if (is_array($info)) {
+            $resolved['title'] = isset($info['title']) ? (string) $info['title'] : '';
+            $resolved['url'] = isset($info['url']) ? (string) $info['url'] : '';
+        }
+    }
+
+    if ($provider === 'article') {
+        if ($resolved['title'] === '' && !empty($_TABLES['stories'])) {
+            $resolved['title'] = (string) DB_getItem(
+                $_TABLES['stories'],
+                'title',
+                "sid = '" . DB_escapeString($itemId) . "'"
+            );
+        }
+        if ($resolved['url'] === '') {
+            $url = rtrim($_CONF['site_url'], '/') . '/article.php?story=' . rawurlencode($itemId);
+            $resolved['url'] = function_exists('COM_buildURL') ? COM_buildURL($url) : $url;
+        }
+    } elseif ($provider === 'staticpages') {
+        if ($resolved['title'] === '' && !empty($_TABLES['staticpage'])) {
+            $resolved['title'] = (string) DB_getItem(
+                $_TABLES['staticpage'],
+                'sp_title',
+                "sp_id = '" . DB_escapeString($itemId) . "'"
+            );
+        }
+        if ($resolved['url'] === '') {
+            $url = rtrim($_CONF['site_url'], '/') . '/staticpages/index.php?page=' . rawurlencode($itemId);
+            $resolved['url'] = function_exists('COM_buildURL') ? COM_buildURL($url) : $url;
+        }
+    }
+
+    return $resolved;
+}
+
 if (isset($_GET['faq_ajax']) && $_GET['faq_ajax'] === 'items') {
     $provider = isset($_GET['provider']) ? COM_applyFilter($_GET['provider']) : '';
     $payload = faq_relationObjectOptions($provider, 100);
@@ -214,16 +273,9 @@ if (!faq_relationTableExists()) {
             $target .= ' (' . $row['item_subtype'] . ')';
         }
 
-        $resolvedTitle = '';
-        $resolvedUrl = '';
-
-        if (function_exists('PLG_getItemInfo')) {
-            $info = PLG_getItemInfo($row['provider'], $row['item_id'], 'title,url', 0);
-            if (is_array($info)) {
-                $resolvedTitle = isset($info['title']) ? (string) $info['title'] : '';
-                $resolvedUrl = isset($info['url']) ? (string) $info['url'] : '';
-            }
-        }
+        $resolved = faq_adminResolveAssociationTarget($row['provider'], $row['item_id']);
+        $resolvedTitle = $resolved['title'];
+        $resolvedUrl = $resolved['url'];
 
         $display .= '<tr><td>' . htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8') . '<br><small>'
                   . htmlspecialchars($row['faq_id'], ENT_QUOTES, 'UTF-8') . '</small></td>';
@@ -282,15 +334,9 @@ if (!faq_categoryRelationTableExists()) {
             $target .= ' (' . $row['item_subtype'] . ')';
         }
 
-        $resolvedTitle = '';
-        $resolvedUrl = '';
-        if (function_exists('PLG_getItemInfo')) {
-            $info = PLG_getItemInfo($row['provider'], $row['item_id'], 'title,url', 0);
-            if (is_array($info)) {
-                $resolvedTitle = isset($info['title']) ? (string) $info['title'] : '';
-                $resolvedUrl = isset($info['url']) ? (string) $info['url'] : '';
-            }
-        }
+        $resolved = faq_adminResolveAssociationTarget($row['provider'], $row['item_id']);
+        $resolvedTitle = $resolved['title'];
+        $resolvedUrl = $resolved['url'];
 
         $display .= '<tr><td><strong>' . htmlspecialchars($row['title'], ENT_QUOTES, 'UTF-8') . '</strong><br><small>'
                   . htmlspecialchars($row['category_id'], ENT_QUOTES, 'UTF-8') . '</small></td><td>';
