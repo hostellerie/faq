@@ -20,7 +20,7 @@ Legend:
 - Item Info, collection retrieval, URL resolution, lifecycle callbacks, sitemap, metadata and capability declaration.
 - `faq_relations` and relation CRUD.
 - Associations administration with provider/item selection.
-- Coverage administration with `all / with / without` relation status.
+- Coverage administration with managed/external/both/none status, including a read-only Core audit for Articles and Static Pages when normalized collection/content capabilities are unavailable.
 - Contextual FAQ rendering, automatic/manual placement model and article compatibility fallback.
 - `faqembed` / `faqrelated` manual placement support.
 - Public semantic FAQ rendering and Question/Answer structured data.
@@ -47,7 +47,6 @@ Legend:
 - Agent/LLM-assisted FAQ suggestions.
 - Additional caching beyond the current lightweight invalidation hooks unless profiling demonstrates a need.
 - Multilingual FAQ identity/schema redesign.
-- Automatic detection of FAQ-like question/answer content authored directly inside external providers and not managed by the FAQ plugin.
 
 ## 1. Goal
 
@@ -596,18 +595,33 @@ Coverage must be permission-aware.
 
 ### Current 1.3.0 coverage semantics
 
-The current Coverage implementation measures **FAQ-plugin coverage**, not generic question/answer semantics in arbitrary content.
+Coverage distinguishes FAQ-plugin relations from FAQ-like content authored directly in native Geeklog content.
 
-For each enumerable provider item it counts enabled relations stored by FAQ through `faq_relations` / `faq_relationCountForItem()`.
+For providers exposing the shared collection contract, Coverage enumerates items through Item Info and counts enabled relations stored by FAQ through `faq_relations` / `faq_relationCountForItem()`.
 
-Therefore, an Article or Static Page that contains manually authored FAQ-like HTML, schema.org FAQ markup, headings/questions, or other question/answer content **not represented by a FAQ plugin relation** is currently reported as **Without FAQ**.
+Geeklog Core articles and Static Pages do not currently expose the full collection/content surface required for this audit. For these two **Geeklog-owned** providers only, FAQ follows the same read-only exception already used by Hub's editorial audits:
 
-FAQ 1.3.0 must not silently inspect private provider tables to infer such content. Detecting externally authored FAQ-like content would require either:
+- Articles are enumerated from the Core stories table with publication, ACL and language filtering.
+- Static Pages are enumerated from the Static Pages table with draft/template, ACL and language filtering.
+- Stored content is inspected read-only; FAQ never rewrites it.
+- Third-party plugin tables are never inspected by this fallback.
 
-- a provider-owned normalized content/body field exposed through Item Info or another public contract; or
-- a future provider-neutral semantic capability that explicitly reports FAQ/Q&A content.
+The external-content audit reports strong editorial signals rather than claiming semantic certainty. Current signals include:
 
-This broader semantic-content detection is deferred and is not part of the 1.3.0 acceptance criteria.
+- FAQPage JSON-LD;
+- FAQPage microdata;
+- paired Question/Answer schema;
+- repeated `<details><summary>` Q&A structures;
+- explicit FAQ / Frequently Asked Questions / Questions fréquentes headings.
+
+Coverage can therefore distinguish:
+
+- **Managed FAQ only**;
+- **External FAQ signal only**;
+- **Managed + external**;
+- **No FAQ detected**.
+
+FAQ-plugin autotags alone are not treated as external FAQ authorship. This direct Core-table fallback should be removed or reduced when Core/Static Pages expose equivalent normalized collection/content capabilities.
 
 ### Graceful degradation
 
