@@ -31,11 +31,11 @@
 </div>
 
 <div id="faq_advanced_editarea" style="display:{show_adveditor};">
-<textarea id="faq_desc_advanced" cols="60" rows="20">{faq_desc}</textarea>
+<textarea id="faq_desc_advanced" cols="60" rows="20">{faq_desc_advanced}</textarea>
 </div>
 
 <div id="faq_html_editarea" style="display:{show_htmleditor};">
-<textarea id="faq_desc_source" name="faq_desc" cols="60" rows="20" wrap="virtual">{faq_desc}</textarea>
+<textarea id="faq_desc_source" name="faq_desc" cols="60" rows="20" wrap="virtual">{faq_desc_source}</textarea>
 <div class="warningsmall faq-editor-note">{lang_allowed_html}</div>
 {media_picker_button_source}
 </div>
