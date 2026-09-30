@@ -185,7 +185,7 @@ function faq_usesLegacyLineBreaks($content)
 {
     $content = (string) $content;
 
-    if (strpos($content, "\n") === false) {
+    if (!preg_match('/\\R/u', $content)) {
         return false;
     }
 
