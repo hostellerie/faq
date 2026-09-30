@@ -14,6 +14,8 @@ if (!faq_relationProviderAllowed($provider)) {
 }
 
 $status = isset($_GET['status']) ? COM_applyFilter($_GET['status']) : 'all';
+$page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+$perPage = 50;
 
 // Development compatibility with the first 1.3.0 Coverage filters.
 if ($status === 'with') {
@@ -104,7 +106,7 @@ if ($items === false) {
     $externalOnly = 0;
     $both = 0;
     $none = 0;
-    $rows = '';
+    $filteredItems = array();
 
     foreach ($items as $item) {
         if (!is_array($item) || !isset($item['id'])) {
@@ -137,6 +139,31 @@ if ($items === false) {
         if ($status !== 'all' && $status !== $rowStatus) {
             continue;
         }
+
+        $item['_coverage_count'] = $count;
+        $item['_coverage_signals'] = $signals;
+        $item['_coverage_status'] = $rowStatus;
+        $filteredItems[] = $item;
+    }
+
+    $baseCoverageUrl = $_CONF['site_admin_url']
+        . '/plugins/faq/coverage.php?provider=' . rawurlencode($provider);
+    $total = $managedOnly + $externalOnly + $both + $none;
+
+    $filteredTotal = count($filteredItems);
+    $pageCount = max(1, (int) ceil($filteredTotal / $perPage));
+    if ($page > $pageCount) {
+        $page = $pageCount;
+    }
+    $offset = ($page - 1) * $perPage;
+    $pageItems = array_slice($filteredItems, $offset, $perPage);
+    $rows = '';
+
+    foreach ($pageItems as $item) {
+        $count = isset($item['_coverage_count']) ? (int) $item['_coverage_count'] : 0;
+        $signals = isset($item['_coverage_signals']) && is_array($item['_coverage_signals'])
+            ? $item['_coverage_signals'] : array();
+        $rowStatus = isset($item['_coverage_status']) ? $item['_coverage_status'] : 'none';
 
         $title = isset($item['title']) ? $item['title'] : $item['id'];
         $title = html_entity_decode((string) $title, ENT_QUOTES, 'UTF-8');
@@ -187,10 +214,6 @@ if ($items === false) {
         $rows .= '<td>' . $actions . '</td></tr>';
     }
 
-    $baseCoverageUrl = $_CONF['site_admin_url']
-        . '/plugins/faq/coverage.php?provider=' . rawurlencode($provider);
-    $total = $managedOnly + $externalOnly + $both + $none;
-
     $summary = array(
         'managed' => array($managedOnly, $LANG_FAQ_COVERAGE['managed_only']),
         'external' => array($externalOnly, $LANG_FAQ_COVERAGE['external_only']),
@@ -216,6 +239,42 @@ if ($items === false) {
               . '<th>' . htmlspecialchars($LANG_FAQ_COVERAGE['external_signals'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '<th>' . htmlspecialchars($LANG_FAQ_COVERAGE['action'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '</tr></thead><tbody>' . $rows . '</tbody></table></div>';
+
+    if ($pageCount > 1) {
+        $paginationBase = $baseCoverageUrl . '&status=' . rawurlencode($status);
+        $display .= '<nav class="faq-admin-pagination" aria-label="Pagination">';
+
+        $startPage = max(1, $page - 3);
+        $endPage = min($pageCount, $page + 3);
+
+        if ($startPage > 1) {
+            $display .= '<a href="' . htmlspecialchars($paginationBase . '&page=1', ENT_QUOTES, 'UTF-8') . '">1</a>';
+            if ($startPage > 2) {
+                $display .= '<span>&hellip;</span>';
+            }
+        }
+
+        for ($pageNumber = $startPage; $pageNumber <= $endPage; $pageNumber++) {
+            if ($pageNumber === $page) {
+                $display .= '<strong aria-current="page">' . $pageNumber . '</strong>';
+            } else {
+                $display .= '<a href="'
+                          . htmlspecialchars($paginationBase . '&page=' . $pageNumber, ENT_QUOTES, 'UTF-8')
+                          . '">' . $pageNumber . '</a>';
+            }
+        }
+
+        if ($endPage < $pageCount) {
+            if ($endPage < $pageCount - 1) {
+                $display .= '<span>&hellip;</span>';
+            }
+            $display .= '<a href="'
+                      . htmlspecialchars($paginationBase . '&page=' . $pageCount, ENT_QUOTES, 'UTF-8')
+                      . '">' . $pageCount . '</a>';
+        }
+
+        $display .= '</nav>';
+    }
 }
 
 $display .= COM_endBlock();
