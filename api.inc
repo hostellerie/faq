@@ -663,6 +663,7 @@ function plugin_upgrade_faq()
                     item_id varchar(128) NOT NULL,
                     item_subtype varchar(64) NOT NULL DEFAULT '',
                     placement varchar(16) NOT NULL DEFAULT 'automatic',
+                    topic_scope varchar(16) NOT NULL DEFAULT 'both',
                     sort_order int(11) NOT NULL DEFAULT 0,
                     enabled tinyint(1) unsigned NOT NULL DEFAULT 1,
                     created datetime DEFAULT NULL,
@@ -673,6 +674,10 @@ function plugin_upgrade_faq()
                     KEY category_lookup (category_id, enabled)
                 ) ENGINE=InnoDB";
         DB_query($sql);
+    }
+
+    if (function_exists('faq_relationEnsureTopicScopeColumns')) {
+        faq_relationEnsureTopicScopeColumns();
     }
 
     if ($installed_version == $code_version) {
@@ -733,6 +738,7 @@ function plugin_upgrade_faq()
                             item_id varchar(128) NOT NULL,
                             item_subtype varchar(64) NOT NULL DEFAULT '',
                             placement varchar(16) NOT NULL DEFAULT 'automatic',
+                            topic_scope varchar(16) NOT NULL DEFAULT 'both',
                             sort_order int(11) NOT NULL DEFAULT 0,
                             enabled tinyint(1) unsigned NOT NULL DEFAULT 1,
                             created datetime DEFAULT NULL,
@@ -752,6 +758,7 @@ function plugin_upgrade_faq()
                             item_id varchar(128) NOT NULL,
                             item_subtype varchar(64) NOT NULL DEFAULT '',
                             placement varchar(16) NOT NULL DEFAULT 'automatic',
+                            topic_scope varchar(16) NOT NULL DEFAULT 'both',
                             sort_order int(11) NOT NULL DEFAULT 0,
                             enabled tinyint(1) unsigned NOT NULL DEFAULT 1,
                             created datetime DEFAULT NULL,
@@ -769,6 +776,10 @@ function plugin_upgrade_faq()
                 $done = true;
                 break;
         }
+    }
+
+    if (function_exists('faq_relationEnsureTopicScopeColumns')) {
+        faq_relationEnsureTopicScopeColumns();
     }
 
     require_once $_CONF['path_system'] . 'classes/config.class.php';
