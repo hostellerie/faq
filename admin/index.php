@@ -727,10 +727,10 @@ function listfaq ($cat = '')
     );
 
     $tpl->parse('output', 'list');
-    $questionInstructions = $tpl->finish($tpl->get_var('output'))
-        . '<p class="faq-admin-help">'
+    $questionInstructions = '<p class="faq-admin-help">'
         . htmlspecialchars($LANG_FAQ_ADMIN['faq instructions'], ENT_QUOTES, COM_getCharset())
-        . '</p>';
+        . '</p>'
+        . $tpl->finish($tpl->get_var('output'));
 
     $text_arr = array('has_menu' => true,
     //                  'title' => $LANG_FAQ_ADMIN['FAQ Editor'],
