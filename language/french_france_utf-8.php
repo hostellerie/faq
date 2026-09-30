@@ -125,7 +125,21 @@ $LANG_FAQ_RELATIONS = array(
     'category_relation_table_missing' => 'La table des relations de catégories FAQ n’est pas encore installée.',
     'category' => 'Catégorie',
     'action' => 'Action',
-    'delete' => 'Supprimer'
+    'delete' => 'Supprimer',
+    'category_association_saved' => 'Association de catégorie enregistrée. Les nouvelles FAQ ajoutées à cette catégorie seront incluses automatiquement.',
+    'association_saved' => 'Association enregistrée.',
+    'association_save_failed' => 'L’association n’a pas pu être enregistrée. Vérifiez la FAQ ou la catégorie sélectionnée ainsi que le contenu cible.',
+    'association_deleted' => 'Association supprimée.',
+    'select_content' => 'Sélectionner un contenu',
+    'loading' => 'Chargement…',
+    'no_selectable_content' => 'Aucun contenu sélectionnable',
+    'enter_id_manually' => 'Saisir l’ID manuellement…',
+    'collection_unavailable' => 'Collection indisponible ; saisissez manuellement l’ID du contenu.',
+    'unable_load_collection' => 'Impossible de charger la collection du fournisseur ; saisissez manuellement l’ID du contenu.',
+    'manual_fallback' => 'Saisie manuelle : indiquez l’ID du contenu. Le sous-type reste facultatif.',
+    'provider_no_item_info' => 'Ce fournisseur n’expose pas Geeklog Item Info.',
+    'provider_no_content' => 'Le fournisseur ne retourne aucun contenu sélectionnable.',
+    'provider_selectable_count' => '%d élément(s) sélectionnable(s).'
 );
 
 $LANG_FAQ_COVERAGE = array(
