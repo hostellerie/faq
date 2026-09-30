@@ -213,31 +213,33 @@ function faq_adminNavigation($active = '')
 
     $items[] = array(
         'key' => 'faq',
-        'label' => isset($LANG_FAQ_ADMIN['questions']) ? $LANG_FAQ_ADMIN['questions'] : 'Questions',
+        'label' => $LANG_FAQ_ADMIN['questions'],
         'url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=faq'
     );
 
     if (SEC_hasRights('faq.admin')) {
         $items[] = array(
             'key' => 'cat',
-            'label' => isset($LANG_FAQ_ADMIN['categories']) ? $LANG_FAQ_ADMIN['categories'] : 'Categories',
+            'label' => $LANG_FAQ_ADMIN['categories'],
             'url' => $_CONF['site_admin_url'] . '/plugins/faq/index.php?mode=cat'
         );
     }
 
     $items[] = array(
         'key' => 'relations',
-        'label' => isset($LANG_FAQ_ADMIN['associations']) ? $LANG_FAQ_ADMIN['associations'] : 'Associations',
+        'label' => $LANG_FAQ_ADMIN['associations'],
         'url' => $_CONF['site_admin_url'] . '/plugins/faq/relations.php'
     );
 
     $items[] = array(
         'key' => 'coverage',
-        'label' => isset($LANG_FAQ_ADMIN['coverage']) ? $LANG_FAQ_ADMIN['coverage'] : 'Coverage',
+        'label' => $LANG_FAQ_ADMIN['coverage'],
         'url' => $_CONF['site_admin_url'] . '/plugins/faq/coverage.php'
     );
 
-    $html = '<nav class="plugin-admin-nav faq-admin-nav" aria-label="FAQ administration">'
+    $html = '<nav class="plugin-admin-nav faq-admin-nav" aria-label="'
+          . htmlspecialchars($LANG_FAQ_ADMIN['administration_aria'], ENT_QUOTES, 'UTF-8')
+          . '">'
           . '<div class="plugin-admin-nav__primary faq-admin-nav__primary">';
 
     foreach ($items as $item) {
@@ -266,11 +268,7 @@ function faq_adminNavigation($active = '')
               . '" class="plugin-admin-nav__form faq-admin-config-form">'
               . '<input type="hidden" name="conf_group" value="faq">'
               . '<button type="submit" class="' . $classes . '"' . $ariaCurrent . '>'
-              . htmlspecialchars(
-                    isset($LANG_FAQ_ADMIN['configuration']) ? $LANG_FAQ_ADMIN['configuration'] : 'Configuration',
-                    ENT_QUOTES,
-                    'UTF-8'
-                )
+              . htmlspecialchars($LANG_FAQ_ADMIN['configuration'], ENT_QUOTES, 'UTF-8')
               . '</button></form>';
     }
 
