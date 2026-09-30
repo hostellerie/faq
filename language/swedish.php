@@ -200,7 +200,14 @@ $LANG_FAQ_RELATIONS = array(
     'provider_selectable_count' => '%d selectable item(s).',
     'external_confirmation_required' => 'This article already contains an external FAQ/Q&A signal. Confirm the association explicitly before saving.',
     'confirm_external_faq' => 'If the selected article already contains an external FAQ/Q&A, I confirm that this managed association should still be added.',
-    'topic_provider' => 'Geeklog topic'
+    'topic_provider' => 'Geeklog topic',
+    'display_help_title' => 'How contextual FAQ display works',
+    'display_help_intro' => 'Associations can be rendered automatically or placed manually inside the content.',
+    'display_help_automatic' => 'FAQ renders at the native insertion point supported by the selected provider.',
+    'display_help_manual' => 'No automatic output. Insert this autotag where the associated FAQ should appear:',
+    'display_help_related' => 'Explicitly renders associations for a provider and content ID.',
+    'display_help_embed' => 'Embeds one specific FAQ independently of associations.',
+    'display_help_context_note' => '[faq-context] uses the current content provider and ID. On articles it also applies topic inheritance and duplicate/external-FAQ protection.'
 );
 
 $LANG_FAQ_COVERAGE = array(
