@@ -219,7 +219,7 @@ function plugin_templatesetvars_faq($templatename, &$template)
         return;
     }
 
-    $html = faq_renderContextual('article', $storyId, '', 'automatic');
+    $html = faq_renderArticleContextual($storyId, 'automatic');
     if ($html === '') {
         return;
     }
@@ -238,6 +238,26 @@ function plugin_templatesetvars_faq($templatename, &$template)
     if ($storyIntro !== '' && strpos($storyIntro, 'faq-context-block') === false) {
         $template->set_var('story_introtext', $storyIntro . "\n" . $html);
     }
+}
+
+/**
+ * Render topic-associated FAQs on Geeklog topic index pages.
+ *
+ * Geeklog calls plugin_centerblock_*() from public index.php and passes the
+ * current topic id. Restrict output to the top-centerblock pass.
+ */
+function plugin_centerblock_faq($where = 1, $page = 1, $topic = '')
+{
+    global $_FAQ_CONF;
+
+    if (empty($_FAQ_CONF['contextual_enabled'])
+        || (int) $where !== 1
+        || (string) $topic === ''
+    ) {
+        return '';
+    }
+
+    return faq_renderContextual('topic', (string) $topic, 'topic', 'automatic');
 }
 
 function plugin_itemdisplay_faq($id, $type)
