@@ -704,6 +704,101 @@ function faq_relationGetForFaq($faq_id)
  *
  * This is used by Coverage to avoid one relation query per audited item.
  */
+/**
+ * Return FAQ ids grouped by target item for one provider in one query.
+ */
+function faq_relationFaqMapForProvider($provider)
+{
+    global $_TABLES;
+
+    $map = array();
+    $provider = faq_normalizeProvider($provider);
+
+    if (!faq_relationProviderAllowed($provider)) {
+        return $map;
+    }
+
+    $providerSql = DB_escapeString($provider);
+    $parts = array();
+
+    if (faq_relationTableExists()) {
+        $parts[] = "SELECT rel.item_id, rel.faq_id
+                      FROM {$_TABLES['faq_relations']} rel
+                      JOIN {$_TABLES['faq']} faq ON faq.id = rel.faq_id
+                      JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category
+                     WHERE rel.enabled = 1
+                       AND rel.provider = '{$providerSql}'"
+                 . COM_getPermSQL('AND', 0, 2, 'faq')
+                 . COM_getPermSQL('AND', 0, 2, 'cat');
+    }
+
+    if (faq_categoryRelationTableExists()) {
+        $parts[] = "SELECT cr.item_id, faq.id AS faq_id
+                      FROM {$_TABLES['faq_category_relations']} cr
+                      JOIN {$_TABLES['faq_category']} cat ON cat.id = cr.category_id
+                      JOIN {$_TABLES['faq']} faq ON faq.category = cat.id
+                     WHERE cr.enabled = 1
+                       AND cr.provider = '{$providerSql}'"
+                 . COM_getPermSQL('AND', 0, 2, 'faq')
+                 . COM_getPermSQL('AND', 0, 2, 'cat');
+    }
+
+    if (empty($parts)) {
+        return $map;
+    }
+
+    $result = DB_query(implode(" UNION ALL ", $parts));
+    if ($result === false) {
+        return $map;
+    }
+
+    while ($row = DB_fetchArray($result)) {
+        $itemId = (string) $row['item_id'];
+        $faqId = (string) $row['faq_id'];
+        if (!isset($map[$itemId])) {
+            $map[$itemId] = array();
+        }
+        $map[$itemId][$faqId] = true;
+    }
+
+    return $map;
+}
+
+/**
+ * Return all article-to-topic assignments in one query.
+ */
+function faq_articleTopicMap()
+{
+    global $_TABLES;
+
+    $map = array();
+    if (empty($_TABLES['topic_assignments']) || empty($_TABLES['topics'])) {
+        return $map;
+    }
+
+    $sql = "SELECT ta.id AS story_id, ta.tid
+              FROM {$_TABLES['topic_assignments']} ta
+              JOIN {$_TABLES['topics']} t ON t.tid = ta.tid
+             WHERE ta.type = 'article'"
+         . COM_getPermSQL('AND', 0, 2, 't')
+         . " ORDER BY ta.id, ta.tid";
+
+    $result = DB_query($sql);
+    if ($result === false) {
+        return $map;
+    }
+
+    while ($row = DB_fetchArray($result)) {
+        $storyId = (string) $row['story_id'];
+        if (!isset($map[$storyId])) {
+            $map[$storyId] = array();
+        }
+        $map[$storyId][] = (string) $row['tid'];
+    }
+
+    return $map;
+}
+
 function faq_relationCountMapForProvider($provider)
 {
     global $_TABLES;
