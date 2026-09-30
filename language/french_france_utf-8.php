@@ -172,7 +172,12 @@ $LANG_FAQ_COVERAGE = array(
     'videos' => 'Vidéos',
     'documents' => 'Documents',
     'maps' => 'Cartes',
-    'media_gallery' => 'Galerie média'
+    'media_gallery' => 'Galerie média',
+    'signal_faqpage_jsonld' => 'FAQPage en JSON-LD',
+    'signal_faqpage_microdata' => 'Microdonnées FAQPage',
+    'signal_question_answer_schema' => 'Schéma Question/Réponse',
+    'signal_details_summary' => 'Blocs questions/réponses details/summary répétés',
+    'signal_faq_heading' => 'Titre de section FAQ'
 );
 
 $LANG_FAQ_IMPORT = array(
