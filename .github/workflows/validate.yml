@@ -65,7 +65,7 @@ jobs:
         if: matrix.php == '8.1'
         run: |
           grep -q 'function plugin_templatesetvars_faq' modern.inc
-          grep -q "faq_renderContextual('article'" modern.inc
+          grep -q "faq_renderArticleContextual" modern.inc
           grep -q "story_text_no_br" modern.inc
           grep -q "story_introtext" modern.inc
           grep -q "faq-context-block" modern.inc
@@ -98,7 +98,7 @@ jobs:
           grep -q "function faq_categoryRelationAdd" relations.inc
           grep -q "function faq_categoryRelationGetForItem" relations.inc
           grep -q "function faq_categoryRelationDeleteForCategory" relations.inc
-          grep -q "Whole category" admin/relations.php
+          grep -q "LANG_FAQ_RELATIONS\['whole_category'\]" admin/relations.php
           grep -q "faq-relation-target-type" public_html/relations-admin.js
           grep -q "faq_category_relations" modern.inc
           grep -q "faq_category_relations" admin/index.php
@@ -124,10 +124,10 @@ jobs:
         run: |
           grep -q 'function faq_coverageCoreCollection' relations.inc
           grep -q 'function faq_coverageExternalSignals' relations.inc
-          grep -q "in_array(\$provider, array('article', 'staticpages')" admin/coverage.php
-          grep -q 'External FAQ signal only' admin/coverage.php
-          grep -q 'FAQPage JSON-LD' relations.inc
-          grep -q 'Repeated details/summary Q&A' relations.inc
+          grep -q "in_array(\$provider, array('article', 'staticpages', 'topic')" admin/coverage.php
+          grep -q "LANG_FAQ_COVERAGE\['external_faq_only'\]" admin/coverage.php
+          grep -q "signal_faqpage_jsonld" relations.inc
+          grep -q "signal_details_summary" relations.inc
 
       - name: Validate administration navigation contract
         if: matrix.php == '8.1'
@@ -140,3 +140,13 @@ jobs:
           fi
           grep -q "var(--eclipse-primary, #3157d5)" public_html/faq-admin.css
           grep -q "var(--eclipse-link, #2448bd)" public_html/faq-admin.css
+
+
+      - name: Validate Geeklog Resource asset paths
+        if: matrix.php == '8.1'
+        run: |
+          grep -q "return '/faq/' . ltrim" functions.inc
+          if grep -A12 "function faq_assetPath" functions.inc | grep -q "?v="; then
+            echo "faq_assetPath must not append a query string; Geeklog 2.2.2 validates the physical resource path."
+            exit 1
+          fi
