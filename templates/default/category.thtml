@@ -1,6 +1,6 @@
 {block_start}
 <div class="faq-public faq-view faq-category-view">
-  <nav class="faq-breadcrumbs" aria-label="FAQ breadcrumb">
+  <nav class="faq-breadcrumbs" aria-label="{faq_aria_breadcrumb}">
     <a href="{faq_cats_url}">{faq_lang_cats}</a>
     <span aria-hidden="true">›</span>
     <span>{faq_cat_title}</span>
