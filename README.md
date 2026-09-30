@@ -187,3 +187,21 @@ Contextual FAQ rendering follows Geeklog's native `PLG_itemDisplay($id, $type)` 
 Known provider implementations used during FAQ 1.3.0 development include Documents `documents_1.3.0`, Videos `videos_0.21.0`, and Maps `update/maps-1.7`.
 
 Older development rows containing `before` or `after` are interpreted as `automatic`.
+
+
+## Languages
+
+FAQ 1.3.0 keeps all public, administration, Associations, Coverage and native Configuration labels in the plugin language files.
+
+Maintained language files:
+
+- `english.php`
+- `english_utf-8.php`
+- `french_france_utf-8.php`
+- `persian_utf-8.php`
+- `swedish.php`
+- `swedish_utf-8.php`
+
+French has a complete native translation for the current 1.3.0 interface.
+
+Historical Persian and Swedish translations keep their existing translated strings and include explicit English fallbacks for newer 1.3.0 keys that have not yet received a native translation. This keeps the language-key contract complete and avoids missing labels or undefined language keys.
