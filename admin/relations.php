@@ -445,7 +445,9 @@ if (!faq_categoryRelationTableExists()) {
         }
         $display .= '</td>';
 
-        $placementLabel = $row['placement'] === 'manual' ? 'Manual only' : 'Automatic';
+        $placementLabel = $row['placement'] === 'manual'
+            ? $LANG_FAQ_RELATIONS['manual_only']
+            : $LANG_FAQ_RELATIONS['automatic'];
         $display .= '<td>' . htmlspecialchars($placementLabel, ENT_QUOTES, 'UTF-8') . '</td>';
         $display .= '<td>' . (int) $row['sort_order'] . '</td><td>';
 
