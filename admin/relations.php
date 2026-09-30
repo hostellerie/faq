@@ -104,6 +104,17 @@ function faq_adminResolveAssociationTarget($provider, $itemId, $subType = '')
             $url = rtrim($_CONF['site_url'], '/') . '/article.php?story=' . rawurlencode($itemId);
             $resolved['url'] = function_exists('COM_buildURL') ? COM_buildURL($url) : $url;
         }
+    } elseif ($provider === 'topic') {
+        if ($resolved['title'] === '' && !empty($_TABLES['topics'])) {
+            $resolved['title'] = (string) DB_getItem(
+                $_TABLES['topics'],
+                'topic',
+                "tid = '" . DB_escapeString($itemId) . "'"
+            );
+        }
+        if ($resolved['url'] === '') {
+            $resolved['url'] = rtrim($_CONF['site_url'], '/') . '/index.php?topic=' . rawurlencode($itemId);
+        }
     } elseif ($provider === 'staticpages') {
         if ($resolved['title'] === '' && !empty($_TABLES['staticpage'])) {
             $resolved['title'] = (string) DB_getItem(
@@ -166,16 +177,28 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
 
         $placement = COM_applyFilter(isset($_POST['placement']) ? $_POST['placement'] : 'automatic');
         $sort_order = isset($_POST['sort_order']) ? (int) $_POST['sort_order'] : 0;
+        $confirmExternal = !empty($_POST['confirm_external_faq']);
+        $externalConflict = false;
 
-        $saved = $target_type === 'category'
-            ? faq_categoryRelationAdd($category_id, $provider, $item_id, $subtype, $placement, $sort_order)
-            : faq_relationAdd($faq_id, $provider, $item_id, $subtype, $placement, $sort_order);
+        if ($provider === 'article' && $item_id !== '') {
+            $externalSignals = faq_articleExternalSignals($item_id);
+            $externalConflict = !empty($externalSignals);
+        }
+
+        if ($externalConflict && !$confirmExternal) {
+            $saved = false;
+            $msg = $LANG_FAQ_RELATIONS['external_confirmation_required'];
+        } else {
+            $saved = $target_type === 'category'
+                ? faq_categoryRelationAdd($category_id, $provider, $item_id, $subtype, $placement, $sort_order)
+                : faq_relationAdd($faq_id, $provider, $item_id, $subtype, $placement, $sort_order);
+        }
 
         if ($saved) {
             $msg = $target_type === 'category'
                 ? $LANG_FAQ_RELATIONS['category_association_saved']
                 : $LANG_FAQ_RELATIONS['association_saved'];
-        } else {
+        } elseif (!$externalConflict || $confirmExternal) {
             $msg = $LANG_FAQ_RELATIONS['association_save_failed'];
         }
     } elseif ($action === 'delete' || $action === 'delete_category') {
@@ -302,6 +325,9 @@ $display .= '<details class="faq-relation-advanced"><summary>'
           . '</details>';
 
 $display .= '<div id="faq-relation-note" class="faq-admin-help"></div>';
+$display .= '<label class="faq-admin-help"><input type="checkbox" name="confirm_external_faq" value="1"> '
+          . htmlspecialchars($LANG_FAQ_RELATIONS['confirm_external_faq'], ENT_QUOTES, 'UTF-8')
+          . '</label>';
 $display .= '<input type="hidden" name="faq_relation_action" value="add">';
 $display .= '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . $token . '">';
 $display .= '<div class="faq-relation-actions"><input type="submit" value="'
