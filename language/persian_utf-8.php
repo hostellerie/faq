@@ -110,6 +110,7 @@ $LANG_FAQ_ADMIN = array(
     'FAQ Plugin' => 'افزونه پرسشگان',
     'faqman_import' => 'افزونه مدیریت پرسشگان را نصب کرده اید (که مشابه این افزونه نمی باشد). اما می توانید داده ها را از افزونه مدیریت پرسشگان وارد کنید.',
     'cat instructions' => 'برای ایجاد یک دسته بندی پرسشگان روی "ایجاد جدید" کلیک کنید. برای ایجاد ورودی های پرسشگان برای دسته بندی پرسشگان خود روی "ویرایشگر پرسشگان" کلیک کنید.',
+    'faq instructions' => 'Create and manage FAQ questions and answers here. Use the category filter to quickly find the FAQs you want to edit.',
     'import' => 'وارد كردن',
     'access' => 'دسترسی'
 );
@@ -212,6 +213,7 @@ $LANG_FAQ_RELATIONS = array(
 
 $LANG_FAQ_COVERAGE = array(
     'title' => 'FAQ Coverage',
+    'intro' => 'Review which content uses managed FAQs, topic-inherited FAQs, or FAQ already present in the content. Use the filters to find content with no FAQ, external FAQ signals, or associations to review.',
     'provider' => 'Provider',
     'faq_status' => 'FAQ status',
     'all' => 'All',
