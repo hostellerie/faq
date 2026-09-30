@@ -921,6 +921,8 @@ function faq_coverageCoreCollection($provider, $limit = 100)
  */
 function faq_coverageExternalSignals($content)
 {
+    global $LANG_FAQ_COVERAGE;
+
     $content = (string) $content;
     $signals = array();
 
@@ -929,11 +931,11 @@ function faq_coverageExternalSignals($content)
     }
 
     if (preg_match('/["\']@type["\']\s*:\s*["\']FAQPage["\']/i', $content)) {
-        $signals[] = 'FAQPage JSON-LD';
+        $signals[] = $LANG_FAQ_COVERAGE['signal_faqpage_jsonld'];
     }
 
     if (preg_match('~itemtype\s*=\s*["\'][^"\']*schema\\.org/FAQPage[^"\']*["\']~i', $content)) {
-        $signals[] = 'FAQPage microdata';
+        $signals[] = $LANG_FAQ_COVERAGE['signal_faqpage_microdata'];
     }
 
     $hasQuestionSchema = preg_match('/["\']@type["\']\s*:\s*["\']Question["\']/i', $content)
@@ -941,12 +943,12 @@ function faq_coverageExternalSignals($content)
     $hasAnswerSchema = preg_match('/["\']@type["\']\s*:\s*["\']Answer["\']/i', $content)
         || preg_match('~itemtype\s*=\s*["\'][^"\']*schema\\.org/Answer[^"\']*["\']~i', $content);
     if ($hasQuestionSchema && $hasAnswerSchema) {
-        $signals[] = 'Question/Answer schema';
+        $signals[] = $LANG_FAQ_COVERAGE['signal_question_answer_schema'];
     }
 
     $detailsCount = preg_match_all('~<details\b[^>]*>.*?<summary\b[^>]*>.*?</summary>.*?</details>~is', $content, $detailsMatches);
     if ($detailsCount >= 2) {
-        $signals[] = 'Repeated details/summary Q&A';
+        $signals[] = $LANG_FAQ_COVERAGE['signal_details_summary'];
     }
 
     $hasFaqHeading = preg_match(
@@ -954,7 +956,7 @@ function faq_coverageExternalSignals($content)
         $content
     );
     if ($hasFaqHeading) {
-        $signals[] = 'FAQ heading';
+        $signals[] = $LANG_FAQ_COVERAGE['signal_faq_heading'];
     }
 
     return array_values(array_unique($signals));
