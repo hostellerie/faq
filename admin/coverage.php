@@ -33,14 +33,91 @@ if ($limit < 1 || $limit > 200) {
 }
 
 $coreAudit = in_array($provider, array('article', 'staticpages'), true);
+$coverageCacheTtl = 300;
+$coverageCacheHit = false;
+$coverageSummary = null;
 
 if ($coreAudit) {
-    // Core coverage is an audit, not a picker: inspect every accessible item.
-    $limit = 0;
-    // Geeklog Core and Static Pages do not yet expose the shared collection
-    // surface required for this audit. Follow Hub's read-only Core-table audit
-    // precedent rather than pretending the capability exists.
-    $items = faq_coverageCoreCollection($provider, $limit);
+    $cacheKey = '';
+    if (function_exists('CACHE_security_hash')) {
+        $cacheKey = 'faq_coverage__' . $provider . '__' . CACHE_security_hash();
+    }
+
+    if ($cacheKey !== ''
+        && function_exists('CACHE_check_instance')
+        && function_exists('CACHE_get_instance_update')
+    ) {
+        $cached = CACHE_check_instance($cacheKey);
+        if ($cached !== false && $cached !== '') {
+            $updated = CACHE_get_instance_update($cacheKey);
+            if ($updated !== false && (time() - (int) $updated) <= $coverageCacheTtl) {
+                $cacheData = @unserialize($cached);
+                if (is_array($cacheData)
+                    && isset($cacheData['items'])
+                    && isset($cacheData['summary'])
+                ) {
+                    $items = $cacheData['items'];
+                    $coverageSummary = $cacheData['summary'];
+                    $coverageCacheHit = true;
+                }
+            }
+        }
+    }
+
+    if (!$coverageCacheHit) {
+        // Core coverage is an audit, not a picker: inspect every accessible item.
+        // The expensive full scan is cached; page changes then reuse this result.
+        $items = faq_coverageCoreCollection($provider, 0);
+
+        if (is_array($items)) {
+            $relationCounts = faq_relationCountMapForProvider($provider);
+            $summaryBuild = array(
+                'managed' => 0,
+                'external' => 0,
+                'both' => 0,
+                'none' => 0
+            );
+
+            foreach ($items as $itemIndex => $item) {
+                if (!is_array($item) || !isset($item['id'])) {
+                    continue;
+                }
+
+                $itemId = (string) $item['id'];
+                $count = isset($relationCounts[$itemId]) ? (int) $relationCounts[$itemId] : 0;
+                $signals = isset($item['_audit_content'])
+                    ? faq_coverageExternalSignals($item['_audit_content'])
+                    : array();
+
+                $hasManaged = $count > 0;
+                $hasExternal = !empty($signals);
+
+                if ($hasManaged && $hasExternal) {
+                    $rowStatus = 'both';
+                } elseif ($hasManaged) {
+                    $rowStatus = 'managed';
+                } elseif ($hasExternal) {
+                    $rowStatus = 'external';
+                } else {
+                    $rowStatus = 'none';
+                }
+
+                $items[$itemIndex]['_coverage_count'] = $count;
+                $items[$itemIndex]['_coverage_signals'] = $signals;
+                $items[$itemIndex]['_coverage_status'] = $rowStatus;
+                $summaryBuild[$rowStatus]++;
+            }
+
+            $coverageSummary = $summaryBuild;
+
+            if ($cacheKey !== '' && function_exists('CACHE_create_instance')) {
+                CACHE_create_instance($cacheKey, serialize(array(
+                    'items' => $items,
+                    'summary' => $coverageSummary
+                )));
+            }
+        }
+    }
 } else {
     $items = faq_providerCollection($provider, 'id,title,url,date-modified', array(
         'limit' => $limit,
@@ -108,41 +185,46 @@ if ($items === false) {
     $none = 0;
     $filteredItems = array();
 
+    if ($coreAudit && is_array($coverageSummary)) {
+        $managedOnly = isset($coverageSummary['managed']) ? (int) $coverageSummary['managed'] : 0;
+        $externalOnly = isset($coverageSummary['external']) ? (int) $coverageSummary['external'] : 0;
+        $both = isset($coverageSummary['both']) ? (int) $coverageSummary['both'] : 0;
+        $none = isset($coverageSummary['none']) ? (int) $coverageSummary['none'] : 0;
+    }
+
     foreach ($items as $item) {
         if (!is_array($item) || !isset($item['id'])) {
             continue;
         }
 
-        $count = faq_relationCountForItem($provider, (string) $item['id']);
-        $signals = array();
-        if ($coreAudit && isset($item['_audit_content'])) {
-            $signals = faq_coverageExternalSignals($item['_audit_content']);
-        }
-
-        $hasManaged = $count > 0;
-        $hasExternal = !empty($signals);
-
-        if ($hasManaged && $hasExternal) {
-            $both++;
-            $rowStatus = 'both';
-        } elseif ($hasManaged) {
-            $managedOnly++;
-            $rowStatus = 'managed';
-        } elseif ($hasExternal) {
-            $externalOnly++;
-            $rowStatus = 'external';
+        if ($coreAudit) {
+            $count = isset($item['_coverage_count']) ? (int) $item['_coverage_count'] : 0;
+            $signals = isset($item['_coverage_signals']) && is_array($item['_coverage_signals'])
+                ? $item['_coverage_signals'] : array();
+            $rowStatus = isset($item['_coverage_status']) ? $item['_coverage_status'] : 'none';
         } else {
-            $none++;
-            $rowStatus = 'none';
+            $count = faq_relationCountForItem($provider, (string) $item['id']);
+            $signals = array();
+            $hasManaged = $count > 0;
+            $hasExternal = false;
+
+            if ($hasManaged) {
+                $managedOnly++;
+                $rowStatus = 'managed';
+            } else {
+                $none++;
+                $rowStatus = 'none';
+            }
+
+            $item['_coverage_count'] = $count;
+            $item['_coverage_signals'] = $signals;
+            $item['_coverage_status'] = $rowStatus;
         }
 
         if ($status !== 'all' && $status !== $rowStatus) {
             continue;
         }
 
-        $item['_coverage_count'] = $count;
-        $item['_coverage_signals'] = $signals;
-        $item['_coverage_status'] = $rowStatus;
         $filteredItems[] = $item;
     }
 
