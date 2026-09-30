@@ -110,6 +110,7 @@ $LANG_FAQ_ADMIN = array(
     'FAQ Plugin' => 'FAQ Plugin',
     'faqman_import' => 'Du har FAQMAN pluginen installerad (vilken icke skall förväxlas med denna plugin). Men du kan importera data från FAQMAN pluginen.',
     'cat instructions' => 'Click on "Create New" menu item to create a FAQ Category. Click on the "FAQ Editor" menu item to create FAQ entries for your FAQ Category.',
+    'faq instructions' => 'Create and manage FAQ questions and answers here. Use the category filter to quickly find the FAQs you want to edit.',
     'import' => 'import',
     'access' => 'Rättigheter'
 );
@@ -212,6 +213,7 @@ $LANG_FAQ_RELATIONS = array(
 
 $LANG_FAQ_COVERAGE = array(
     'title' => 'FAQ Coverage',
+    'intro' => 'Review which content uses managed FAQs, topic-inherited FAQs, or FAQ already present in the content. Use the filters to find content with no FAQ, external FAQ signals, or associations to review.',
     'provider' => 'Provider',
     'faq_status' => 'FAQ status',
     'all' => 'All',
