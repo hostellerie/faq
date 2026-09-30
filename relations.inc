@@ -749,7 +749,7 @@ function faq_renderFaqItems($items, $css_class, $asFaqPage)
         $answerSource = $asFaqPage
             ? (string) $item['description']
             : faq_contextualAnswerSource($item['description']);
-        $answer = PLG_replaceTags($answerSource);
+        $answer = faq_renderContent($answerSource);
 
         $html .= '<details class="faq-contextual-item">';
         $html .= '<summary class="faq-contextual-question">' . $question . '</summary>';
