@@ -244,14 +244,15 @@ function plugin_templatesetvars_faq($templatename, &$template)
  * Render topic-associated FAQs on Geeklog topic index pages.
  *
  * Geeklog calls plugin_centerblock_*() from public index.php and passes the
- * current topic id. Restrict output to the top-centerblock pass.
+ * current topic id. Restrict output to the bottom-centerblock pass so topic
+ * FAQs appear after the article list.
  */
 function plugin_centerblock_faq($where = 1, $page = 1, $topic = '')
 {
     global $_FAQ_CONF;
 
     if (empty($_FAQ_CONF['contextual_enabled'])
-        || (int) $where !== 1
+        || (int) $where !== 3
         || (string) $topic === ''
     ) {
         return '';
