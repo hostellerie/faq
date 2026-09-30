@@ -174,6 +174,54 @@ function faq_getCategoryList($selected = '')
 
 
 
+/**
+ * Detect legacy FAQ content where formatting relies on literal line breaks
+ * instead of block-level HTML.
+ *
+ * Inline HTML is intentionally allowed: old FAQ entries often mixed tags such
+ * as <strong> or <a> with plain-text newlines.
+ */
+function faq_usesLegacyLineBreaks($content)
+{
+    $content = (string) $content;
+
+    if (strpos($content, "\n") === false) {
+        return false;
+    }
+
+    return !preg_match(
+        '/<(?:address|article|aside|blockquote|br|div|dl|fieldset|figure|footer|form|h[1-6]|header|hr|li|main|nav|ol|p|pre|section|table|thead|tbody|tfoot|tr|td|th|ul)\\b/i',
+        $content
+    );
+}
+
+/**
+ * Prepare stored FAQ content for a visual HTML editor without changing the
+ * database representation.
+ */
+function faq_prepareEditorHtml($content)
+{
+    $content = (string) $content;
+
+    if (faq_usesLegacyLineBreaks($content)) {
+        return nl2br($content);
+    }
+
+    return $content;
+}
+
+/**
+ * Render FAQ content while preserving historical plain-text line breaks.
+ *
+ * Conversion happens before plugin tags are expanded so line breaks generated
+ * inside replacement HTML are not altered.
+ */
+function faq_renderContent($content)
+{
+    return PLG_replaceTags(faq_prepareEditorHtml($content));
+}
+
+
 function faq_assetUrl($relative)
 {
     global $_CONF, $LANG_FAQ_ADMIN;
