@@ -173,10 +173,10 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
 
         if ($saved) {
             $msg = $target_type === 'category'
-                ? 'Category association saved. New FAQs added to this category will be included automatically.'
-                : 'Association saved.';
+                ? $LANG_FAQ_RELATIONS['category_association_saved']
+                : $LANG_FAQ_RELATIONS['association_saved'];
         } else {
-            $msg = 'The association could not be saved. Check the selected FAQ/category and content.';
+            $msg = $LANG_FAQ_RELATIONS['association_save_failed'];
         }
     } elseif ($action === 'delete' || $action === 'delete_category') {
         $relation_id = isset($_POST['relation_id']) ? (int) $_POST['relation_id'] : 0;
@@ -184,7 +184,7 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
             ? faq_categoryRelationDelete($relation_id)
             : faq_relationDelete($relation_id);
         if ($deleted) {
-            $msg = 'Association deleted.';
+            $msg = $LANG_FAQ_RELATIONS['association_deleted'];
         }
     }
 }
@@ -202,28 +202,28 @@ if ($prefillProvider !== '' && !in_array($prefillProvider, $providers, true)) {
     sort($providers, SORT_STRING);
 }
 
-$display .= COM_startBlock('FAQ Associations');
+$display .= COM_startBlock($LANG_FAQ_RELATIONS['title']);
 
 if ($msg !== '') {
     $display .= COM_showMessageText($msg, 'FAQ');
 }
 
 $display .= '<p class="faq-admin-help">'
-          . 'Associate either one FAQ or an entire FAQ category with content exposed by Geeklog providers. '
-          . 'A category association is dynamic: newly added FAQs in that category are included automatically. '
-          . 'Providers and selectable content are discovered automatically when possible; manual ID remains a fallback.'
+          . htmlspecialchars($LANG_FAQ_RELATIONS['intro'], ENT_QUOTES, 'UTF-8')
           . '</p>';
 
-$display .= '<h2>Add association</h2>';
+$display .= '<h2>' . htmlspecialchars($LANG_FAQ_RELATIONS['add_association'], ENT_QUOTES, 'UTF-8') . '</h2>';
 $display .= '<form method="post" action="' . $_CONF['site_admin_url'] . '/plugins/faq/relations.php" class="faq-admin-form">';
 $display .= '<div class="faq-relation-grid">';
 
-$display .= '<label>Association source<select id="faq-relation-target-type" name="target_type">'
-          . '<option value="faq">Individual FAQ</option>'
-          . '<option value="category">Whole category</option>'
+$display .= '<label>' . htmlspecialchars($LANG_FAQ_RELATIONS['association_source'], ENT_QUOTES, 'UTF-8')
+          . '<select id="faq-relation-target-type" name="target_type">'
+          . '<option value="faq">' . htmlspecialchars($LANG_FAQ_RELATIONS['individual_faq'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '<option value="category">' . htmlspecialchars($LANG_FAQ_RELATIONS['whole_category'], ENT_QUOTES, 'UTF-8') . '</option>'
           . '</select></label>';
 
-$display .= '<label id="faq-relation-faq-wrap">FAQ<select id="faq-relation-faq" name="faq_id">';
+$display .= '<label id="faq-relation-faq-wrap">' . htmlspecialchars($LANG_FAQ_RELATIONS['faq'], ENT_QUOTES, 'UTF-8')
+          . '<select id="faq-relation-faq" name="faq_id">';
 $result = DB_query("SELECT faq.id, faq.title
                       FROM {$_TABLES['faq']} faq
                       JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category"
@@ -236,7 +236,10 @@ while ($row = DB_fetchArray($result)) {
 }
 $display .= '</select></label>';
 
-$display .= '<label id="faq-relation-category-wrap" style="display:none">FAQ category<select id="faq-relation-category" name="category_id"><option value="">Select a category</option>';
+$display .= '<label id="faq-relation-category-wrap" style="display:none">'
+          . htmlspecialchars($LANG_FAQ_RELATIONS['faq_category'], ENT_QUOTES, 'UTF-8')
+          . '<select id="faq-relation-category" name="category_id"><option value="">'
+          . htmlspecialchars($LANG_FAQ_RELATIONS['select_category'], ENT_QUOTES, 'UTF-8') . '</option>';
 $categoryResult = DB_query("SELECT cat.id, cat.title
                               FROM {$_TABLES['faq_category']} cat"
                           . COM_getPermSQL('WHERE', 0, 3, 'cat')
@@ -247,9 +250,18 @@ while ($categoryRow = DB_fetchArray($categoryResult)) {
 }
 $display .= '</select></label>';
 
-$display .= '<label>Provider<select id="faq-relation-provider" name="provider"'
-          . ' data-items-url="' . htmlspecialchars($_CONF['site_admin_url'] . '/plugins/faq/relations.php', ENT_QUOTES, 'UTF-8') . '" required>';
-$display .= '<option value="">Select a provider</option>';
+$display .= '<label>' . htmlspecialchars($LANG_FAQ_RELATIONS['provider'], ENT_QUOTES, 'UTF-8')
+          . '<select id="faq-relation-provider" name="provider"'
+          . ' data-items-url="' . htmlspecialchars($_CONF['site_admin_url'] . '/plugins/faq/relations.php', ENT_QUOTES, 'UTF-8') . '"'
+          . ' data-msg-select-content="' . htmlspecialchars($LANG_FAQ_RELATIONS['select_content'], ENT_QUOTES, 'UTF-8') . '"'
+          . ' data-msg-loading="' . htmlspecialchars($LANG_FAQ_RELATIONS['loading'], ENT_QUOTES, 'UTF-8') . '"'
+          . ' data-msg-select-provider-first="' . htmlspecialchars($LANG_FAQ_RELATIONS['select_provider_first'], ENT_QUOTES, 'UTF-8') . '"'
+          . ' data-msg-no-content="' . htmlspecialchars($LANG_FAQ_RELATIONS['no_selectable_content'], ENT_QUOTES, 'UTF-8') . '"'
+          . ' data-msg-enter-manual="' . htmlspecialchars($LANG_FAQ_RELATIONS['enter_id_manually'], ENT_QUOTES, 'UTF-8') . '"'
+          . ' data-msg-collection-unavailable="' . htmlspecialchars($LANG_FAQ_RELATIONS['collection_unavailable'], ENT_QUOTES, 'UTF-8') . '"'
+          . ' data-msg-load-failed="' . htmlspecialchars($LANG_FAQ_RELATIONS['unable_load_collection'], ENT_QUOTES, 'UTF-8') . '"'
+          . ' data-msg-manual-fallback="' . htmlspecialchars($LANG_FAQ_RELATIONS['manual_fallback'], ENT_QUOTES, 'UTF-8') . '" required>';
+$display .= '<option value="">' . htmlspecialchars($LANG_FAQ_RELATIONS['select_provider'], ENT_QUOTES, 'UTF-8') . '</option>';
 foreach ($providers as $provider) {
     $selected = $provider === $prefillProvider ? ' selected' : '';
     $display .= '<option value="' . htmlspecialchars($provider, ENT_QUOTES, 'UTF-8') . '"' . $selected . '>'
@@ -257,50 +269,58 @@ foreach ($providers as $provider) {
 }
 $display .= '</select></label>';
 
-$display .= '<label id="faq-relation-item-wrap">Content'
+$display .= '<label id="faq-relation-item-wrap">' . htmlspecialchars($LANG_FAQ_RELATIONS['content'], ENT_QUOTES, 'UTF-8')
           . '<select id="faq-relation-item" name="item_id_choice" data-selected-item="'
           . htmlspecialchars($prefillItem, ENT_QUOTES, 'UTF-8') . '" disabled>'
-          . '<option value="">Select a provider first</option></select></label>';
+          . '<option value="">' . htmlspecialchars($LANG_FAQ_RELATIONS['select_provider_first'], ENT_QUOTES, 'UTF-8') . '</option></select></label>';
 
-$display .= '<label id="faq-relation-item-manual-wrap" style="display:none">Content ID'
+$display .= '<label id="faq-relation-item-manual-wrap" style="display:none">'
+          . htmlspecialchars($LANG_FAQ_RELATIONS['content_id'], ENT_QUOTES, 'UTF-8')
           . '<input type="text" id="faq-relation-item-manual" name="item_id_manual" maxlength="128" autocomplete="off" value="'
           . htmlspecialchars($prefillItem, ENT_QUOTES, 'UTF-8') . '"></label>';
 
 $display .= '<input type="hidden" id="faq-relation-subtype" name="item_subtype" value="">';
 
-$display .= '<label>Placement<select name="placement">'
-          . '<option value="automatic">Automatic</option>'
-          . '<option value="manual">Manual only</option>'
+$display .= '<label>' . htmlspecialchars($LANG_FAQ_RELATIONS['placement'], ENT_QUOTES, 'UTF-8')
+          . '<select name="placement">'
+          . '<option value="automatic">' . htmlspecialchars($LANG_FAQ_RELATIONS['automatic'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '<option value="manual">' . htmlspecialchars($LANG_FAQ_RELATIONS['manual_only'], ENT_QUOTES, 'UTF-8') . '</option>'
           . '</select></label>';
 
-$display .= '<label>Order<input type="number" name="sort_order" value="0" min="0"></label>';
+$display .= '<label>' . htmlspecialchars($LANG_FAQ_RELATIONS['order'], ENT_QUOTES, 'UTF-8')
+          . '<input type="number" name="sort_order" value="0" min="0"></label>';
 
 $display .= '</div>';
 
-$display .= '<details class="faq-relation-advanced"><summary>Advanced fallback</summary>'
+$display .= '<details class="faq-relation-advanced"><summary>'
+          . htmlspecialchars($LANG_FAQ_RELATIONS['advanced_fallback'], ENT_QUOTES, 'UTF-8') . '</summary>'
           . '<div class="faq-relation-grid">'
-          . '<label>Subtype <input type="text" id="faq-relation-subtype-manual" name="item_subtype_manual" maxlength="64" autocomplete="off"></label>'
+          . '<label>' . htmlspecialchars($LANG_FAQ_RELATIONS['subtype'], ENT_QUOTES, 'UTF-8')
+          . ' <input type="text" id="faq-relation-subtype-manual" name="item_subtype_manual" maxlength="64" autocomplete="off"></label>'
           . '</div>'
-          . '<p class="faq-admin-help">Subtype is normally detected from the selected provider item. Enter it manually only for a legacy/custom provider that does not expose it.</p>'
+          . '<p class="faq-admin-help">' . htmlspecialchars($LANG_FAQ_RELATIONS['subtype_help'], ENT_QUOTES, 'UTF-8') . '</p>'
           . '</details>';
 
 $display .= '<div id="faq-relation-note" class="faq-admin-help"></div>';
 $display .= '<input type="hidden" name="faq_relation_action" value="add">';
 $display .= '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . $token . '">';
-$display .= '<div class="faq-relation-actions"><input type="submit" value="Save association"></div>';
+$display .= '<div class="faq-relation-actions"><input type="submit" value="'
+          . htmlspecialchars($LANG_FAQ_RELATIONS['save_association'], ENT_QUOTES, 'UTF-8') . '"></div>';
 $display .= '</form>';
 
-$display .= '<h2 class="faq-relation-current-title">Current individual FAQ associations</h2>';
+$display .= '<h2 class="faq-relation-current-title">' . htmlspecialchars($LANG_FAQ_RELATIONS['current_faq_associations'], ENT_QUOTES, 'UTF-8') . '</h2>';
 
 if ($filterProvider !== '' && $filterItem !== '') {
-    $display .= '<div class="faq-admin-filter-context"><strong>Filtered content:</strong> <code>'
+    $display .= '<div class="faq-admin-filter-context"><strong>'
+              . htmlspecialchars($LANG_FAQ_RELATIONS['filtered_content'], ENT_QUOTES, 'UTF-8')
+              . '</strong> <code>'
               . htmlspecialchars($filterProvider . ':' . $filterItem, ENT_QUOTES, 'UTF-8')
               . '</code> <a href="' . htmlspecialchars($_CONF['site_admin_url'] . '/plugins/faq/relations.php', ENT_QUOTES, 'UTF-8')
-              . '">Show all associations</a></div>';
+              . '">' . htmlspecialchars($LANG_FAQ_RELATIONS['show_all_associations'], ENT_QUOTES, 'UTF-8') . '</a></div>';
 }
 
 if (!faq_relationTableExists()) {
-    $display .= '<p>The FAQ 1.3.0 relation table is not installed yet. Run the plugin upgrade.</p>';
+    $display .= '<p>' . htmlspecialchars($LANG_FAQ_RELATIONS['relation_table_missing'], ENT_QUOTES, 'UTF-8') . '</p>';
 } else {
     $sql = "SELECT rel.relation_id, rel.faq_id, rel.provider, rel.item_id, rel.item_subtype,
                    rel.placement, rel.sort_order, rel.enabled, faq.title
@@ -316,7 +336,11 @@ if (!faq_relationTableExists()) {
     $result = DB_query($sql);
 
     $display .= '<div class="faq-admin-table"><table class="admin-list"><thead><tr>'
-              . '<th>FAQ</th><th>Content</th><th>Placement</th><th>Order</th><th>Action</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['faq'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['content'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['placement'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['order'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['action'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '</tr></thead><tbody>';
 
     while ($row = DB_fetchArray($result)) {
@@ -349,7 +373,9 @@ if (!faq_relationTableExists()) {
         }
         $display .= '</td>';
 
-                $placementLabel = $row['placement'] === 'manual' ? 'Manual only' : 'Automatic';
+                $placementLabel = $row['placement'] === 'manual'
+            ? $LANG_FAQ_RELATIONS['manual_only']
+            : $LANG_FAQ_RELATIONS['automatic'];
         $display .= '<td>' . htmlspecialchars($placementLabel, ENT_QUOTES, 'UTF-8') . '</td>';
         $display .= '<td>' . (int) $row['sort_order'] . '</td><td>';
         $deleteAction = $_CONF['site_admin_url'] . '/plugins/faq/relations.php';
@@ -360,15 +386,15 @@ if (!faq_relationTableExists()) {
         $display .= '<input type="hidden" name="faq_relation_action" value="delete">';
         $display .= '<input type="hidden" name="relation_id" value="' . (int) $row['relation_id'] . '">';
         $display .= '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . SEC_createToken() . '">';
-        $display .= '<input type="submit" value="Delete"></form></td></tr>';
+        $display .= '<input type="submit" value="' . htmlspecialchars($LANG_FAQ_RELATIONS['delete'], ENT_QUOTES, 'UTF-8') . '"></form></td></tr>';
     }
 
     $display .= '</tbody></table></div>';
 }
 
-$display .= '<h2 class="faq-relation-current-title">Current category associations</h2>';
+$display .= '<h2 class="faq-relation-current-title">' . htmlspecialchars($LANG_FAQ_RELATIONS['current_category_associations'], ENT_QUOTES, 'UTF-8') . '</h2>';
 if (!faq_categoryRelationTableExists()) {
-    $display .= '<p>The FAQ category relation table is not installed yet.</p>';
+    $display .= '<p>' . htmlspecialchars($LANG_FAQ_RELATIONS['category_relation_table_missing'], ENT_QUOTES, 'UTF-8') . '</p>';
 } else {
     $sql = "SELECT rel.relation_id, rel.category_id, rel.provider, rel.item_id, rel.item_subtype,
                    rel.placement, rel.sort_order, rel.enabled, cat.title
@@ -384,7 +410,11 @@ if (!faq_categoryRelationTableExists()) {
     $result = DB_query($sql);
 
     $display .= '<div class="faq-admin-table"><table class="admin-list"><thead><tr>'
-              . '<th>Category</th><th>Content</th><th>Placement</th><th>Order</th><th>Action</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['category'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['content'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['placement'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['order'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['action'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '</tr></thead><tbody>';
 
     while ($row = DB_fetchArray($result)) {
@@ -427,7 +457,7 @@ if (!faq_categoryRelationTableExists()) {
                   . '<input type="hidden" name="faq_relation_action" value="delete_category">'
                   . '<input type="hidden" name="relation_id" value="' . (int) $row['relation_id'] . '">'
                   . '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . SEC_createToken() . '">'
-                  . '<input type="submit" value="Delete"></form></td></tr>';
+                  . '<input type="submit" value="' . htmlspecialchars($LANG_FAQ_RELATIONS['delete'], ENT_QUOTES, 'UTF-8') . '"></form></td></tr>';
     }
 
     $display .= '</tbody></table></div>';
@@ -435,4 +465,4 @@ if (!faq_categoryRelationTableExists()) {
 
 $display .= COM_endBlock();
 
-COM_output(COM_createHTMLDocument($display, array('pagetitle' => 'FAQ Associations')));
+COM_output(COM_createHTMLDocument($display, array('pagetitle' => $LANG_FAQ_RELATIONS['title'])));
