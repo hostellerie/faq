@@ -239,6 +239,24 @@ $display .= '<p class="faq-admin-help">'
           . htmlspecialchars($LANG_FAQ_RELATIONS['intro'], ENT_QUOTES, 'UTF-8')
           . '</p>';
 
+$display .= '<details class="faq-relation-advanced faq-relation-help"><summary>'
+          . htmlspecialchars($LANG_FAQ_RELATIONS['display_help_title'], ENT_QUOTES, 'UTF-8')
+          . '</summary>'
+          . '<p>' . htmlspecialchars($LANG_FAQ_RELATIONS['display_help_intro'], ENT_QUOTES, 'UTF-8') . '</p>'
+          . '<ul>'
+          . '<li><strong>' . htmlspecialchars($LANG_FAQ_RELATIONS['automatic'], ENT_QUOTES, 'UTF-8') . '</strong> — '
+          . htmlspecialchars($LANG_FAQ_RELATIONS['display_help_automatic'], ENT_QUOTES, 'UTF-8') . '</li>'
+          . '<li><strong>' . htmlspecialchars($LANG_FAQ_RELATIONS['manual_only'], ENT_QUOTES, 'UTF-8') . '</strong> — '
+          . htmlspecialchars($LANG_FAQ_RELATIONS['display_help_manual'], ENT_QUOTES, 'UTF-8')
+          . ' <code>[faq-context]</code></li>'
+          . '<li><code>[faqrelated:article my-article-id]</code> — '
+          . htmlspecialchars($LANG_FAQ_RELATIONS['display_help_related'], ENT_QUOTES, 'UTF-8') . '</li>'
+          . '<li><code>[faqembed:faq-id]</code> — '
+          . htmlspecialchars($LANG_FAQ_RELATIONS['display_help_embed'], ENT_QUOTES, 'UTF-8') . '</li>'
+          . '</ul>'
+          . '<p>' . htmlspecialchars($LANG_FAQ_RELATIONS['display_help_context_note'], ENT_QUOTES, 'UTF-8') . '</p>'
+          . '</details>';
+
 $display .= '<h2>' . htmlspecialchars($LANG_FAQ_RELATIONS['add_association'], ENT_QUOTES, 'UTF-8') . '</h2>';
 $display .= '<form method="post" action="' . $_CONF['site_admin_url'] . '/plugins/faq/relations.php" class="faq-admin-form">';
 $display .= '<div class="faq-relation-grid">';
