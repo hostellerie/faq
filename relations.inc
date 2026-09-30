@@ -129,7 +129,8 @@ function faq_relationProviderTypes()
 
     $types = array(
         'article' => true,
-        'staticpages' => true
+        'staticpages' => true,
+        'topic' => true
     );
 
     if (is_array($_PLUGINS)) {
@@ -191,6 +192,41 @@ function faq_relationCoreArticleOptions($limit)
     return $rows;
 }
 
+function faq_relationCoreTopicOptions($limit)
+{
+    global $_CONF, $_TABLES;
+
+    $rows = array();
+    $limit = max(1, min(200, (int) $limit));
+
+    if (empty($_TABLES['topics'])) {
+        return $rows;
+    }
+
+    $sql = "SELECT t.tid AS id, t.topic AS title
+              FROM {$_TABLES['topics']} AS t"
+         . COM_getPermSQL('WHERE', 0, 2, 't')
+         . " ORDER BY t.topic ASC, t.tid ASC LIMIT " . $limit;
+
+    $result = DB_query($sql, 1);
+    if ($result === false) {
+        return $rows;
+    }
+
+    while ($row = DB_fetchArray($result)) {
+        $id = (string) $row['id'];
+        $url = rtrim($_CONF['site_url'], '/') . '/index.php?topic=' . rawurlencode($id);
+        $rows[] = array(
+            'id' => $id,
+            'title' => (string) $row['title'],
+            'url' => $url,
+            'subtype' => 'topic'
+        );
+    }
+
+    return $rows;
+}
+
 function faq_relationCoreStaticPageOptions($limit)
 {
     global $_TABLES;
@@ -235,6 +271,14 @@ function faq_relationObjectOptions($provider, $limit = 100)
         return array(
             'supported' => true,
             'items' => faq_relationCoreArticleOptions($limit),
+            'message' => ''
+        );
+    }
+
+    if ($provider === 'topic') {
+        return array(
+            'supported' => true,
+            'items' => faq_relationCoreTopicOptions($limit),
             'message' => ''
         );
     }
@@ -831,6 +875,120 @@ function faq_renderFaqItems($items, $css_class, $asFaqPage)
     $html .= faq_structuredQuestions($items, $asFaqPage);
 
     return $html;
+}
+
+/**
+ * Return every readable Geeklog topic assigned to an article.
+ */
+function faq_articleTopicIds($storyId)
+{
+    global $_TABLES;
+
+    $topics = array();
+    if (empty($_TABLES['topic_assignments']) || empty($_TABLES['topics'])) {
+        return $topics;
+    }
+
+    $storyIdSql = DB_escapeString((string) $storyId);
+    $sql = "SELECT DISTINCT ta.tid
+              FROM {$_TABLES['topic_assignments']} ta
+              JOIN {$_TABLES['topics']} t ON t.tid = ta.tid
+             WHERE ta.type = 'article'
+               AND ta.id = '{$storyIdSql}'"
+         . COM_getPermSQL('AND', 0, 2, 't')
+         . " ORDER BY ta.tid";
+
+    $result = DB_query($sql);
+    while ($row = DB_fetchArray($result)) {
+        $topics[] = (string) $row['tid'];
+    }
+
+    return $topics;
+}
+
+/**
+ * Detect FAQ-like content already embedded directly in an article.
+ */
+function faq_articleExternalSignals($storyId)
+{
+    global $_TABLES;
+
+    if (empty($_TABLES['stories'])) {
+        return array();
+    }
+
+    $storyIdSql = DB_escapeString((string) $storyId);
+    $sql = "SELECT introtext, bodytext
+              FROM {$_TABLES['stories']}
+             WHERE sid = '{$storyIdSql}'
+               AND draft_flag = 0
+               AND date <= NOW()"
+         . COM_getPermSQL('AND', 0, 2);
+
+    $result = DB_query($sql);
+    if ($result === false || DB_numRows($result) !== 1) {
+        return array();
+    }
+
+    $row = DB_fetchArray($result);
+    $content = (isset($row['introtext']) ? (string) $row['introtext'] : '')
+             . "\n"
+             . (isset($row['bodytext']) ? (string) $row['bodytext'] : '');
+
+    return faq_coverageExternalSignals($content);
+}
+
+/**
+ * Merge direct article associations with inherited topic associations.
+ *
+ * Direct article associations always win. Topic inheritance is suppressed when
+ * the article already contains an external FAQ/Q&A signal. Duplicate FAQ ids
+ * are removed across direct and multi-topic sources.
+ */
+function faq_relationGetForArticleWithTopics($storyId, $placement = 'automatic')
+{
+    $direct = faq_relationGetForItem('article', (string) $storyId, '', $placement);
+    $seen = array();
+    $items = array();
+
+    foreach ($direct as $row) {
+        $faqId = isset($row['faq_id']) ? (string) $row['faq_id'] : '';
+        if ($faqId !== '') {
+            $seen[$faqId] = true;
+        }
+        $row['_faq_origin'] = 'direct';
+        $items[] = $row;
+    }
+
+    // Explicit direct associations are honored even when external FAQ content
+    // exists. Only automatic topic inheritance is suppressed.
+    if (!empty(faq_articleExternalSignals($storyId))) {
+        return $items;
+    }
+
+    foreach (faq_articleTopicIds($storyId) as $topicId) {
+        $topicItems = faq_relationGetForItem('topic', $topicId, 'topic', $placement);
+        foreach ($topicItems as $row) {
+            $faqId = isset($row['faq_id']) ? (string) $row['faq_id'] : '';
+            if ($faqId !== '' && isset($seen[$faqId])) {
+                continue;
+            }
+            if ($faqId !== '') {
+                $seen[$faqId] = true;
+            }
+            $row['_faq_origin'] = 'topic';
+            $row['_faq_topic_id'] = $topicId;
+            $items[] = $row;
+        }
+    }
+
+    return $items;
+}
+
+function faq_renderArticleContextual($storyId, $placement = 'automatic')
+{
+    $items = faq_relationGetForArticleWithTopics($storyId, $placement);
+    return faq_renderFaqItems($items, 'faq-contextual faq-contextual-article', false);
 }
 
 function faq_renderContextual($provider, $item_id, $subtype = '', $placement = '')
