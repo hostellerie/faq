@@ -251,3 +251,19 @@
 .faq-admin-pagination strong {
     font-weight: 700;
 }
+
+
+.faq-inline-edit {
+    display: inline-block;
+    margin: 0 .25rem .25rem 0;
+}
+
+.faq-relation-order-input {
+    box-sizing: border-box;
+    width: 5.5rem;
+    max-width: 100%;
+}
+
+.faq-admin-table select {
+    max-width: 14rem;
+}
