@@ -46,27 +46,56 @@ if ($coreAudit) {
 
 $_SCRIPTS->setCSSFile('faq_admin', faq_assetPath('faq-admin.css'));
 $display = faq_adminNavigation('coverage');
-$display .= COM_startBlock('FAQ Coverage');
-$display .= '<form method="get" action="' . $_CONF['site_admin_url'] . '/plugins/faq/coverage.php" class="faq-admin-toolbar">';
-$display .= '<label for="faq-coverage-provider">Provider</label><select id="faq-coverage-provider" name="provider">';
-foreach (array('article' => 'Articles', 'staticpages' => 'Static Pages', 'videos' => 'Videos', 'documents' => 'Documents', 'maps' => 'Maps', 'mediagallery' => 'Media Gallery') as $key => $label) {
+$display .= COM_startBlock($LANG_FAQ_COVERAGE['title']);
+
+$providerLabels = array(
+    'article' => $LANG_FAQ_COVERAGE['articles'],
+    'staticpages' => $LANG_FAQ_COVERAGE['static_pages'],
+    'videos' => $LANG_FAQ_COVERAGE['videos'],
+    'documents' => $LANG_FAQ_COVERAGE['documents'],
+    'maps' => $LANG_FAQ_COVERAGE['maps'],
+    'mediagallery' => $LANG_FAQ_COVERAGE['media_gallery']
+);
+
+$display .= '<form method="get" action="' . $_CONF['site_admin_url']
+          . '/plugins/faq/coverage.php" class="faq-admin-toolbar">';
+$display .= '<label for="faq-coverage-provider">'
+          . htmlspecialchars($LANG_FAQ_COVERAGE['provider'], ENT_QUOTES, 'UTF-8')
+          . '</label><select id="faq-coverage-provider" name="provider">';
+foreach ($providerLabels as $key => $label) {
     $selected = $provider === $key ? ' selected' : '';
-    $display .= '<option value="' . $key . '"' . $selected . '>' . $label . '</option>';
+    $display .= '<option value="' . $key . '"' . $selected . '>'
+              . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</option>';
 }
 $display .= '</select>';
-$display .= '<label for="faq-coverage-status">FAQ status</label><select id="faq-coverage-status" name="status">'
-          . '<option value="all"' . ($status === 'all' ? ' selected' : '') . '>All</option>'
-          . '<option value="managed"' . ($status === 'managed' ? ' selected' : '') . '>Managed FAQ only</option>'
-          . '<option value="external"' . ($status === 'external' ? ' selected' : '') . '>External FAQ signal only</option>'
-          . '<option value="both"' . ($status === 'both' ? ' selected' : '') . '>Managed + external</option>'
-          . '<option value="none"' . ($status === 'none' ? ' selected' : '') . '>No FAQ detected</option>'
-          . '</select><input type="submit" value="Show"></form>';
+
+$display .= '<label for="faq-coverage-status">'
+          . htmlspecialchars($LANG_FAQ_COVERAGE['faq_status'], ENT_QUOTES, 'UTF-8')
+          . '</label><select id="faq-coverage-status" name="status">'
+          . '<option value="all"' . ($status === 'all' ? ' selected' : '') . '>'
+          . htmlspecialchars($LANG_FAQ_COVERAGE['all'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '<option value="managed"' . ($status === 'managed' ? ' selected' : '') . '>'
+          . htmlspecialchars($LANG_FAQ_COVERAGE['managed_faq_only'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '<option value="external"' . ($status === 'external' ? ' selected' : '') . '>'
+          . htmlspecialchars($LANG_FAQ_COVERAGE['external_faq_only'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '<option value="both"' . ($status === 'both' ? ' selected' : '') . '>'
+          . htmlspecialchars($LANG_FAQ_COVERAGE['managed_external'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '<option value="none"' . ($status === 'none' ? ' selected' : '') . '>'
+          . htmlspecialchars($LANG_FAQ_COVERAGE['no_faq_detected'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '</select><input type="submit" value="'
+          . htmlspecialchars($LANG_FAQ_COVERAGE['show'], ENT_QUOTES, 'UTF-8') . '"></form>';
 
 if ($items === false) {
-    $display .= '<p>This provider does not expose an enumerable Item Info collection on this installation. FAQ will not query third-party plugin tables. Manual associations remain available.</p>';
+    $display .= '<p>'
+              . htmlspecialchars($LANG_FAQ_COVERAGE['provider_not_enumerable'], ENT_QUOTES, 'UTF-8')
+              . '</p>';
 } else {
     if ($coreAudit) {
-        $display .= '<p class="faq-admin-audit-note"><strong>Core content audit:</strong> Articles and Static Pages are inspected read-only because their current Geeklog providers do not expose the required collection/content contract. External FAQ detection is an editorial signal, not proof.</p>';
+        $display .= '<p class="faq-admin-audit-note"><strong>'
+                  . htmlspecialchars($LANG_FAQ_COVERAGE['core_audit_label'], ENT_QUOTES, 'UTF-8')
+                  . '</strong> '
+                  . htmlspecialchars($LANG_FAQ_COVERAGE['core_audit_help'], ENT_QUOTES, 'UTF-8')
+                  . '</p>';
     }
 
     $managedOnly = 0;
@@ -111,7 +140,8 @@ if ($items === false) {
         $url = isset($item['url']) ? $item['url'] : '';
         $titleHtml = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
         if ($url !== '') {
-            $titleHtml = '<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">' . $titleHtml . '</a>';
+            $titleHtml = '<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">'
+                       . $titleHtml . '</a>';
         }
 
         $signalHtml = empty($signals)
@@ -119,40 +149,75 @@ if ($items === false) {
             : htmlspecialchars(implode(', ', $signals), ENT_QUOTES, 'UTF-8');
 
         $stateLabel = $rowStatus === 'both'
-            ? 'Managed + external'
+            ? $LANG_FAQ_COVERAGE['managed_external']
             : ($rowStatus === 'managed'
-                ? 'Managed'
-                : ($rowStatus === 'external' ? 'External signal' : 'None'));
+                ? $LANG_FAQ_COVERAGE['managed']
+                : ($rowStatus === 'external'
+                    ? $LANG_FAQ_COVERAGE['external_signal']
+                    : $LANG_FAQ_COVERAGE['none']));
 
-        $actions = '<a href="' . $_CONF['site_admin_url'] . '/plugins/faq/relations.php?provider='
-                 . rawurlencode($provider) . '&amp;item_id=' . rawurlencode((string) $item['id']) . '">Manage</a>';
+        $actions = '<a href="' . $_CONF['site_admin_url']
+                 . '/plugins/faq/relations.php?provider=' . rawurlencode($provider)
+                 . '&amp;item_id=' . rawurlencode((string) $item['id']) . '">'
+                 . htmlspecialchars($LANG_FAQ_COVERAGE['manage'], ENT_QUOTES, 'UTF-8')
+                 . '</a>';
 
         if ($provider === 'article') {
-            $actions .= ' &middot; <a href="' . $_CONF['site_admin_url'] . '/story.php?mode=edit&amp;sid='
-                     . rawurlencode((string) $item['id']) . '">Edit</a>';
+            $actions .= ' &middot; <a href="' . $_CONF['site_admin_url']
+                     . '/story.php?mode=edit&amp;sid='
+                     . rawurlencode((string) $item['id']) . '">'
+                     . htmlspecialchars($LANG_FAQ_COVERAGE['edit'], ENT_QUOTES, 'UTF-8') . '</a>';
         } elseif ($provider === 'staticpages') {
-            $actions .= ' &middot; <a href="' . $_CONF['site_admin_url'] . '/plugins/staticpages/index.php?mode=edit&amp;sp_id='
-                     . rawurlencode((string) $item['id']) . '">Edit</a>';
+            $actions .= ' &middot; <a href="' . $_CONF['site_admin_url']
+                     . '/plugins/staticpages/index.php?mode=edit&amp;sp_id='
+                     . rawurlencode((string) $item['id']) . '">'
+                     . htmlspecialchars($LANG_FAQ_COVERAGE['edit'], ENT_QUOTES, 'UTF-8') . '</a>';
         }
 
-        $rows .= '<tr><td>' . $titleHtml . '<br><small>' . htmlspecialchars((string) $item['id'], ENT_QUOTES, 'UTF-8') . '</small></td>';
-        $rows .= '<td><strong>' . htmlspecialchars($stateLabel, ENT_QUOTES, 'UTF-8') . '</strong><br><small>Managed relations: ' . $count . '</small></td>';
+        $rows .= '<tr><td>' . $titleHtml . '<br><small>'
+               . htmlspecialchars((string) $item['id'], ENT_QUOTES, 'UTF-8') . '</small></td>';
+        $rows .= '<td><strong>' . htmlspecialchars($stateLabel, ENT_QUOTES, 'UTF-8')
+               . '</strong><br><small>'
+               . htmlspecialchars($LANG_FAQ_COVERAGE['managed_relations'], ENT_QUOTES, 'UTF-8')
+               . ' ' . $count . '</small></td>';
         $rows .= '<td>' . $signalHtml . '</td>';
         $rows .= '<td>' . $actions . '</td></tr>';
     }
 
-    $baseCoverageUrl = $_CONF['site_admin_url'] . '/plugins/faq/coverage.php?provider=' . rawurlencode($provider);
+    $baseCoverageUrl = $_CONF['site_admin_url']
+        . '/plugins/faq/coverage.php?provider=' . rawurlencode($provider);
     $total = $managedOnly + $externalOnly + $both + $none;
-    $display .= '<div class="faq-admin-summary">'
-              . '<a class="faq-admin-summary-link' . ($status === 'managed' ? ' active' : '') . '" href="' . htmlspecialchars($baseCoverageUrl . '&status=managed', ENT_QUOTES, 'UTF-8') . '"><strong>' . $managedOnly . '</strong>Managed only</a>'
-              . '<a class="faq-admin-summary-link' . ($status === 'external' ? ' active' : '') . '" href="' . htmlspecialchars($baseCoverageUrl . '&status=external', ENT_QUOTES, 'UTF-8') . '"><strong>' . $externalOnly . '</strong>External only</a>'
-              . '<a class="faq-admin-summary-link' . ($status === 'both' ? ' active' : '') . '" href="' . htmlspecialchars($baseCoverageUrl . '&status=both', ENT_QUOTES, 'UTF-8') . '"><strong>' . $both . '</strong>Both</a>'
-              . '<a class="faq-admin-summary-link' . ($status === 'none' ? ' active' : '') . '" href="' . htmlspecialchars($baseCoverageUrl . '&status=none', ENT_QUOTES, 'UTF-8') . '"><strong>' . $none . '</strong>None</a>'
-              . '<a class="faq-admin-summary-link' . ($status === 'all' ? ' active' : '') . '" href="' . htmlspecialchars($baseCoverageUrl . '&status=all', ENT_QUOTES, 'UTF-8') . '"><strong>' . $total . '</strong>All</a>'
-              . '</div>';
-    $display .= '<div class="faq-admin-table"><table class="admin-list"><thead><tr><th>Content</th><th>FAQ status</th><th>External signals</th><th>Action</th></tr></thead><tbody>' . $rows . '</tbody></table></div>';
+
+    $summary = array(
+        'managed' => array($managedOnly, $LANG_FAQ_COVERAGE['managed_only']),
+        'external' => array($externalOnly, $LANG_FAQ_COVERAGE['external_only']),
+        'both' => array($both, $LANG_FAQ_COVERAGE['both']),
+        'none' => array($none, $LANG_FAQ_COVERAGE['none']),
+        'all' => array($total, $LANG_FAQ_COVERAGE['all'])
+    );
+
+    $display .= '<div class="faq-admin-summary">';
+    foreach ($summary as $summaryKey => $summaryData) {
+        $display .= '<a class="faq-admin-summary-link'
+                  . ($status === $summaryKey ? ' active' : '')
+                  . '" href="'
+                  . htmlspecialchars($baseCoverageUrl . '&status=' . $summaryKey, ENT_QUOTES, 'UTF-8')
+                  . '"><strong>' . (int) $summaryData[0] . '</strong>'
+                  . htmlspecialchars($summaryData[1], ENT_QUOTES, 'UTF-8') . '</a>';
+    }
+    $display .= '</div>';
+
+    $display .= '<div class="faq-admin-table"><table class="admin-list"><thead><tr>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_COVERAGE['content'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_COVERAGE['faq_status'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_COVERAGE['external_signals'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_COVERAGE['action'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '</tr></thead><tbody>' . $rows . '</tbody></table></div>';
 }
 
 $display .= COM_endBlock();
 
-COM_output(COM_createHTMLDocument($display, array('pagetitle' => 'FAQ Coverage')));
+COM_output(COM_createHTMLDocument(
+    $display,
+    array('pagetitle' => $LANG_FAQ_COVERAGE['title'])
+));
