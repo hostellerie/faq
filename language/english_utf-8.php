@@ -1,7 +1,7 @@
 <?php
 
 /******************************************************************************
-* english.php
+* english_utf-8.php
 * This is the english language page for the Geeklog FAQ Plug-in!
 *
 * Copyright (C) 2006 Emil Gustafsson
@@ -36,6 +36,11 @@ $LANG_FAQ_COMMON = array(
     'Updated' => 'Updated',
     'Answer' => 'Answer',
     'permalink' => 'Permalink',
+    'back_to' => 'Back to',
+    'breadcrumb_aria' => 'FAQ breadcrumb',
+    'actions_aria' => 'FAQ actions',
+    'related_questions' => 'Related questions',
+    'category_page_title' => 'FAQ Category: %s',
     'no_autolink_faq' => '[FAQ ID "%s" does not exist or you do not have access to it]',
     'no_autolink_cat' => '[FAQ category "%s" does not exist or you do not have access to it]',
     'autolink_error' => '[error in "%s" FAQ link]'
@@ -57,7 +62,6 @@ $LANG_FAQ_STATS = array(
 ******************************************************************************/
 $LANG_FAQ_SEARCH = array(
  'FAQ' => 'FAQ',
- 'category' => 'Category',
  'results' => 'FAQ Results',
  'title' => 'Question',
  'date' => 'Updated',
@@ -123,7 +127,75 @@ $LANG_FAQ_ADMIN = array(
     'coverage' => 'Coverage',
     'configuration' => 'Configuration',
     'new_question' => 'New question',
-    'new_category' => 'New category'
+    'new_category' => 'New category',
+    'administration_aria' => 'FAQ administration'
+);
+
+$LANG_FAQ_RELATIONS = array(
+    'title' => 'FAQ Associations',
+    'intro' => 'Associate either one FAQ or an entire FAQ category with content exposed by Geeklog providers. A category association is dynamic: newly added FAQs in that category are included automatically. Providers and selectable content are discovered automatically when possible; manual ID remains a fallback.',
+    'add_association' => 'Add association',
+    'association_source' => 'Association source',
+    'individual_faq' => 'Individual FAQ',
+    'whole_category' => 'Whole category',
+    'faq' => 'FAQ',
+    'faq_category' => 'FAQ category',
+    'select_category' => 'Select a category',
+    'provider' => 'Provider',
+    'select_provider' => 'Select a provider',
+    'content' => 'Content',
+    'select_provider_first' => 'Select a provider first',
+    'content_id' => 'Content ID',
+    'placement' => 'Placement',
+    'automatic' => 'Automatic',
+    'manual_only' => 'Manual only',
+    'order' => 'Order',
+    'advanced_fallback' => 'Advanced fallback',
+    'subtype' => 'Subtype',
+    'subtype_help' => 'Subtype is normally detected from the selected provider item. Enter it manually only for a legacy/custom provider that does not expose it.',
+    'save_association' => 'Save association',
+    'current_faq_associations' => 'Current individual FAQ associations',
+    'current_category_associations' => 'Current category associations',
+    'filtered_content' => 'Filtered content:',
+    'show_all_associations' => 'Show all associations',
+    'relation_table_missing' => 'The FAQ 1.3.0 relation table is not installed yet. Run the plugin upgrade.',
+    'category_relation_table_missing' => 'The FAQ category relation table is not installed yet.',
+    'category' => 'Category',
+    'action' => 'Action',
+    'delete' => 'Delete'
+);
+
+$LANG_FAQ_COVERAGE = array(
+    'title' => 'FAQ Coverage',
+    'provider' => 'Provider',
+    'faq_status' => 'FAQ status',
+    'all' => 'All',
+    'managed_faq_only' => 'Managed FAQ only',
+    'external_faq_only' => 'External FAQ signal only',
+    'managed_external' => 'Managed + external',
+    'no_faq_detected' => 'No FAQ detected',
+    'show' => 'Show',
+    'provider_not_enumerable' => 'This provider does not expose an enumerable Item Info collection on this installation. FAQ will not query third-party plugin tables. Manual associations remain available.',
+    'core_audit_label' => 'Core content audit:',
+    'core_audit_help' => 'Articles and Static Pages are inspected read-only because their current Geeklog providers do not expose the required collection/content contract. External FAQ detection is an editorial signal, not proof.',
+    'managed' => 'Managed',
+    'external_signal' => 'External signal',
+    'none' => 'None',
+    'manage' => 'Manage',
+    'edit' => 'Edit',
+    'managed_relations' => 'Managed relations:',
+    'managed_only' => 'Managed only',
+    'external_only' => 'External only',
+    'both' => 'Both',
+    'content' => 'Content',
+    'external_signals' => 'External signals',
+    'action' => 'Action',
+    'articles' => 'Articles',
+    'static_pages' => 'Static Pages',
+    'videos' => 'Videos',
+    'documents' => 'Documents',
+    'maps' => 'Maps',
+    'media_gallery' => 'Media Gallery'
 );
 
 $LANG_FAQ_IMPORT = array(
@@ -184,4 +256,17 @@ $LANG_configselects['faq'][12] = array(
     'No access' => 0,
     'Read-Only' => 2,
     'Read-Write' => 3
+);
+
+
+$LANG_configtooltips['faq'] = array(
+    'hidenewfaq' => 'Hide FAQ entries from the Geeklog What\'s New block.',
+    'hidefaqmenu' => 'Hide the FAQ item from the site menu while keeping public FAQ URLs available.',
+    'newfaqinterval' => 'Number of seconds during which a recently updated FAQ is considered new.',
+    'no_hit_rights' => 'Comma-separated FAQ rights whose users should not increment FAQ hit counters.',
+    'contextual_enabled' => 'Allow FAQ associations to be rendered inside supported content providers such as articles, Documents, Maps and Videos.',
+    'contextual_default_placement' => 'Automatic lets the content provider choose its native item-display position. Manual only disables automatic contextual output.',
+    'structured_data' => 'Output FAQPage structured data on standalone FAQ pages when appropriate.',
+    'coverage_limit' => 'Maximum number of provider items inspected and displayed on the Coverage administration page.',
+    'default_permissions' => 'Default owner, group, member and anonymous permissions assigned to newly created FAQ content.'
 );
