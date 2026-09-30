@@ -654,6 +654,68 @@ function faq_relationGetForFaq($faq_id)
     return $items;
 }
 
+
+/**
+ * Return managed FAQ counts for every item of one provider in one query.
+ *
+ * This is used by Coverage to avoid one relation query per audited item.
+ */
+function faq_relationCountMapForProvider($provider)
+{
+    global $_TABLES;
+
+    $counts = array();
+    $provider = faq_normalizeProvider($provider);
+
+    if (!faq_relationProviderAllowed($provider)) {
+        return $counts;
+    }
+
+    $providerSql = DB_escapeString($provider);
+    $parts = array();
+
+    if (faq_relationTableExists()) {
+        $parts[] = "SELECT rel.item_id, rel.faq_id
+                      FROM {$_TABLES['faq_relations']} rel
+                      JOIN {$_TABLES['faq']} faq ON faq.id = rel.faq_id
+                      JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category
+                     WHERE rel.enabled = 1
+                       AND rel.provider = '{$providerSql}'"
+                 . COM_getPermSQL('AND', 0, 2, 'faq')
+                 . COM_getPermSQL('AND', 0, 2, 'cat');
+    }
+
+    if (faq_categoryRelationTableExists()) {
+        $parts[] = "SELECT cr.item_id, faq.id AS faq_id
+                      FROM {$_TABLES['faq_category_relations']} cr
+                      JOIN {$_TABLES['faq_category']} cat ON cat.id = cr.category_id
+                      JOIN {$_TABLES['faq']} faq ON faq.category = cat.id
+                     WHERE cr.enabled = 1
+                       AND cr.provider = '{$providerSql}'"
+                 . COM_getPermSQL('AND', 0, 2, 'faq')
+                 . COM_getPermSQL('AND', 0, 2, 'cat');
+    }
+
+    if (empty($parts)) {
+        return $counts;
+    }
+
+    $sql = "SELECT item_id, COUNT(DISTINCT faq_id) AS faq_count
+              FROM (" . implode(" UNION ALL ", $parts) . ") faq_coverage_rel
+             GROUP BY item_id";
+
+    $result = DB_query($sql);
+    if ($result === false) {
+        return $counts;
+    }
+
+    while ($row = DB_fetchArray($result)) {
+        $counts[(string) $row['item_id']] = (int) $row['faq_count'];
+    }
+
+    return $counts;
+}
+
 function faq_relationCountForItem($provider, $item_id, $subtype = '')
 {
     if (!faq_relationTableExists()) {
@@ -781,6 +843,12 @@ function faq_clearLocalCache()
 {
     if (function_exists('CACHE_remove_instance')) {
         CACHE_remove_instance('faq');
+
+        if (function_exists('CACHE_security_hash')) {
+            $securityHash = CACHE_security_hash();
+            CACHE_remove_instance('faq_coverage__article__' . $securityHash);
+            CACHE_remove_instance('faq_coverage__staticpages__' . $securityHash);
+        }
     }
 }
 
