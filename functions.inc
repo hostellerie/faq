@@ -237,16 +237,16 @@ function faq_assetUrl($relative)
     return $url;
 }
 
+/**
+ * Return a Geeklog Resource-safe path under public_html.
+ *
+ * $_SCRIPTS->setCSSFile() / setJavaScriptFile() expect a real relative
+ * public_html path. Do not append cache-busting query strings here: Geeklog
+ * 2.2.2 validates the physical file before registering it.
+ */
 function faq_assetPath($relative)
 {
-    $url = faq_assetUrl($relative);
-    $site = isset($GLOBALS['_CONF']['site_url']) ? rtrim($GLOBALS['_CONF']['site_url'], '/') : '';
-
-    if ($site !== '' && strpos($url, $site) === 0) {
-        return substr($url, strlen($site));
-    }
-
-    return $url;
+    return '/faq/' . ltrim((string) $relative, '/');
 }
 
 function faq_adminNavigation($active = '')
