@@ -229,7 +229,8 @@ function editfaq ($id = '')
     $tpl->set_var('faq_category_options', faq_getCategoryList ($A['category']));
     $tpl->set_var('faq_category', $A['category']);
     $tpl->set_var('faq_hits', $A['hits']);
-    $tpl->set_var('faq_desc', faq_editorEscapeContent($A['description']));
+    $tpl->set_var('faq_desc_source', faq_editorEscapeContent($A['description']));
+    $tpl->set_var('faq_desc_advanced', faq_editorEscapeContent(faq_prepareEditorHtml($A['description'])));
     faq_setupContentEditor($tpl, 'faq.edit');
     $thetime = COM_getUserDateTimeFormat($A['unixdate']);
     $tpl->set_var('faq_date', $thetime[0]);
@@ -334,7 +335,8 @@ function editcat ($id = '')
     $tpl->set_var('faq_lang_id', $LANG_FAQ_ADMIN['id']);
     $tpl->set_var('faq_id', $A['id']);
     $tpl->set_var('faq_lang_desc', $LANG_FAQ_ADMIN['description']);
-    $tpl->set_var('faq_desc', faq_editorEscapeContent($A['description']));
+    $tpl->set_var('faq_desc_source', faq_editorEscapeContent($A['description']));
+    $tpl->set_var('faq_desc_advanced', faq_editorEscapeContent(faq_prepareEditorHtml($A['description'])));
     faq_setupContentEditor($tpl, 'faq.admin');
     $tpl->set_var('lang_save', $LANG_FAQ_ADMIN['save']);
     $tpl->set_var('lang_cancel', $LANG_FAQ_ADMIN['cancel']);
