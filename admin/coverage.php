@@ -33,6 +33,8 @@ if ($limit < 1 || $limit > 200) {
 $coreAudit = in_array($provider, array('article', 'staticpages'), true);
 
 if ($coreAudit) {
+    // Core coverage is an audit, not a picker: inspect every accessible item.
+    $limit = 0;
     // Geeklog Core and Static Pages do not yet expose the shared collection
     // surface required for this audit. Follow Hub's read-only Core-table audit
     // precedent rather than pretending the capability exists.
@@ -137,6 +139,7 @@ if ($items === false) {
         }
 
         $title = isset($item['title']) ? $item['title'] : $item['id'];
+        $title = html_entity_decode((string) $title, ENT_QUOTES, 'UTF-8');
         $url = isset($item['url']) ? $item['url'] : '';
         $titleHtml = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
         if ($url !== '') {
