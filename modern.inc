@@ -258,7 +258,7 @@ function plugin_centerblock_faq($where = 1, $page = 1, $topic = '')
         return '';
     }
 
-    return faq_renderContextual('topic', (string) $topic, 'topic', 'automatic');
+    return faq_renderContextual('topic', (string) $topic, 'topic', 'automatic', 'topic');
 }
 
 function plugin_itemdisplay_faq($id, $type)
