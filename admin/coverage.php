@@ -169,6 +169,10 @@ $_SCRIPTS->setCSSFile('faq_admin', faq_assetPath('faq-admin.css'));
 $display = faq_adminNavigation('coverage');
 $display .= COM_startBlock($LANG_FAQ_COVERAGE['title']);
 
+$display .= '<p class="faq-admin-help">'
+          . htmlspecialchars($LANG_FAQ_COVERAGE['intro'], ENT_QUOTES, 'UTF-8')
+          . '</p>';
+
 $providerLabels = array(
     'article' => $LANG_FAQ_COVERAGE['articles'],
     'topic' => $LANG_FAQ_COVERAGE['topics'],
