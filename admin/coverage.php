@@ -32,7 +32,7 @@ if ($limit < 1 || $limit > 200) {
     $limit = 100;
 }
 
-$coreAudit = in_array($provider, array('article', 'staticpages'), true);
+$coreAudit = in_array($provider, array('article', 'staticpages', 'topic'), true);
 $coverageCacheTtl = 300;
 $coverageCacheHit = false;
 $coverageSummary = null;
@@ -67,10 +67,15 @@ if ($coreAudit) {
     if (!$coverageCacheHit) {
         // Core coverage is an audit, not a picker: inspect every accessible item.
         // The expensive full scan is cached; page changes then reuse this result.
-        $items = faq_coverageCoreCollection($provider, 0);
+        $items = $provider === 'topic'
+            ? faq_relationCoreTopicOptions(200)
+            : faq_coverageCoreCollection($provider, 0);
 
         if (is_array($items)) {
             $relationCounts = faq_relationCountMapForProvider($provider);
+            $directFaqMap = $provider === 'article' ? faq_relationFaqMapForProvider('article') : array();
+            $topicFaqMap = $provider === 'article' ? faq_relationFaqMapForProvider('topic') : array();
+            $articleTopicMap = $provider === 'article' ? faq_articleTopicMap() : array();
             $summaryBuild = array(
                 'managed' => 0,
                 'external' => 0,
@@ -88,6 +93,39 @@ if ($coreAudit) {
                 $signals = isset($item['_audit_content'])
                     ? faq_coverageExternalSignals($item['_audit_content'])
                     : array();
+                $origin = array();
+                $topicInheritedBlocked = false;
+
+                if ($provider === 'article') {
+                    $visibleFaqs = isset($directFaqMap[$itemId]) ? $directFaqMap[$itemId] : array();
+                    if (!empty($visibleFaqs)) {
+                        $origin[] = 'direct';
+                    }
+
+                    $topicFaqs = array();
+                    if (isset($articleTopicMap[$itemId])) {
+                        foreach ($articleTopicMap[$itemId] as $topicId) {
+                            if (!empty($topicFaqMap[$topicId])) {
+                                foreach ($topicFaqMap[$topicId] as $faqId => $true) {
+                                    $topicFaqs[$faqId] = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!empty($topicFaqs)) {
+                        if (!empty($signals)) {
+                            $topicInheritedBlocked = true;
+                        } else {
+                            foreach ($topicFaqs as $faqId => $true) {
+                                $visibleFaqs[$faqId] = true;
+                            }
+                            $origin[] = 'topic';
+                        }
+                    }
+
+                    $count = count($visibleFaqs);
+                }
 
                 $hasManaged = $count > 0;
                 $hasExternal = !empty($signals);
@@ -105,6 +143,8 @@ if ($coreAudit) {
                 $items[$itemIndex]['_coverage_count'] = $count;
                 $items[$itemIndex]['_coverage_signals'] = $signals;
                 $items[$itemIndex]['_coverage_status'] = $rowStatus;
+                $items[$itemIndex]['_coverage_origin'] = $origin;
+                $items[$itemIndex]['_coverage_topic_blocked'] = $topicInheritedBlocked;
                 $summaryBuild[$rowStatus]++;
             }
 
@@ -131,6 +171,7 @@ $display .= COM_startBlock($LANG_FAQ_COVERAGE['title']);
 
 $providerLabels = array(
     'article' => $LANG_FAQ_COVERAGE['articles'],
+    'topic' => $LANG_FAQ_COVERAGE['topics'],
     'staticpages' => $LANG_FAQ_COVERAGE['static_pages'],
     'videos' => $LANG_FAQ_COVERAGE['videos'],
     'documents' => $LANG_FAQ_COVERAGE['documents'],
@@ -246,6 +287,9 @@ if ($items === false) {
         $signals = isset($item['_coverage_signals']) && is_array($item['_coverage_signals'])
             ? $item['_coverage_signals'] : array();
         $rowStatus = isset($item['_coverage_status']) ? $item['_coverage_status'] : 'none';
+        $origin = isset($item['_coverage_origin']) && is_array($item['_coverage_origin'])
+            ? $item['_coverage_origin'] : array();
+        $topicBlocked = !empty($item['_coverage_topic_blocked']);
 
         $title = isset($item['title']) ? $item['title'] : $item['id'];
         $title = html_entity_decode((string) $title, ENT_QUOTES, 'UTF-8');
@@ -288,10 +332,26 @@ if ($items === false) {
 
         $rows .= '<tr><td>' . $titleHtml . '<br><small>'
                . htmlspecialchars((string) $item['id'], ENT_QUOTES, 'UTF-8') . '</small></td>';
+        $originLabels = array();
+        foreach ($origin as $originKey) {
+            if ($originKey === 'direct') {
+                $originLabels[] = $LANG_FAQ_COVERAGE['origin_direct'];
+            } elseif ($originKey === 'topic') {
+                $originLabels[] = $LANG_FAQ_COVERAGE['origin_topic'];
+            }
+        }
+        if ($topicBlocked) {
+            $originLabels[] = $LANG_FAQ_COVERAGE['topic_inheritance_blocked'];
+        }
+
         $rows .= '<td><strong>' . htmlspecialchars($stateLabel, ENT_QUOTES, 'UTF-8')
                . '</strong><br><small>'
                . htmlspecialchars($LANG_FAQ_COVERAGE['managed_relations'], ENT_QUOTES, 'UTF-8')
-               . ' ' . $count . '</small></td>';
+               . ' ' . $count;
+        if (!empty($originLabels)) {
+            $rows .= '<br>' . htmlspecialchars(implode(' · ', $originLabels), ENT_QUOTES, 'UTF-8');
+        }
+        $rows .= '</small></td>';
         $rows .= '<td>' . $signalHtml . '</td>';
         $rows .= '<td>' . $actions . '</td></tr>';
     }
