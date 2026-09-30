@@ -91,6 +91,7 @@ Version 1.3.0 modernizes FAQ as a reusable Geeklog question-and-answer content p
 - Topic-level FAQ rendering on Geeklog topic index pages and inheritance from Topics to their Articles.
 - Manual fallback through autotags when automatic placement is unavailable.
 - Editorial **Associations** and **Coverage** administration pages.
+- Existing associations can be edited inline for placement, Topic scope and sort order without delete/recreate.
 - Provider-neutral design: FAQ does not query private Story, Static Pages or third-party plugin tables for coverage.
 - Optional Hub interoperability without making Hub an installation dependency.
 - Semantic server-rendered FAQ markup and Question/Answer JSON-LD.
