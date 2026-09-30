@@ -215,6 +215,10 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
 $token = SEC_createToken();
 $prefillProvider = isset($_GET['provider']) ? faq_normalizeProvider($_GET['provider']) : 'article';
 $prefillItem = isset($_GET['item_id']) ? trim((string) $_GET['item_id']) : '';
+if (!empty($externalConflict) && !$confirmExternal) {
+    $prefillProvider = faq_normalizeProvider($provider);
+    $prefillItem = (string) $item_id;
+}
 
 $filterProvider = $prefillItem !== '' ? $prefillProvider : '';
 $filterItem = $prefillItem;
@@ -287,8 +291,9 @@ $display .= '<label>' . htmlspecialchars($LANG_FAQ_RELATIONS['provider'], ENT_QU
 $display .= '<option value="">' . htmlspecialchars($LANG_FAQ_RELATIONS['select_provider'], ENT_QUOTES, 'UTF-8') . '</option>';
 foreach ($providers as $provider) {
     $selected = $provider === $prefillProvider ? ' selected' : '';
+    $providerLabel = $provider === 'topic' ? $LANG_FAQ_RELATIONS['topic_provider'] : $provider;
     $display .= '<option value="' . htmlspecialchars($provider, ENT_QUOTES, 'UTF-8') . '"' . $selected . '>'
-              . htmlspecialchars($provider, ENT_QUOTES, 'UTF-8') . '</option>';
+              . htmlspecialchars($providerLabel, ENT_QUOTES, 'UTF-8') . '</option>';
 }
 $display .= '</select></label>';
 
