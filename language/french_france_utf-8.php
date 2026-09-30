@@ -78,6 +78,7 @@ $LANG_FAQ_ADMIN = array(
     'FAQ Plugin' => 'Plugin FAQ',
     'faqman_import' => 'Le plugin FAQMAN est installé. Vous pouvez importer ses données dans FAQ.',
     'cat instructions' => 'Créez et gérez ici les catégories FAQ. Utilisez l’onglet Questions pour gérer les questions de chaque catégorie.',
+    'faq instructions' => 'Créez et gérez ici les questions et leurs réponses. Utilisez le filtre de catégorie pour retrouver rapidement les FAQ à modifier.',
     'import' => 'importer',
     'access' => 'Accès',
     'editor_mode' => 'Mode d’édition',
@@ -154,6 +155,7 @@ $LANG_FAQ_RELATIONS = array(
 
 $LANG_FAQ_COVERAGE = array(
     'title' => 'Couverture FAQ',
+    'intro' => 'Vérifiez quels contenus utilisent des FAQ gérées, héritées d’un topic ou déjà présentes dans le contenu. Utilisez les filtres pour repérer les contenus sans FAQ, avec FAQ externe ou nécessitant une association.',
     'provider' => 'Fournisseur',
     'faq_status' => 'État FAQ',
     'all' => 'Tout',
