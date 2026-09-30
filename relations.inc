@@ -1101,6 +1101,9 @@ function faq_clearLocalCache()
             $securityHash = CACHE_security_hash();
             CACHE_remove_instance('faq_coverage__article__' . $securityHash);
             CACHE_remove_instance('faq_coverage__staticpages__' . $securityHash);
+            CACHE_remove_instance('faq_coverage_v2__article__' . $securityHash);
+            CACHE_remove_instance('faq_coverage_v2__staticpages__' . $securityHash);
+            CACHE_remove_instance('faq_coverage_v2__topic__' . $securityHash);
         }
     }
 }
