@@ -727,9 +727,14 @@ function listfaq ($cat = '')
     );
 
     $tpl->parse('output', 'list');
+    $questionInstructions = $tpl->finish($tpl->get_var('output'))
+        . '<p class="faq-admin-help">'
+        . htmlspecialchars($LANG_FAQ_ADMIN['faq instructions'], ENT_QUOTES, COM_getCharset())
+        . '</p>';
+
     $text_arr = array('has_menu' => true,
     //                  'title' => $LANG_FAQ_ADMIN['FAQ Editor'],
-                      'instructions' => $tpl->finish($tpl->get_var('output')),
+                      'instructions' => $questionInstructions,
                       'icon' => plugin_geticon_faq());
 
     $data_arr = array();
