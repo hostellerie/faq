@@ -115,6 +115,7 @@ $LANG_FAQ_ADMIN = array(
     'FAQ Plugin' => 'FAQ Plugin',
     'faqman_import' => 'You have the FAQMAN plugin installed (which is not the same as this plugin). But you may import data from the FAQMAN plugin.',
     'cat instructions' => 'Create and manage FAQ categories here. Use the Questions tab to manage the questions attached to each category.',
+    'faq instructions' => 'Create and manage FAQ questions and answers here. Use the category filter to quickly find the FAQs you want to edit.',
     'import' => 'import',
     'access' => 'Access',
     'editor_mode' => 'Editor mode',
@@ -191,6 +192,7 @@ $LANG_FAQ_RELATIONS = array(
 
 $LANG_FAQ_COVERAGE = array(
     'title' => 'FAQ Coverage',
+    'intro' => 'Review which content uses managed FAQs, topic-inherited FAQs, or FAQ already present in the content. Use the filters to find content with no FAQ, external FAQ signals, or associations to review.',
     'provider' => 'Provider',
     'faq_status' => 'FAQ status',
     'all' => 'All',
