@@ -86,8 +86,9 @@ Version 1.3.0 modernizes FAQ as a reusable Geeklog question-and-answer content p
 
 - Normalized Item Info through `plugin_getiteminfo_faq()`, including collection requests with `id = '*'`.
 - Sitemap, URL resolution, lifecycle and capability integration for modern Geeklog consumers.
-- Contextual FAQ associations stored in `faq_relations`.
+- Contextual FAQ associations stored in `faq_relations`, including Geeklog Topic targets.
 - Automatic contextual rendering through `plugin_itemdisplay_faq()` when the host provider calls `PLG_itemDisplay()`.
+- Topic-level FAQ rendering on Geeklog topic index pages and inheritance from Topics to their Articles.
 - Manual fallback through autotags when automatic placement is unavailable.
 - Editorial **Associations** and **Coverage** administration pages.
 - Provider-neutral design: FAQ does not query private Story, Static Pages or third-party plugin tables for coverage.
@@ -108,9 +109,14 @@ Examples:
 ```text
 rocket-stove-draft -> article:123
 rocket-stove-draft -> staticpages:rocket-stove
+rocket-stove-category -> topic:construction
 ```
 
 One FAQ may be reused on several items and one item may contain several FAQs.
+
+Geeklog Topics are first-class contextual targets in 1.3.0. A FAQ or FAQ category associated with a Topic can be rendered on the Topic index page and inherited by Articles assigned to that Topic. Direct Article associations take priority over inherited Topic associations, and duplicate FAQ ids are removed across direct and multi-topic sources.
+
+When an Article already contains an external FAQ/Q&A signal, automatic Topic inheritance is suppressed for that Article to avoid silent duplication. An administrator may still create a direct managed association explicitly after confirming the potential conflict.
 
 A whole FAQ category can also be linked to a content item. Category links are dynamic: FAQ stores one category relation, then resolves the category's current readable FAQs at render time. New FAQs added to that category therefore appear automatically. Individual FAQ links are de-duplicated against category-derived FAQs.
 
@@ -142,9 +148,17 @@ to render one complete question/answer block, and:
 [faqrelated:article 123]
 ```
 
-to render FAQs associated with a content identity.
+to render FAQs associated with an explicit content identity.
 
-Where Geeklog supplies autotag context, `faqrelated` can also reuse the current provider/item context.
+It also adds:
+
+```text
+[faq-context]
+```
+
+to render the managed FAQs associated with the current content without repeating its provider and id. Geeklog's `PLG_replaceTags()` provider/id context is used when available; conservative Core fallbacks are kept for compatible older call paths.
+
+For Articles, `[faq-context]` uses the same relation engine as automatic rendering: direct relations, Topic inheritance, duplicate suppression and external-FAQ protection remain consistent.
 
 ### Geeklog 2.1.1 compatibility
 
@@ -180,8 +194,9 @@ PHP syntax is validated in GitHub Actions against PHP 5.6 and PHP 8.1.
 Contextual FAQ rendering follows Geeklog's native `PLG_itemDisplay($id, $type)` contract.
 
 - **Automatic** returns the FAQ fragment to the host provider.
-- **Manual only** suppresses automatic output and leaves placement to FAQ autotags.
+- **Manual only** keeps the relation active but suppresses automatic output; place it with `[faq-context]`, `[faqrelated:...]` or `[faqembed:...]`.
 - The host provider decides where the automatic fragment appears on its public item page.
+- Geeklog Topic pages use Core centerblock positions; FAQ currently renders Topic FAQs after the article list.
 - FAQ does not invent generic before/after slots that the Geeklog API does not expose.
 
 Known provider implementations used during FAQ 1.3.0 development include Documents `documents_1.3.0`, Videos `videos_0.21.0`, and Maps `update/maps-1.7`.
