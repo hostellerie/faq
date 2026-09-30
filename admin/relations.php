@@ -259,6 +259,7 @@ $display .= '<details class="faq-relation-advanced faq-relation-help"><summary>'
           . htmlspecialchars($LANG_FAQ_RELATIONS['display_help_embed'], ENT_QUOTES, 'UTF-8') . '</li>'
           . '</ul>'
           . '<p>' . htmlspecialchars($LANG_FAQ_RELATIONS['display_help_context_note'], ENT_QUOTES, 'UTF-8') . '</p>'
+          . '<p>' . htmlspecialchars($LANG_FAQ_RELATIONS['topic_scope_help'], ENT_QUOTES, 'UTF-8') . '</p>'
           . '</details>';
 
 $display .= '<h2>' . htmlspecialchars($LANG_FAQ_RELATIONS['add_association'], ENT_QUOTES, 'UTF-8') . '</h2>';
