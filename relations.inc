@@ -625,6 +625,76 @@ function faq_relationAdd($faq_id, $provider, $item_id, $subtype = '', $placement
     return true;
 }
 
+function faq_relationUpdateSettings($relation_id, $placement, $sort_order, $topic_scope = 'both')
+{
+    global $_TABLES;
+
+    if (!faq_relationTableExists()) {
+        return false;
+    }
+
+    $relation_id = (int) $relation_id;
+    if ($relation_id < 1) {
+        return false;
+    }
+
+    $provider = DB_getItem($_TABLES['faq_relations'], 'provider', 'relation_id = ' . $relation_id);
+    if ($provider === '') {
+        return false;
+    }
+
+    $placement = strtolower(trim((string) $placement));
+    $placement = in_array($placement, array('automatic', 'manual'), true)
+        ? $placement : 'automatic';
+    $topic_scope = faq_relationNormalizeTopicScope($provider, $topic_scope);
+    $sort_order = max(0, (int) $sort_order);
+
+    DB_query("UPDATE {$_TABLES['faq_relations']}
+                 SET placement = '" . DB_escapeString($placement) . "',
+                     topic_scope = '" . DB_escapeString($topic_scope) . "',
+                     sort_order = {$sort_order},
+                     modified = NOW()
+               WHERE relation_id = {$relation_id}");
+
+    faq_clearLocalCache();
+    return true;
+}
+
+function faq_categoryRelationUpdateSettings($relation_id, $placement, $sort_order, $topic_scope = 'both')
+{
+    global $_TABLES;
+
+    if (!faq_categoryRelationTableExists()) {
+        return false;
+    }
+
+    $relation_id = (int) $relation_id;
+    if ($relation_id < 1) {
+        return false;
+    }
+
+    $provider = DB_getItem($_TABLES['faq_category_relations'], 'provider', 'relation_id = ' . $relation_id);
+    if ($provider === '') {
+        return false;
+    }
+
+    $placement = strtolower(trim((string) $placement));
+    $placement = in_array($placement, array('automatic', 'manual'), true)
+        ? $placement : 'automatic';
+    $topic_scope = faq_relationNormalizeTopicScope($provider, $topic_scope);
+    $sort_order = max(0, (int) $sort_order);
+
+    DB_query("UPDATE {$_TABLES['faq_category_relations']}
+                 SET placement = '" . DB_escapeString($placement) . "',
+                     topic_scope = '" . DB_escapeString($topic_scope) . "',
+                     sort_order = {$sort_order},
+                     modified = NOW()
+               WHERE relation_id = {$relation_id}");
+
+    faq_clearLocalCache();
+    return true;
+}
+
 function faq_relationDelete($relation_id)
 {
     global $_TABLES;
