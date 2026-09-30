@@ -150,3 +150,16 @@ jobs:
             echo "faq_assetPath must not append a query string; Geeklog 2.2.2 validates the physical resource path."
             exit 1
           fi
+
+
+      - name: Validate topic association scope
+        if: matrix.php == '8.1'
+        run: |
+          grep -q "topic_scope varchar(16) NOT NULL DEFAULT 'both'" sql/mysql_install.php
+          grep -q "function faq_relationNormalizeTopicScope" relations.inc
+          grep -q "function faq_relationEnsureTopicScopeColumns" relations.inc
+          grep -q "faq-relation-topic-scope" admin/relations.php
+          grep -q "topic_scope_articles" language/english_utf-8.php
+          grep -q "topic_scope_articles" language/french_france_utf-8.php
+          grep -q "faq_relationGetForItem('topic', \\$topicId, 'topic', \\$placement, 'articles')" relations.inc
+          grep -q "faq_renderContextual('topic', (string) \\$topic, 'topic', 'automatic', 'topic')" modern.inc
