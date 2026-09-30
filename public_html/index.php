@@ -75,7 +75,7 @@ if ( ! empty($faq_id)) {
     $pagetitle = $A['title'];
 
     $answerParts = faq_splitAnswerNavigation($A['description']);
-    $faqAnswerHtml = PLG_replaceTags($answerParts['answer']);
+    $faqAnswerHtml = faq_renderContent($answerParts['answer']);
     $faqRelatedHtml = '';
     if ($answerParts['related'] !== '') {
         $relatedLabel = $LANG_FAQ_COMMON['related_questions'];
@@ -171,7 +171,7 @@ if ( ! empty($faq_id)) {
     $tpl->set_var('faq_lang_cats', $LANG_FAQ_COMMON['Categories']);
     $tpl->set_var('faq_cats_url', $_CONF['site_url'] . '/faq/index.php');
     $tpl->set_var('faq_cat_title', $cat['title']);
-    $tpl->set_var('faq_cat_desc', PLG_replaceTags($cat['description']));
+    $tpl->set_var('faq_cat_desc', faq_renderContent($cat['description']));
     $tpl->set_var('faq_updated_label', $LANG_FAQ_COMMON['Updated']);
     $tpl->set_var('faq_hits_label', $LANG_FAQ_COMMON['Hits']);
     $tpl->set_var('faq_cat_edit', '');
@@ -249,7 +249,7 @@ else {
         $A = DB_fetchArray($r);
         $tpl->set_var('faq_cat_url', $_CONF['site_url'] . '/faq/index.php?cat=' . $A['id']);
         $tpl->set_var('faq_cat_title', $A['title']);
-        $tpl->set_var('faq_cat_desc', PLG_replaceTags($A['description']));
+        $tpl->set_var('faq_cat_desc', faq_renderContent($A['description']));
         $tpl->set_var('faq_cat_faqs', $A['cnt']);
         $tpl->set_var('faq_cat_hits', COM_numberFormat($A['hits']));
         $tpl->set_var('faq_cat_faqs_label', $LANG_FAQ_COMMON['FAQs']);
