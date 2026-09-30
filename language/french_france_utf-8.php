@@ -139,10 +139,10 @@ $LANG_FAQ_RELATIONS = array(
     'manual_fallback' => 'Saisie manuelle : indiquez l’ID du contenu. Le sous-type reste facultatif.',
     'provider_no_item_info' => 'Ce fournisseur n’expose pas Geeklog Item Info.',
     'provider_no_content' => 'Le fournisseur ne retourne aucun contenu sélectionnable.',
-    'provider_selectable_count' => '%d élément(s) sélectionnable(s).'
-,
+    'provider_selectable_count' => '%d élément(s) sélectionnable(s).',
     'external_confirmation_required' => 'Cet article contient déjà un signal FAQ/Q&R externe. Confirmez explicitement l’association avant de l’enregistrer.',
-    'confirm_external_faq' => 'Si l’article sélectionné contient déjà une FAQ/Q&R externe, je confirme que cette association gérée doit tout de même être ajoutée.'
+    'confirm_external_faq' => 'Si l’article sélectionné contient déjà une FAQ/Q&R externe, je confirme que cette association gérée doit tout de même être ajoutée.',
+    'topic_provider' => 'Topic Geeklog'
 );
 
 $LANG_FAQ_COVERAGE = array(
@@ -171,6 +171,10 @@ $LANG_FAQ_COVERAGE = array(
     'external_signals' => 'Signaux externes',
     'action' => 'Action',
     'articles' => 'Articles',
+    'topics' => 'Topics',
+    'origin_direct' => 'Association directe',
+    'origin_topic' => 'Héritée du topic',
+    'topic_inheritance_blocked' => 'Héritage du topic bloqué par une FAQ externe',
     'static_pages' => 'Pages statiques',
     'videos' => 'Vidéos',
     'documents' => 'Documents',
