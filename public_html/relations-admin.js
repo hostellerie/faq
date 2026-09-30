@@ -45,6 +45,8 @@
         var itemWrap = byId('faq-relation-item-wrap');
         var subtype = byId('faq-relation-subtype');
         var subtypeManual = byId('faq-relation-subtype-manual');
+        var topicScopeWrap = byId('faq-relation-topic-scope-wrap');
+        var topicScope = byId('faq-relation-topic-scope');
         var note = byId('faq-relation-note');
         var endpoint;
         var selectedItem;
@@ -102,9 +104,23 @@
             }
         }
 
+        function updateTopicScope() {
+            var isTopic = provider.value === 'topic';
+            if (topicScopeWrap) {
+                topicScopeWrap.style.display = isTopic ? '' : 'none';
+            }
+            if (topicScope) {
+                topicScope.disabled = !isTopic;
+                if (!isTopic) {
+                    topicScope.value = 'both';
+                }
+            }
+        }
+
         function loadItems() {
             var type = provider.value;
 
+            updateTopicScope();
             resetItems(itemSelect, note, messages.loading);
             setManual(itemManual, itemManualWrap, false);
             if (itemWrap) {
