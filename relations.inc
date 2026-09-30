@@ -45,6 +45,7 @@ function faq_categoryRelationEnsureTable()
                 item_id varchar(128) NOT NULL,
                 item_subtype varchar(64) NOT NULL DEFAULT '',
                 placement varchar(16) NOT NULL DEFAULT 'automatic',
+                topic_scope varchar(16) NOT NULL DEFAULT 'both',
                 sort_order int(11) NOT NULL DEFAULT 0,
                 enabled tinyint(1) unsigned NOT NULL DEFAULT 1,
                 created datetime DEFAULT NULL,
@@ -75,6 +76,61 @@ function faq_normalizeProvider($provider)
     }
     return $provider;
 }
+
+function faq_relationNormalizeTopicScope($provider, $scope)
+{
+    $provider = faq_normalizeProvider($provider);
+    if ($provider !== 'topic') {
+        return 'both';
+    }
+
+    $scope = strtolower(trim((string) $scope));
+    return in_array($scope, array('topic', 'articles', 'both'), true)
+        ? $scope : 'both';
+}
+
+function faq_relationTopicScopeSql($alias, $scope)
+{
+    $scope = strtolower(trim((string) $scope));
+    if ($scope === 'topic') {
+        return " AND {$alias}.topic_scope IN ('both', 'topic')";
+    }
+    if ($scope === 'articles') {
+        return " AND {$alias}.topic_scope IN ('both', 'articles')";
+    }
+
+    return '';
+}
+
+function faq_relationColumnExists($table, $column)
+{
+    $table = str_replace(array('\\', '%', '_'), array('\\\\', '\\%', '\\_'), (string) $table);
+    $column = DB_escapeString((string) $column);
+    $result = DB_query("SHOW COLUMNS FROM {$table} LIKE '{$column}'");
+    return $result !== false && DB_numRows($result) > 0;
+}
+
+function faq_relationEnsureTopicScopeColumns()
+{
+    global $_TABLES;
+
+    $tables = array();
+    if (faq_relationTableExists()) {
+        $tables[] = $_TABLES['faq_relations'];
+    }
+    if (faq_categoryRelationTableExists()) {
+        $tables[] = $_TABLES['faq_category_relations'];
+    }
+
+    foreach ($tables as $table) {
+        if (!faq_relationColumnExists($table, 'topic_scope')) {
+            DB_query("ALTER TABLE {$table}
+                      ADD topic_scope varchar(16) NOT NULL DEFAULT 'both'
+                      AFTER placement");
+        }
+    }
+}
+
 
 
 function faq_relationNormalizeInfoRecord($record, $fallbackId = '')
@@ -393,7 +449,7 @@ function faq_relationCategoryExists($category_id, $access = 2)
     return DB_numRows($result) === 1;
 }
 
-function faq_categoryRelationAdd($category_id, $provider, $item_id, $subtype = '', $placement = 'automatic', $sort_order = 0)
+function faq_categoryRelationAdd($category_id, $provider, $item_id, $subtype = '', $placement = 'automatic', $sort_order = 0, $topic_scope = 'both')
 {
     global $_TABLES;
 
@@ -466,7 +522,7 @@ function faq_categoryRelationDeleteForCategory($category_id)
     faq_clearLocalCache();
 }
 
-function faq_categoryRelationGetForItem($provider, $item_id, $subtype = '', $placement = '')
+function faq_categoryRelationGetForItem($provider, $item_id, $subtype = '', $placement = '', $topic_scope = '')
 {
     global $_TABLES;
 
@@ -485,7 +541,7 @@ function faq_categoryRelationGetForItem($provider, $item_id, $subtype = '', $pla
 
     $sql = "SELECT cr.relation_id AS category_relation_id,
                    cr.category_id, cr.provider, cr.item_id, cr.item_subtype,
-                   cr.placement, cr.sort_order,
+                   cr.placement, cr.topic_scope, cr.sort_order,
                    faq.id AS faq_id, faq.title, faq.description, faq.category,
                    faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
               FROM {$_TABLES['faq_category_relations']} cr
@@ -505,6 +561,9 @@ function faq_categoryRelationGetForItem($provider, $item_id, $subtype = '', $pla
         $placement = DB_escapeString($placement);
         $sql .= " AND cr.placement = '{$placement}'";
     }
+    if ($provider === 'topic' && $topic_scope !== '') {
+        $sql .= faq_relationTopicScopeSql('cr', $topic_scope);
+    }
 
     $sql .= COM_getPermSQL('AND', 0, 2, 'faq')
           . COM_getPermSQL('AND', 0, 2, 'cat')
@@ -518,7 +577,7 @@ function faq_categoryRelationGetForItem($provider, $item_id, $subtype = '', $pla
     return $items;
 }
 
-function faq_relationAdd($faq_id, $provider, $item_id, $subtype = '', $placement = 'automatic', $sort_order = 0)
+function faq_relationAdd($faq_id, $provider, $item_id, $subtype = '', $placement = 'automatic', $sort_order = 0, $topic_scope = 'both')
 {
     global $_TABLES;
 
@@ -592,7 +651,7 @@ function faq_relationDeleteForFaq($faq_id)
     faq_clearLocalCache();
 }
 
-function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement = '')
+function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement = '', $topic_scope = '')
 {
     global $_TABLES;
 
@@ -602,14 +661,14 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
         return $items;
     }
 
-    $categoryItems = faq_categoryRelationGetForItem($provider, $item_id, $subtype, $placement);
+    $categoryItems = faq_categoryRelationGetForItem($provider, $item_id, $subtype, $placement, $topic_scope);
 
     $provider = DB_escapeString($provider);
     $item_id = DB_escapeString($item_id);
     $subtype = DB_escapeString(substr((string) $subtype, 0, 64));
 
     $sql = "SELECT rel.relation_id, rel.faq_id, rel.provider, rel.item_id, rel.item_subtype,
-                   rel.placement, rel.sort_order, faq.title, faq.description, faq.category,
+                   rel.placement, rel.topic_scope, rel.sort_order, faq.title, faq.description, faq.category,
                    faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
               FROM {$_TABLES['faq_relations']} rel
               JOIN {$_TABLES['faq']} faq ON faq.id = rel.faq_id
@@ -633,6 +692,9 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
     } elseif ($placement !== '') {
         $placement = DB_escapeString($placement);
         $sql .= " AND rel.placement = '{$placement}'";
+    }
+    if ($provider === 'topic' && $topic_scope !== '') {
+        $sql .= faq_relationTopicScopeSql('rel', $topic_scope);
     }
 
     $sql .= COM_getPermSQL('AND', 0, 2, 'faq')
@@ -707,7 +769,7 @@ function faq_relationGetForFaq($faq_id)
 /**
  * Return FAQ ids grouped by target item for one provider in one query.
  */
-function faq_relationFaqMapForProvider($provider)
+function faq_relationFaqMapForProvider($provider, $topic_scope = '')
 {
     global $_TABLES;
 
@@ -728,6 +790,7 @@ function faq_relationFaqMapForProvider($provider)
                       JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category
                      WHERE rel.enabled = 1
                        AND rel.provider = '{$providerSql}'"
+                 . (($provider === 'topic' && $topic_scope !== '') ? faq_relationTopicScopeSql('rel', $topic_scope) : '')
                  . COM_getPermSQL('AND', 0, 2, 'faq')
                  . COM_getPermSQL('AND', 0, 2, 'cat');
     }
@@ -739,6 +802,7 @@ function faq_relationFaqMapForProvider($provider)
                       JOIN {$_TABLES['faq']} faq ON faq.category = cat.id
                      WHERE cr.enabled = 1
                        AND cr.provider = '{$providerSql}'"
+                 . (($provider === 'topic' && $topic_scope !== '') ? faq_relationTopicScopeSql('cr', $topic_scope) : '')
                  . COM_getPermSQL('AND', 0, 2, 'faq')
                  . COM_getPermSQL('AND', 0, 2, 'cat');
     }
@@ -799,7 +863,7 @@ function faq_articleTopicMap()
     return $map;
 }
 
-function faq_relationCountMapForProvider($provider)
+function faq_relationCountMapForProvider($provider, $topic_scope = '')
 {
     global $_TABLES;
 
@@ -1062,7 +1126,7 @@ function faq_relationGetForArticleWithTopics($storyId, $placement = 'automatic')
     }
 
     foreach (faq_articleTopicIds($storyId) as $topicId) {
-        $topicItems = faq_relationGetForItem('topic', $topicId, 'topic', $placement);
+        $topicItems = faq_relationGetForItem('topic', $topicId, 'topic', $placement, 'articles');
         foreach ($topicItems as $row) {
             $faqId = isset($row['faq_id']) ? (string) $row['faq_id'] : '';
             if ($faqId !== '' && isset($seen[$faqId])) {
@@ -1086,9 +1150,9 @@ function faq_renderArticleContextual($storyId, $placement = 'automatic')
     return faq_renderFaqItems($items, 'faq-contextual faq-contextual-article', false);
 }
 
-function faq_renderContextual($provider, $item_id, $subtype = '', $placement = '')
+function faq_renderContextual($provider, $item_id, $subtype = '', $placement = '', $topic_scope = '')
 {
-    $items = faq_relationGetForItem($provider, $item_id, $subtype, $placement);
+    $items = faq_relationGetForItem($provider, $item_id, $subtype, $placement, $topic_scope);
     return faq_renderFaqItems($items, 'faq-contextual', false);
 }
 
