@@ -24,7 +24,7 @@
         select.innerHTML = '';
         var option = document.createElement('option');
         option.value = '';
-        option.textContent = text || 'Select content';
+        option.textContent = text || '';
         select.appendChild(option);
         select.disabled = true;
         if (note) {
@@ -57,14 +57,14 @@
         endpoint = provider.getAttribute('data-items-url') || 'relations.php';
         selectedItem = itemSelect.getAttribute('data-selected-item') || '';
         messages = {
-            selectContent: provider.getAttribute('data-msg-select-content') || 'Select content',
-            loading: provider.getAttribute('data-msg-loading') || 'Loading…',
-            selectProviderFirst: provider.getAttribute('data-msg-select-provider-first') || 'Select a provider first',
-            noContent: provider.getAttribute('data-msg-no-content') || 'No selectable content',
-            enterManual: provider.getAttribute('data-msg-enter-manual') || 'Enter ID manually…',
-            collectionUnavailable: provider.getAttribute('data-msg-collection-unavailable') || 'Collection unavailable; enter the content ID manually.',
-            loadFailed: provider.getAttribute('data-msg-load-failed') || 'Unable to load the provider collection; enter the content ID manually.',
-            manualFallback: provider.getAttribute('data-msg-manual-fallback') || 'Manual fallback: enter the content ID. Subtype remains optional.'
+            selectContent: provider.getAttribute('data-msg-select-content') || '',
+            loading: provider.getAttribute('data-msg-loading') || '',
+            selectProviderFirst: provider.getAttribute('data-msg-select-provider-first') || '',
+            noContent: provider.getAttribute('data-msg-no-content') || '',
+            enterManual: provider.getAttribute('data-msg-enter-manual') || '',
+            collectionUnavailable: provider.getAttribute('data-msg-collection-unavailable') || '',
+            loadFailed: provider.getAttribute('data-msg-load-failed') || '',
+            manualFallback: provider.getAttribute('data-msg-manual-fallback') || ''
         };
 
         function updateTargetSource() {
