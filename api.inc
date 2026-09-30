@@ -570,7 +570,13 @@ function plugin_autotags_faq ($op, $content = '', $autotag = '', $parameters = a
                 break;
             }
 
-            $related = faq_relationGetForItem($provider, $item_id, '', '');
+            $related = faq_relationGetForItem(
+                $provider,
+                $item_id,
+                '',
+                '',
+                $provider === 'topic' ? 'topic' : ''
+            );
             $link = faq_renderFaqItems($related, 'faq-autotag faq-autotag-related', false);
             break;
 
@@ -587,7 +593,13 @@ function plugin_autotags_faq ($op, $content = '', $autotag = '', $parameters = a
             if ($provider === 'article') {
                 $related = faq_relationGetForArticleWithTopics($item_id, '');
             } else {
-                $related = faq_relationGetForItem($provider, $item_id, '', '');
+                $related = faq_relationGetForItem(
+                    $provider,
+                    $item_id,
+                    '',
+                    '',
+                    $provider === 'topic' ? 'topic' : ''
+                );
             }
 
             $link = faq_renderFaqItems(
