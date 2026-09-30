@@ -226,6 +226,8 @@ function faq_relationCoreStaticPageOptions($limit)
 
 function faq_relationObjectOptions($provider, $limit = 100)
 {
+    global $LANG_FAQ_RELATIONS;
+
     $provider = faq_normalizeProvider($provider);
     $limit = max(1, min(200, (int) $limit));
 
@@ -262,7 +264,7 @@ function faq_relationObjectOptions($provider, $limit = 100)
             return array(
                 'supported' => false,
                 'items' => array(),
-                'message' => 'This provider does not expose Geeklog Item Info.'
+                'message' => $LANG_FAQ_RELATIONS['provider_no_item_info']
             );
         }
 
