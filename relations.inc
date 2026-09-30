@@ -812,7 +812,13 @@ function faq_coverageCoreCollection($provider, $limit = 100)
     global $_CONF, $_TABLES;
 
     $provider = faq_normalizeProvider($provider);
-    $limit = max(1, min(200, (int) $limit));
+    $limit = (int) $limit;
+    if ($limit < 0) {
+        $limit = 0;
+    } elseif ($limit > 200) {
+        $limit = 200;
+    }
+    $limitSql = $limit > 0 ? ' LIMIT ' . $limit : '';
     $items = array();
 
     if ($provider === 'article') {
@@ -832,7 +838,7 @@ function faq_coverageCoreCollection($provider, $limit = 100)
             $sql .= COM_getLangSQL('sid', 'AND', 's');
         }
 
-        $sql .= " ORDER BY s.date DESC, s.title ASC LIMIT " . $limit;
+        $sql .= " ORDER BY s.date DESC, s.title ASC" . $limitSql;
         $result = DB_query($sql, 1);
         if ($result === false) {
             return false;
@@ -881,7 +887,7 @@ function faq_coverageCoreCollection($provider, $limit = 100)
             $sql .= COM_getLangSQL('sp_id', 'AND', 'sp');
         }
 
-        $sql .= " ORDER BY sp.sp_title ASC, sp.sp_id ASC LIMIT " . $limit;
+        $sql .= " ORDER BY sp.sp_title ASC, sp.sp_id ASC" . $limitSql;
         $result = DB_query($sql, 1);
         if ($result === false) {
             return false;
