@@ -40,7 +40,7 @@ $coverageSummary = null;
 if ($coreAudit) {
     $cacheKey = '';
     if (function_exists('CACHE_security_hash')) {
-        $cacheKey = 'faq_coverage_v2__' . $provider . '__' . CACHE_security_hash();
+        $cacheKey = 'faq_coverage_v3__' . $provider . '__' . CACHE_security_hash();
     }
 
     if ($cacheKey !== ''
