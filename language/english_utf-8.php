@@ -177,6 +177,9 @@ $LANG_FAQ_RELATIONS = array(
     'provider_no_item_info' => 'This provider does not expose Geeklog Item Info.',
     'provider_no_content' => 'The provider returned no selectable content.',
     'provider_selectable_count' => '%d selectable item(s).'
+,
+    'external_confirmation_required' => 'This article already contains an external FAQ/Q&A signal. Confirm the association explicitly before saving.',
+    'confirm_external_faq' => 'If the selected article already contains an external FAQ/Q&A, I confirm that this managed association should still be added.'
 );
 
 $LANG_FAQ_COVERAGE = array(
