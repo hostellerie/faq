@@ -22,7 +22,8 @@ Legend:
 - Associations administration with provider/item selection.
 - Coverage administration with managed/external/both/none status, including a read-only Core audit for Articles and Static Pages when normalized collection/content capabilities are unavailable.
 - Contextual FAQ rendering, automatic/manual placement model and article compatibility fallback.
-- `faqembed` / `faqrelated` manual placement support.
+- Geeklog Topic associations, Topic-page rendering and Topic-to-Article FAQ inheritance with duplicate suppression and external-FAQ protection.
+- `faqembed`, `faqrelated` and `faq-context` manual placement support.
 - Public semantic FAQ rendering and Question/Answer structured data.
 - Native Geeklog administration discovery through `plugin_getadminoption_faq()` and Command & Control discovery through `plugin_cclabel_faq()`.
 - Theme-neutral plugin administration navigation, with Eclipse-aware visual variables and no required UIkit contract.
@@ -30,8 +31,6 @@ Legend:
 
 ### To validate before release
 
-- Real upgrade from a populated 1.2.x installation to 1.3.0, including IDs, categories, permissions, autotags and stored HTML preservation.
-- Clean install / uninstall / reinstall on Geeklog 2.1.1 and 2.2.2.
 - Functional matrix on PHP 5.6 and PHP 8.1 beyond syntax linting.
 - Full disabled-plugin audit: menus, What's New, blocks, contextual output, structured data and other public contributions.
 - Final ACL/CSRF/input-validation audit for FAQ CRUD, Associations and Coverage.
@@ -999,13 +998,15 @@ Add release notes describing migrations and compatibility.
 - [x] Automated release archive generation.
 - [x] Native administration menu / Command & Control hooks.
 - [x] Theme-neutral administration navigation contract.
-- [ ] Real 1.2.x upgrade test with populated data.
+- [x] Real historical 1.2.x upgrade test with populated data.
+- [x] Clean install / uninstall on Geeklog 2.1.1 and 2.2.2.
 - [ ] Disabled-state audit.
 - [ ] Permissions/security/CSRF audit.
-- [ ] Compatibility matrix on Geeklog 2.1.1 and 2.2.2.
+- [ ] Remaining functional compatibility matrix on Geeklog 2.1.1 and 2.2.2.
 - [ ] Denim/Eclipse/mobile visual regression pass.
 - [ ] Language fallback audit.
-- [ ] Final README / upgrade / release notes.
+- [x] README updated for Topic inheritance and `faq-context`.
+- [ ] Final upgrade / release notes.
 - [ ] Cache profiling decision: add nothing unless justified.
 
 ---
