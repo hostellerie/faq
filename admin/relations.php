@@ -148,6 +148,8 @@ if (isset($_GET['faq_ajax']) && $_GET['faq_ajax'] === 'items') {
 $_SCRIPTS->setCSSFile('faq_admin', faq_assetPath('faq-admin.css'));
 $_SCRIPTS->setJavaScriptFile('faq_relations_admin', faq_assetPath('relations-admin.js'), true, 220);
 
+faq_relationEnsureTopicScopeColumns();
+
 $display = faq_adminNavigation('relations');
 $msg = '';
 
@@ -176,6 +178,8 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
         }
 
         $placement = COM_applyFilter(isset($_POST['placement']) ? $_POST['placement'] : 'automatic');
+        $topic_scope = COM_applyFilter(isset($_POST['topic_scope']) ? $_POST['topic_scope'] : 'both');
+        $topic_scope = faq_relationNormalizeTopicScope($provider, $topic_scope);
         $sort_order = isset($_POST['sort_order']) ? (int) $_POST['sort_order'] : 0;
         $confirmExternal = !empty($_POST['confirm_external_faq']);
         $externalConflict = false;
@@ -190,8 +194,8 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
             $msg = $LANG_FAQ_RELATIONS['external_confirmation_required'];
         } else {
             $saved = $target_type === 'category'
-                ? faq_categoryRelationAdd($category_id, $provider, $item_id, $subtype, $placement, $sort_order)
-                : faq_relationAdd($faq_id, $provider, $item_id, $subtype, $placement, $sort_order);
+                ? faq_categoryRelationAdd($category_id, $provider, $item_id, $subtype, $placement, $sort_order, $topic_scope)
+                : faq_relationAdd($faq_id, $provider, $item_id, $subtype, $placement, $sort_order, $topic_scope);
         }
 
         if ($saved) {
@@ -333,6 +337,14 @@ $display .= '<label>' . htmlspecialchars($LANG_FAQ_RELATIONS['placement'], ENT_Q
           . '<option value="manual">' . htmlspecialchars($LANG_FAQ_RELATIONS['manual_only'], ENT_QUOTES, 'UTF-8') . '</option>'
           . '</select></label>';
 
+$display .= '<label id="faq-relation-topic-scope-wrap" style="display:none">'
+          . htmlspecialchars($LANG_FAQ_RELATIONS['topic_scope'], ENT_QUOTES, 'UTF-8')
+          . '<select id="faq-relation-topic-scope" name="topic_scope">'
+          . '<option value="both">' . htmlspecialchars($LANG_FAQ_RELATIONS['topic_scope_both'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '<option value="topic">' . htmlspecialchars($LANG_FAQ_RELATIONS['topic_scope_topic'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '<option value="articles">' . htmlspecialchars($LANG_FAQ_RELATIONS['topic_scope_articles'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '</select></label>';
+
 $display .= '<label>' . htmlspecialchars($LANG_FAQ_RELATIONS['order'], ENT_QUOTES, 'UTF-8')
           . '<input type="number" name="sort_order" value="0" min="0"></label>';
 
@@ -372,7 +384,7 @@ if (!faq_relationTableExists()) {
     $display .= '<p>' . htmlspecialchars($LANG_FAQ_RELATIONS['relation_table_missing'], ENT_QUOTES, 'UTF-8') . '</p>';
 } else {
     $sql = "SELECT rel.relation_id, rel.faq_id, rel.provider, rel.item_id, rel.item_subtype,
-                   rel.placement, rel.sort_order, rel.enabled, faq.title
+                   rel.placement, rel.topic_scope, rel.sort_order, rel.enabled, faq.title
               FROM {$_TABLES['faq_relations']} rel
               JOIN {$_TABLES['faq']} faq ON faq.id = rel.faq_id";
 
@@ -388,6 +400,7 @@ if (!faq_relationTableExists()) {
               . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['faq'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['content'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['placement'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['topic_scope'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['order'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['action'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '</tr></thead><tbody>';
@@ -426,6 +439,18 @@ if (!faq_relationTableExists()) {
             ? $LANG_FAQ_RELATIONS['manual_only']
             : $LANG_FAQ_RELATIONS['automatic'];
         $display .= '<td>' . htmlspecialchars($placementLabel, ENT_QUOTES, 'UTF-8') . '</td>';
+        if ($row['provider'] === 'topic') {
+            $scopeKey = isset($row['topic_scope']) ? $row['topic_scope'] : 'both';
+            $scopeLabels = array(
+                'topic' => $LANG_FAQ_RELATIONS['topic_scope_topic'],
+                'articles' => $LANG_FAQ_RELATIONS['topic_scope_articles'],
+                'both' => $LANG_FAQ_RELATIONS['topic_scope_both']
+            );
+            $scopeLabel = isset($scopeLabels[$scopeKey]) ? $scopeLabels[$scopeKey] : $scopeLabels['both'];
+        } else {
+            $scopeLabel = '—';
+        }
+        $display .= '<td>' . htmlspecialchars($scopeLabel, ENT_QUOTES, 'UTF-8') . '</td>';
         $display .= '<td>' . (int) $row['sort_order'] . '</td><td>';
         $deleteAction = $_CONF['site_admin_url'] . '/plugins/faq/relations.php';
         if ($filterProvider !== '' && $filterItem !== '') {
@@ -446,7 +471,7 @@ if (!faq_categoryRelationTableExists()) {
     $display .= '<p>' . htmlspecialchars($LANG_FAQ_RELATIONS['category_relation_table_missing'], ENT_QUOTES, 'UTF-8') . '</p>';
 } else {
     $sql = "SELECT rel.relation_id, rel.category_id, rel.provider, rel.item_id, rel.item_subtype,
-                   rel.placement, rel.sort_order, rel.enabled, cat.title
+                   rel.placement, rel.topic_scope, rel.sort_order, rel.enabled, cat.title
               FROM {$_TABLES['faq_category_relations']} rel
               JOIN {$_TABLES['faq_category']} cat ON cat.id = rel.category_id";
 
@@ -462,6 +487,7 @@ if (!faq_categoryRelationTableExists()) {
               . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['category'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['content'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['placement'], ENT_QUOTES, 'UTF-8') . '</th>'
+              . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['topic_scope'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['order'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '<th>' . htmlspecialchars($LANG_FAQ_RELATIONS['action'], ENT_QUOTES, 'UTF-8') . '</th>'
               . '</tr></thead><tbody>';
@@ -498,6 +524,18 @@ if (!faq_categoryRelationTableExists()) {
             ? $LANG_FAQ_RELATIONS['manual_only']
             : $LANG_FAQ_RELATIONS['automatic'];
         $display .= '<td>' . htmlspecialchars($placementLabel, ENT_QUOTES, 'UTF-8') . '</td>';
+        if ($row['provider'] === 'topic') {
+            $scopeKey = isset($row['topic_scope']) ? $row['topic_scope'] : 'both';
+            $scopeLabels = array(
+                'topic' => $LANG_FAQ_RELATIONS['topic_scope_topic'],
+                'articles' => $LANG_FAQ_RELATIONS['topic_scope_articles'],
+                'both' => $LANG_FAQ_RELATIONS['topic_scope_both']
+            );
+            $scopeLabel = isset($scopeLabels[$scopeKey]) ? $scopeLabels[$scopeKey] : $scopeLabels['both'];
+        } else {
+            $scopeLabel = '—';
+        }
+        $display .= '<td>' . htmlspecialchars($scopeLabel, ENT_QUOTES, 'UTF-8') . '</td>';
         $display .= '<td>' . (int) $row['sort_order'] . '</td><td>';
 
         $deleteAction = $_CONF['site_admin_url'] . '/plugins/faq/relations.php';
