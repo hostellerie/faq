@@ -116,6 +116,12 @@ One FAQ may be reused on several items and one item may contain several FAQs.
 
 Geeklog Topics are first-class contextual targets in 1.3.0. A FAQ or FAQ category associated with a Topic can be rendered on the Topic index page and inherited by Articles assigned to that Topic. Direct Article associations take priority over inherited Topic associations, and duplicate FAQ ids are removed across direct and multi-topic sources.
 
+Topic associations also have an explicit scope:
+
+- **Topic only** — render on the Topic index page but do not inherit into Articles;
+- **Topic articles only** — inherit into Articles but do not render on the Topic index page;
+- **Topic + topic articles** — do both (default, preserving the original 1.3.0-development behavior).
+
 When an Article already contains an external FAQ/Q&A signal, automatic Topic inheritance is suppressed for that Article to avoid silent duplication. An administrator may still create a direct managed association explicitly after confirming the potential conflict.
 
 A whole FAQ category can also be linked to a content item. Category links are dynamic: FAQ stores one category relation, then resolves the category's current readable FAQs at render time. New FAQs added to that category therefore appear automatically. Individual FAQ links are de-duplicated against category-derived FAQs.
