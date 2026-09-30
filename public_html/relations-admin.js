@@ -48,6 +48,7 @@
         var note = byId('faq-relation-note');
         var endpoint;
         var selectedItem;
+        var messages;
 
         if (!provider || !itemSelect) {
             return;
@@ -55,6 +56,16 @@
 
         endpoint = provider.getAttribute('data-items-url') || 'relations.php';
         selectedItem = itemSelect.getAttribute('data-selected-item') || '';
+        messages = {
+            selectContent: provider.getAttribute('data-msg-select-content') || 'Select content',
+            loading: provider.getAttribute('data-msg-loading') || 'Loading…',
+            selectProviderFirst: provider.getAttribute('data-msg-select-provider-first') || 'Select a provider first',
+            noContent: provider.getAttribute('data-msg-no-content') || 'No selectable content',
+            enterManual: provider.getAttribute('data-msg-enter-manual') || 'Enter ID manually…',
+            collectionUnavailable: provider.getAttribute('data-msg-collection-unavailable') || 'Collection unavailable; enter the content ID manually.',
+            loadFailed: provider.getAttribute('data-msg-load-failed') || 'Unable to load the provider collection; enter the content ID manually.',
+            manualFallback: provider.getAttribute('data-msg-manual-fallback') || 'Manual fallback: enter the content ID. Subtype remains optional.'
+        };
 
         function updateTargetSource() {
             var categoryMode = targetType && targetType.value === 'category';
@@ -94,7 +105,7 @@
         function loadItems() {
             var type = provider.value;
 
-            resetItems(itemSelect, note, 'Loading…');
+            resetItems(itemSelect, note, messages.loading);
             setManual(itemManual, itemManualWrap, false);
             if (itemWrap) {
                 itemWrap.style.display = '';
@@ -107,7 +118,7 @@
             }
 
             if (!type) {
-                resetItems(itemSelect, note, 'Select a provider first');
+                resetItems(itemSelect, note, messages.selectProviderFirst);
                 return;
             }
 
@@ -130,7 +141,7 @@
                     itemSelect.innerHTML = '';
 
                     if (!data || !data.supported) {
-                        showManual(data && data.message ? data.message : 'Collection unavailable; enter the content ID manually.');
+                        showManual(data && data.message ? data.message : messages.collectionUnavailable);
                         return;
                     }
 
@@ -140,7 +151,7 @@
 
                     first = document.createElement('option');
                     first.value = '';
-                    first.textContent = data.items && data.items.length ? 'Select content' : 'No selectable content';
+                    first.textContent = data.items && data.items.length ? messages.selectContent : messages.noContent;
                     itemSelect.appendChild(first);
 
                     if (data.items) {
@@ -156,7 +167,7 @@
 
                     manual = document.createElement('option');
                     manual.value = '__manual__';
-                    manual.textContent = 'Enter ID manually…';
+                    manual.textContent = messages.enterManual;
                     itemSelect.appendChild(manual);
                     itemSelect.disabled = false;
 
@@ -176,7 +187,7 @@
                     }
                 })
                 .catch(function () {
-                    showManual('Unable to load the provider collection; enter the content ID manually.');
+                    showManual(messages.loadFailed);
                 });
         }
 
@@ -198,7 +209,7 @@
             }
 
             if (note && manual) {
-                note.textContent = 'Manual fallback: enter the content ID. Subtype remains optional.';
+                note.textContent = messages.manualFallback;
             }
 
             if (manual && itemManual) {
