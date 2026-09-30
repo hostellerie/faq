@@ -142,7 +142,14 @@ $LANG_FAQ_RELATIONS = array(
     'provider_selectable_count' => '%d élément(s) sélectionnable(s).',
     'external_confirmation_required' => 'Cet article contient déjà un signal FAQ/Q&R externe. Confirmez explicitement l’association avant de l’enregistrer.',
     'confirm_external_faq' => 'Si l’article sélectionné contient déjà une FAQ/Q&R externe, je confirme que cette association gérée doit tout de même être ajoutée.',
-    'topic_provider' => 'Topic Geeklog'
+    'topic_provider' => 'Topic Geeklog',
+    'display_help_title' => 'Fonctionnement de l’affichage contextuel',
+    'display_help_intro' => 'Les associations peuvent être affichées automatiquement ou placées manuellement dans le contenu.',
+    'display_help_automatic' => 'La FAQ est affichée au point d’insertion natif pris en charge par le fournisseur sélectionné.',
+    'display_help_manual' => 'Aucun affichage automatique. Insérez cet autotag à l’endroit où les FAQ associées doivent apparaître :',
+    'display_help_related' => 'Affiche explicitement les associations d’un fournisseur et d’un ID de contenu.',
+    'display_help_embed' => 'Insère une FAQ précise indépendamment des associations.',
+    'display_help_context_note' => '[faq-context] utilise automatiquement le fournisseur et l’ID du contenu courant. Dans un article, il applique aussi l’héritage des topics ainsi que la protection contre les doublons et les FAQ externes.'
 );
 
 $LANG_FAQ_COVERAGE = array(
