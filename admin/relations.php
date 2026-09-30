@@ -132,6 +132,58 @@ function faq_adminResolveAssociationTarget($provider, $itemId, $subType = '')
     return $resolved;
 }
 
+function faq_adminRelationSettingsCells($row, $isCategory, $filterProvider, $filterItem)
+{
+    global $_CONF, $LANG_FAQ_RELATIONS;
+
+    $rowAction = $_CONF['site_admin_url'] . '/plugins/faq/relations.php';
+    if ($filterProvider !== '' && $filterItem !== '') {
+        $rowAction .= '?provider=' . rawurlencode($filterProvider)
+                   . '&item_id=' . rawurlencode($filterItem);
+    }
+
+    $relationId = (int) $row['relation_id'];
+    $formId = ($isCategory ? 'faq-category-relation-edit-' : 'faq-relation-edit-') . $relationId;
+    $html = '<td><select name="placement" form="' . $formId . '">'
+          . '<option value="automatic"' . ($row['placement'] === 'manual' ? '' : ' selected') . '>'
+          . htmlspecialchars($LANG_FAQ_RELATIONS['automatic'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '<option value="manual"' . ($row['placement'] === 'manual' ? ' selected' : '') . '>'
+          . htmlspecialchars($LANG_FAQ_RELATIONS['manual_only'], ENT_QUOTES, 'UTF-8') . '</option>'
+          . '</select></td>';
+
+    if ($row['provider'] === 'topic') {
+        $scope = isset($row['topic_scope']) ? (string) $row['topic_scope'] : 'both';
+        $html .= '<td><select name="topic_scope" form="' . $formId . '">'
+               . '<option value="both"' . ($scope === 'both' ? ' selected' : '') . '>'
+               . htmlspecialchars($LANG_FAQ_RELATIONS['topic_scope_both'], ENT_QUOTES, 'UTF-8') . '</option>'
+               . '<option value="topic"' . ($scope === 'topic' ? ' selected' : '') . '>'
+               . htmlspecialchars($LANG_FAQ_RELATIONS['topic_scope_topic'], ENT_QUOTES, 'UTF-8') . '</option>'
+               . '<option value="articles"' . ($scope === 'articles' ? ' selected' : '') . '>'
+               . htmlspecialchars($LANG_FAQ_RELATIONS['topic_scope_articles'], ENT_QUOTES, 'UTF-8') . '</option>'
+               . '</select></td>';
+    } else {
+        $html .= '<td>—</td>';
+    }
+
+    $html .= '<td><input class="faq-relation-order-input" type="number" name="sort_order" form="' . $formId
+           . '" value="' . (int) $row['sort_order'] . '" min="0"></td><td>'
+           . '<form id="' . $formId . '" method="post" action="' . htmlspecialchars($rowAction, ENT_QUOTES, 'UTF-8')
+           . '" class="faq-inline-edit">'
+           . '<input type="hidden" name="faq_relation_action" value="' . ($isCategory ? 'update_category' : 'update') . '">'
+           . '<input type="hidden" name="relation_id" value="' . $relationId . '">'
+           . '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . SEC_createToken() . '">'
+           . '<input type="submit" value="' . htmlspecialchars($LANG_FAQ_RELATIONS['update'], ENT_QUOTES, 'UTF-8') . '">'
+           . '</form> '
+           . '<form method="post" action="' . htmlspecialchars($rowAction, ENT_QUOTES, 'UTF-8') . '" class="faq-inline-edit">'
+           . '<input type="hidden" name="faq_relation_action" value="' . ($isCategory ? 'delete_category' : 'delete') . '">'
+           . '<input type="hidden" name="relation_id" value="' . $relationId . '">'
+           . '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . SEC_createToken() . '">'
+           . '<input type="submit" value="' . htmlspecialchars($LANG_FAQ_RELATIONS['delete'], ENT_QUOTES, 'UTF-8') . '">'
+           . '</form></td>';
+
+    return $html;
+}
+
 if (isset($_GET['faq_ajax']) && $_GET['faq_ajax'] === 'items') {
     $provider = isset($_GET['provider']) ? COM_applyFilter($_GET['provider']) : '';
     $payload = faq_relationObjectOptions($provider, 100);
@@ -205,6 +257,19 @@ if (isset($_POST['faq_relation_action']) && SEC_checkToken()) {
         } elseif (!$externalConflict || $confirmExternal) {
             $msg = $LANG_FAQ_RELATIONS['association_save_failed'];
         }
+    } elseif ($action === 'update' || $action === 'update_category') {
+        $relation_id = isset($_POST['relation_id']) ? (int) $_POST['relation_id'] : 0;
+        $placement = COM_applyFilter(isset($_POST['placement']) ? $_POST['placement'] : 'automatic');
+        $topic_scope = COM_applyFilter(isset($_POST['topic_scope']) ? $_POST['topic_scope'] : 'both');
+        $sort_order = isset($_POST['sort_order']) ? (int) $_POST['sort_order'] : 0;
+
+        $updated = $action === 'update_category'
+            ? faq_categoryRelationUpdateSettings($relation_id, $placement, $sort_order, $topic_scope)
+            : faq_relationUpdateSettings($relation_id, $placement, $sort_order, $topic_scope);
+
+        $msg = $updated
+            ? $LANG_FAQ_RELATIONS['association_updated']
+            : $LANG_FAQ_RELATIONS['association_update_failed'];
     } elseif ($action === 'delete' || $action === 'delete_category') {
         $relation_id = isset($_POST['relation_id']) ? (int) $_POST['relation_id'] : 0;
         $deleted = $action === 'delete_category'
@@ -436,32 +501,7 @@ if (!faq_relationTableExists()) {
         }
         $display .= '</td>';
 
-                $placementLabel = $row['placement'] === 'manual'
-            ? $LANG_FAQ_RELATIONS['manual_only']
-            : $LANG_FAQ_RELATIONS['automatic'];
-        $display .= '<td>' . htmlspecialchars($placementLabel, ENT_QUOTES, 'UTF-8') . '</td>';
-        if ($row['provider'] === 'topic') {
-            $scopeKey = isset($row['topic_scope']) ? $row['topic_scope'] : 'both';
-            $scopeLabels = array(
-                'topic' => $LANG_FAQ_RELATIONS['topic_scope_topic'],
-                'articles' => $LANG_FAQ_RELATIONS['topic_scope_articles'],
-                'both' => $LANG_FAQ_RELATIONS['topic_scope_both']
-            );
-            $scopeLabel = isset($scopeLabels[$scopeKey]) ? $scopeLabels[$scopeKey] : $scopeLabels['both'];
-        } else {
-            $scopeLabel = '—';
-        }
-        $display .= '<td>' . htmlspecialchars($scopeLabel, ENT_QUOTES, 'UTF-8') . '</td>';
-        $display .= '<td>' . (int) $row['sort_order'] . '</td><td>';
-        $deleteAction = $_CONF['site_admin_url'] . '/plugins/faq/relations.php';
-        if ($filterProvider !== '' && $filterItem !== '') {
-            $deleteAction .= '?provider=' . rawurlencode($filterProvider) . '&item_id=' . rawurlencode($filterItem);
-        }
-        $display .= '<form method="post" action="' . htmlspecialchars($deleteAction, ENT_QUOTES, 'UTF-8') . '" style="display:inline">';
-        $display .= '<input type="hidden" name="faq_relation_action" value="delete">';
-        $display .= '<input type="hidden" name="relation_id" value="' . (int) $row['relation_id'] . '">';
-        $display .= '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . SEC_createToken() . '">';
-        $display .= '<input type="submit" value="' . htmlspecialchars($LANG_FAQ_RELATIONS['delete'], ENT_QUOTES, 'UTF-8') . '"></form></td></tr>';
+        $display .= faq_adminRelationSettingsCells($row, false, $filterProvider, $filterItem) . '</tr>';
     }
 
     $display .= '</tbody></table></div>';
@@ -521,33 +561,7 @@ if (!faq_categoryRelationTableExists()) {
         }
         $display .= '</td>';
 
-        $placementLabel = $row['placement'] === 'manual'
-            ? $LANG_FAQ_RELATIONS['manual_only']
-            : $LANG_FAQ_RELATIONS['automatic'];
-        $display .= '<td>' . htmlspecialchars($placementLabel, ENT_QUOTES, 'UTF-8') . '</td>';
-        if ($row['provider'] === 'topic') {
-            $scopeKey = isset($row['topic_scope']) ? $row['topic_scope'] : 'both';
-            $scopeLabels = array(
-                'topic' => $LANG_FAQ_RELATIONS['topic_scope_topic'],
-                'articles' => $LANG_FAQ_RELATIONS['topic_scope_articles'],
-                'both' => $LANG_FAQ_RELATIONS['topic_scope_both']
-            );
-            $scopeLabel = isset($scopeLabels[$scopeKey]) ? $scopeLabels[$scopeKey] : $scopeLabels['both'];
-        } else {
-            $scopeLabel = '—';
-        }
-        $display .= '<td>' . htmlspecialchars($scopeLabel, ENT_QUOTES, 'UTF-8') . '</td>';
-        $display .= '<td>' . (int) $row['sort_order'] . '</td><td>';
-
-        $deleteAction = $_CONF['site_admin_url'] . '/plugins/faq/relations.php';
-        if ($filterProvider !== '' && $filterItem !== '') {
-            $deleteAction .= '?provider=' . rawurlencode($filterProvider) . '&item_id=' . rawurlencode($filterItem);
-        }
-        $display .= '<form method="post" action="' . htmlspecialchars($deleteAction, ENT_QUOTES, 'UTF-8') . '" style="display:inline">'
-                  . '<input type="hidden" name="faq_relation_action" value="delete_category">'
-                  . '<input type="hidden" name="relation_id" value="' . (int) $row['relation_id'] . '">'
-                  . '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . SEC_createToken() . '">'
-                  . '<input type="submit" value="' . htmlspecialchars($LANG_FAQ_RELATIONS['delete'], ENT_QUOTES, 'UTF-8') . '"></form></td></tr>';
+        $display .= faq_adminRelationSettingsCells($row, true, $filterProvider, $filterItem) . '</tr>';
     }
 
     $display .= '</tbody></table></div>';
