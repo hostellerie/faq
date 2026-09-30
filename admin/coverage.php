@@ -72,9 +72,12 @@ if ($coreAudit) {
             : faq_coverageCoreCollection($provider, 0);
 
         if (is_array($items)) {
-            $relationCounts = faq_relationCountMapForProvider($provider);
+            $relationCounts = faq_relationCountMapForProvider(
+                $provider,
+                $provider === 'topic' ? 'topic' : ''
+            );
             $directFaqMap = $provider === 'article' ? faq_relationFaqMapForProvider('article') : array();
-            $topicFaqMap = $provider === 'article' ? faq_relationFaqMapForProvider('topic') : array();
+            $topicFaqMap = $provider === 'article' ? faq_relationFaqMapForProvider('topic', 'articles') : array();
             $articleTopicMap = $provider === 'article' ? faq_articleTopicMap() : array();
             $summaryBuild = array(
                 'managed' => 0,
