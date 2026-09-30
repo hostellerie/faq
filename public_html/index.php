@@ -78,8 +78,10 @@ if ( ! empty($faq_id)) {
     $faqAnswerHtml = PLG_replaceTags($answerParts['answer']);
     $faqRelatedHtml = '';
     if ($answerParts['related'] !== '') {
-        $faqRelatedHtml = '<aside class="faq-related" aria-label="Related questions">'
-                        . '<h2>Related questions</h2>'
+        $relatedLabel = $LANG_FAQ_COMMON['related_questions'];
+        $faqRelatedHtml = '<aside class="faq-related" aria-label="'
+                        . htmlspecialchars($relatedLabel, ENT_QUOTES, 'UTF-8') . '">'
+                        . '<h2>' . htmlspecialchars($relatedLabel, ENT_QUOTES, 'UTF-8') . '</h2>'
                         . '<div class="faq-related-links">' . PLG_replaceTags($answerParts['related']) . '</div>'
                         . '</aside>';
     }
@@ -110,7 +112,11 @@ if ( ! empty($faq_id)) {
     
     $tpl->set_var('block_start', COM_startBlock($LANG_FAQ_COMMON['FAQ']));
     
-	$tpl->set_var( 'faq_lang_cats' , $LANG_FAQ_COMMON['Categories'] );
+    $tpl->set_var('faq_lang_cats', $LANG_FAQ_COMMON['Categories']);
+    $tpl->set_var('faq_aria_breadcrumb', $LANG_FAQ_COMMON['breadcrumb_aria']);
+    $tpl->set_var('faq_aria_breadcrumb', $LANG_FAQ_COMMON['breadcrumb_aria']);
+    $tpl->set_var('faq_aria_actions', $LANG_FAQ_COMMON['actions_aria']);
+    $tpl->set_var('faq_back_to', $LANG_FAQ_COMMON['back_to']);
 	$tpl->set_var( 'site_url', $_CONF['site_url']  );
 	$tpl->set_var( 'faq_cats_url', $_CONF['site_url'] . '/faq/index.php' );
 	$tpl->set_var( 'faq_title', $A['title'] );
@@ -153,7 +159,7 @@ if ( ! empty($faq_id)) {
     }
     $A = DB_fetchArray($r);
 
-    $pagetitle = $LANG_FAQ_COMMON['FAQ'] . ' Category: ' . $A['title'];
+    $pagetitle = sprintf($LANG_FAQ_COMMON['category_page_title'], $A['title']);
 
     $cat = $A;
 
