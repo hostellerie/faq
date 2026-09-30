@@ -104,9 +104,9 @@ function faq_relationTopicScopeSql($alias, $scope)
 
 function faq_relationColumnExists($table, $column)
 {
-    $table = str_replace(array('\\', '%', '_'), array('\\\\', '\\%', '\\_'), (string) $table);
+    $table = str_replace('`', '``', (string) $table);
     $column = DB_escapeString((string) $column);
-    $result = DB_query("SHOW COLUMNS FROM {$table} LIKE '{$column}'");
+    $result = DB_query("SHOW COLUMNS FROM `{$table}` LIKE '{$column}'");
     return $result !== false && DB_numRows($result) > 0;
 }
 
@@ -472,14 +472,17 @@ function faq_categoryRelationAdd($category_id, $provider, $item_id, $subtype = '
     }
     $placement = in_array($placement, array('automatic', 'manual'), true)
         ? $placement : 'automatic';
+    $topic_scope = faq_relationNormalizeTopicScope($provider, $topic_scope);
+    $topic_scope = DB_escapeString($topic_scope);
     $sort_order = (int) $sort_order;
 
     $sql = "INSERT INTO {$_TABLES['faq_category_relations']}
-                (category_id, provider, item_id, item_subtype, placement, sort_order, enabled, created, modified)
+                (category_id, provider, item_id, item_subtype, placement, topic_scope, sort_order, enabled, created, modified)
             VALUES
-                ('{$category_id}', '{$provider}', '{$item_id}', '{$subtype}', '{$placement}', {$sort_order}, 1, NOW(), NOW())
+                ('{$category_id}', '{$provider}', '{$item_id}', '{$subtype}', '{$placement}', '{$topic_scope}', {$sort_order}, 1, NOW(), NOW())
             ON DUPLICATE KEY UPDATE
                 placement = VALUES(placement),
+                topic_scope = VALUES(topic_scope),
                 sort_order = VALUES(sort_order),
                 enabled = 1,
                 modified = NOW()";
@@ -601,14 +604,17 @@ function faq_relationAdd($faq_id, $provider, $item_id, $subtype = '', $placement
     }
     $placement = in_array($placement, array('automatic', 'manual'), true)
         ? $placement : 'automatic';
+    $topic_scope = faq_relationNormalizeTopicScope($provider, $topic_scope);
+    $topic_scope = DB_escapeString($topic_scope);
     $sort_order = (int) $sort_order;
 
     $sql = "INSERT INTO {$_TABLES['faq_relations']}
-                (faq_id, provider, item_id, item_subtype, placement, sort_order, enabled, created, modified)
+                (faq_id, provider, item_id, item_subtype, placement, topic_scope, sort_order, enabled, created, modified)
             VALUES
-                ('{$faq_id}', '{$provider}', '{$item_id}', '{$subtype}', '{$placement}', {$sort_order}, 1, NOW(), NOW())
+                ('{$faq_id}', '{$provider}', '{$item_id}', '{$subtype}', '{$placement}', '{$topic_scope}', {$sort_order}, 1, NOW(), NOW())
             ON DUPLICATE KEY UPDATE
                 placement = VALUES(placement),
+                topic_scope = VALUES(topic_scope),
                 sort_order = VALUES(sort_order),
                 enabled = 1,
                 modified = NOW()";
@@ -747,7 +753,7 @@ function faq_relationGetForFaq($faq_id)
     }
 
     $faq_id = DB_escapeString($faq_id);
-    $result = DB_query("SELECT relation_id, faq_id, provider, item_id, item_subtype, placement, sort_order, enabled,
+    $result = DB_query("SELECT relation_id, faq_id, provider, item_id, item_subtype, placement, topic_scope, sort_order, enabled,
                                UNIX_TIMESTAMP(created) AS created, UNIX_TIMESTAMP(modified) AS modified
                           FROM {$_TABLES['faq_relations']}
                          WHERE faq_id = '{$faq_id}'
@@ -884,6 +890,7 @@ function faq_relationCountMapForProvider($provider, $topic_scope = '')
                       JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category
                      WHERE rel.enabled = 1
                        AND rel.provider = '{$providerSql}'"
+                 . (($provider === 'topic' && $topic_scope !== '') ? faq_relationTopicScopeSql('rel', $topic_scope) : '')
                  . COM_getPermSQL('AND', 0, 2, 'faq')
                  . COM_getPermSQL('AND', 0, 2, 'cat');
     }
@@ -895,6 +902,7 @@ function faq_relationCountMapForProvider($provider, $topic_scope = '')
                       JOIN {$_TABLES['faq']} faq ON faq.category = cat.id
                      WHERE cr.enabled = 1
                        AND cr.provider = '{$providerSql}'"
+                 . (($provider === 'topic' && $topic_scope !== '') ? faq_relationTopicScopeSql('cr', $topic_scope) : '')
                  . COM_getPermSQL('AND', 0, 2, 'faq')
                  . COM_getPermSQL('AND', 0, 2, 'cat');
     }
