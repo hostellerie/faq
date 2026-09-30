@@ -23,6 +23,7 @@ Legend:
 - Coverage administration with managed/external/both/none status, including a read-only Core audit for Articles and Static Pages when normalized collection/content capabilities are unavailable.
 - Contextual FAQ rendering, automatic/manual placement model and article compatibility fallback.
 - Geeklog Topic associations, Topic-page rendering and Topic-to-Article FAQ inheritance with duplicate suppression and external-FAQ protection.
+- Topic association scope: Topic only, Topic articles only, or both.
 - `faqembed`, `faqrelated` and `faq-context` manual placement support.
 - Public semantic FAQ rendering and Question/Answer structured data.
 - Native Geeklog administration discovery through `plugin_getadminoption_faq()` and Command & Control discovery through `plugin_cclabel_faq()`.
