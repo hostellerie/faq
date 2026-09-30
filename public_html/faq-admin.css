@@ -223,3 +223,31 @@
     background: rgba(49, 87, 213, .06);
     line-height: 1.45;
 }
+
+
+.faq-admin-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.faq-admin-pagination a,
+.faq-admin-pagination strong,
+.faq-admin-pagination span {
+    display: inline-block;
+    min-width: 2rem;
+    padding: 0.35rem 0.55rem;
+    text-align: center;
+}
+
+.faq-admin-pagination a,
+.faq-admin-pagination strong {
+    border: 1px solid rgba(127, 127, 127, 0.35);
+    border-radius: 3px;
+}
+
+.faq-admin-pagination strong {
+    font-weight: 700;
+}
