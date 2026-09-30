@@ -425,12 +425,58 @@ function plugin_user_delete_faq ($uid)
     DB_query ("UPDATE {$_TABLES['faq_category']} SET owner_id = $rootuser WHERE owner_id = $uid");
 }
 
+/**
+ * Resolve the current content context for [faq-context].
+ *
+ * Geeklog 2.2.1+ passes provider/id to PLG_replaceTags(). Older call sites may
+ * not, so conservative request fallbacks are provided for core content only.
+ */
+function faq_autotagResolveContext($parameters)
+{
+    $provider = '';
+    $itemId = '';
+
+    if (is_array($parameters)) {
+        if (!empty($parameters['type'])) {
+            $provider = faq_normalizeProvider($parameters['type']);
+        } elseif (!empty($parameters['plugin'])) {
+            $provider = faq_normalizeProvider($parameters['plugin']);
+        }
+
+        if (isset($parameters['id']) && (string) $parameters['id'] !== '') {
+            $itemId = (string) $parameters['id'];
+        }
+    }
+
+    if ($provider !== '' && $itemId !== '') {
+        return array($provider, $itemId);
+    }
+
+    $script = isset($_SERVER['PHP_SELF']) ? basename((string) $_SERVER['PHP_SELF']) : '';
+
+    if ($script === 'article.php' && !empty($_GET['story'])) {
+        return array('article', trim((string) $_GET['story']));
+    }
+
+    if ($script === 'index.php' && !empty($_GET['topic'])) {
+        return array('topic', trim((string) $_GET['topic']));
+    }
+
+    if ($script === 'index.php' && !empty($_GET['page'])
+        && strpos((string) $_SERVER['PHP_SELF'], '/staticpages/') !== false
+    ) {
+        return array('staticpages', trim((string) $_GET['page']));
+    }
+
+    return array('', '');
+}
+
 function plugin_autotags_faq ($op, $content = '', $autotag = '', $parameters = array())
 {
     global $_CONF, $_TABLES, $LANG_FAQ_COMMON, $_FAQ_CONF;
 
     if ($op == 'tagname' ) {
-        return array ('faq', 'faqcat', 'faqembed', 'faqrelated');     
+        return array ('faq', 'faqcat', 'faqembed', 'faqrelated', 'faq-context');     
     } 
     else if ($op == 'parse') { 
         switch ($autotag['tag']) { 
@@ -526,6 +572,29 @@ function plugin_autotags_faq ($op, $content = '', $autotag = '', $parameters = a
 
             $related = faq_relationGetForItem($provider, $item_id, '', '');
             $link = faq_renderFaqItems($related, 'faq-autotag faq-autotag-related', false);
+            break;
+
+        case 'faq-context':
+            list($provider, $item_id) = faq_autotagResolveContext($parameters);
+
+            if ($provider === '' || $item_id === '') {
+                // Keep failure silent on public pages: an unresolved contextual
+                // marker should not leak implementation details to visitors.
+                $link = '';
+                break;
+            }
+
+            if ($provider === 'article') {
+                $related = faq_relationGetForArticleWithTopics($item_id, '');
+            } else {
+                $related = faq_relationGetForItem($provider, $item_id, '', '');
+            }
+
+            $link = faq_renderFaqItems(
+                $related,
+                'faq-autotag faq-autotag-context',
+                false
+            );
             break;
 
         default:
