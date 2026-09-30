@@ -176,10 +176,10 @@ $LANG_FAQ_RELATIONS = array(
     'manual_fallback' => 'Manual fallback: enter the content ID. Subtype remains optional.',
     'provider_no_item_info' => 'This provider does not expose Geeklog Item Info.',
     'provider_no_content' => 'The provider returned no selectable content.',
-    'provider_selectable_count' => '%d selectable item(s).'
-,
+    'provider_selectable_count' => '%d selectable item(s).',
     'external_confirmation_required' => 'This article already contains an external FAQ/Q&A signal. Confirm the association explicitly before saving.',
-    'confirm_external_faq' => 'If the selected article already contains an external FAQ/Q&A, I confirm that this managed association should still be added.'
+    'confirm_external_faq' => 'If the selected article already contains an external FAQ/Q&A, I confirm that this managed association should still be added.',
+    'topic_provider' => 'Geeklog topic'
 );
 
 $LANG_FAQ_COVERAGE = array(
@@ -208,6 +208,10 @@ $LANG_FAQ_COVERAGE = array(
     'external_signals' => 'External signals',
     'action' => 'Action',
     'articles' => 'Articles',
+    'topics' => 'Topics',
+    'origin_direct' => 'Direct association',
+    'origin_topic' => 'Inherited from topic',
+    'topic_inheritance_blocked' => 'Topic inheritance blocked by external FAQ',
     'static_pages' => 'Static Pages',
     'videos' => 'Videos',
     'documents' => 'Documents',
