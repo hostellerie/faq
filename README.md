@@ -12,6 +12,7 @@ The Geeklog FAQ plugin allows webmasters to create a list of FAQ categories whic
 - Ids of FAQ Categories and Entries can be a unique text string (good for SEO)
 - Entries include a hit counter
 - Entries support HTML and autotags
+- FAQ entries can be explicitly ordered inside their category; equal-order entries keep the configured historical FAQ sort as a fallback
 - Makes use of Geeklog permissions for Categories and Entries
 
 ## Other Information
