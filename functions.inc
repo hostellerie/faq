@@ -217,6 +217,9 @@ function faq_currentPositionValue($category, $faqId)
     if ($index === 0) {
         return 'first';
     }
+    if ($index === count($ids) - 1) {
+        return 'last';
+    }
 
     return 'after:' . $ids[$index - 1];
 }
