@@ -441,11 +441,6 @@ function faq_uniqueSlug($table, $title, $excludeId = '')
 
     $candidate = $base;
     $suffix = 2;
-    $excludeSql = '';
-    if ($excludeId !== '') {
-        $excludeSql = " AND id <> '" . DB_escapeString((string) $excludeId) . "'";
-    }
-
     while (DB_count($table, 'id', DB_escapeString($candidate)) > 0
         && ($excludeId === '' || $candidate !== (string) $excludeId)
     ) {
