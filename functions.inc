@@ -405,6 +405,58 @@ function faq_renderContent($content)
 }
 
 
+function faq_slugify($text, $maxLength = 40)
+{
+    $text = trim(strip_tags((string) $text));
+    if ($text === '') {
+        return '';
+    }
+
+    if (function_exists('iconv')) {
+        $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
+        if ($ascii !== false && $ascii !== '') {
+            $text = $ascii;
+        }
+    }
+
+    $text = strtolower($text);
+    $text = preg_replace('/[^a-z0-9]+/', '-', $text);
+    $text = trim($text, '-');
+
+    $maxLength = max(1, (int) $maxLength);
+    if (strlen($text) > $maxLength) {
+        $text = substr($text, 0, $maxLength);
+        $text = rtrim($text, '-');
+    }
+
+    return $text;
+}
+
+function faq_uniqueSlug($table, $title, $excludeId = '')
+{
+    $base = faq_slugify($title, 40);
+    if ($base === '') {
+        $base = 'faq';
+    }
+
+    $candidate = $base;
+    $suffix = 2;
+    $excludeSql = '';
+    if ($excludeId !== '') {
+        $excludeSql = " AND id <> '" . DB_escapeString((string) $excludeId) . "'";
+    }
+
+    while (DB_count($table, 'id', DB_escapeString($candidate)) > 0
+        && ($excludeId === '' || $candidate !== (string) $excludeId)
+    ) {
+        $tail = '-' . $suffix;
+        $candidate = substr($base, 0, max(1, 40 - strlen($tail))) . $tail;
+        $suffix++;
+    }
+
+    return $candidate;
+}
+
 function faq_assetUrl($relative)
 {
     global $_CONF, $LANG_FAQ_ADMIN;
