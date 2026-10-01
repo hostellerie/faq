@@ -546,7 +546,7 @@ function faq_categoryRelationGetForItem($provider, $item_id, $subtype = '', $pla
                    cr.category_id, cr.provider, cr.item_id, cr.item_subtype,
                    cr.placement, cr.topic_scope, cr.sort_order,
                    faq.id AS faq_id, faq.title, faq.description, faq.category,
-                   faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
+                   faq.sort_order AS faq_sort_order, faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
               FROM {$_TABLES['faq_category_relations']} cr
               JOIN {$_TABLES['faq_category']} cat ON cat.id = cr.category_id
               JOIN {$_TABLES['faq']} faq ON faq.category = cat.id
@@ -745,7 +745,7 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
 
     $sql = "SELECT rel.relation_id, rel.faq_id, rel.provider, rel.item_id, rel.item_subtype,
                    rel.placement, rel.topic_scope, rel.sort_order, faq.title, faq.description, faq.category,
-                   faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
+                   faq.sort_order AS faq_sort_order, faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
               FROM {$_TABLES['faq_relations']} rel
               JOIN {$_TABLES['faq']} faq ON faq.id = rel.faq_id
               JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category
@@ -802,10 +802,15 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
         $leftOrder = isset($left['sort_order']) ? (int) $left['sort_order'] : 0;
         $rightOrder = isset($right['sort_order']) ? (int) $right['sort_order'] : 0;
         if ($leftOrder === $rightOrder) {
-            return strcasecmp(
-                isset($left['title']) ? (string) $left['title'] : '',
-                isset($right['title']) ? (string) $right['title'] : ''
-            );
+            $leftFaqOrder = isset($left['faq_sort_order']) ? (int) $left['faq_sort_order'] : 0;
+            $rightFaqOrder = isset($right['faq_sort_order']) ? (int) $right['faq_sort_order'] : 0;
+            if ($leftFaqOrder === $rightFaqOrder) {
+                return strcasecmp(
+                    isset($left['title']) ? (string) $left['title'] : '',
+                    isset($right['title']) ? (string) $right['title'] : ''
+                );
+            }
+            return ($leftFaqOrder < $rightFaqOrder) ? -1 : 1;
         }
         return ($leftOrder < $rightOrder) ? -1 : 1;
     });
