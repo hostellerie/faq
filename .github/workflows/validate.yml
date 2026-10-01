@@ -110,7 +110,7 @@ jobs:
           grep -q "\$_USER\['uid'\]" admin/relations.php
           grep -q 'function faq_adminResolveAssociationTarget' admin/relations.php
           grep -q "plugin_idtourl_" admin/relations.php
-          grep -q "resolvedTitle === '' && \\$resolvedUrl !== ''" admin/relations.php
+          grep -q "resolvedTitle === '' && \$resolvedUrl !== ''" admin/relations.php
           grep -q "/article.php?story=" admin/relations.php
           grep -q "/staticpages/index.php?page=" admin/relations.php
           if grep -q '>View content<' admin/relations.php; then
@@ -161,8 +161,8 @@ jobs:
           grep -q "faq-relation-topic-scope" admin/relations.php
           grep -q "topic_scope_articles" language/english_utf-8.php
           grep -q "topic_scope_articles" language/french_france_utf-8.php
-          grep -q "faq_relationGetForItem('topic', \\$topicId, 'topic', \\$placement, 'articles')" relations.inc
-          grep -q "faq_renderContextual('topic', (string) \\$topic, 'topic', 'automatic', 'topic')" modern.inc
+          grep -q "faq_relationGetForItem('topic', \$topicId, 'topic', \$placement, 'articles')" relations.inc
+          grep -q "faq_renderContextual('topic', (string) \$topic, 'topic', 'automatic', 'topic')" modern.inc
 
 
       - name: Validate association inline editing
