@@ -16,6 +16,7 @@ Legend:
 - Geeklog 2.1.1-2.2.2 compatibility target and PHP 5.6-8.1 syntax CI.
 - Modern installer/configuration metadata and `plugin.json`.
 - FAQ/category CRUD preservation and historical autotags.
+- Explicit FAQ ordering inside each category, with historical sorting retained as a fallback for equal order values.
 - Native Advanced Editor integration with HTML-source fallback and MediaGallery picker support.
 - Item Info, collection retrieval, URL resolution, lifecycle callbacks, sitemap, metadata and capability declaration.
 - `faq_relations` for individual FAQ associations and `faq_category_relations` for dynamic whole-category associations.
