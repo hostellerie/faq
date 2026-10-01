@@ -139,6 +139,8 @@ $LANG_FAQ_COMMON += array(
 );
 
 $LANG_FAQ_ADMIN += array(
+    'order' => 'Order',
+    'order_help' => 'Controls this FAQ position inside its category. Lower values appear first; values such as 10, 20, 30 leave room for later insertions.',
     'editor_mode' => 'Editor mode',
     'visual_editor' => 'Visual editor',
     'html_source' => 'HTML source',
