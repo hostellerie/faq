@@ -74,6 +74,24 @@ function faq_faqSortOrderColumnExists()
     return $result !== false && DB_numRows($result) > 0;
 }
 
+function faq_faqSortOrderDefault()
+{
+    global $_TABLES;
+
+    if (empty($_TABLES['faq'])) {
+        return null;
+    }
+
+    $table = str_replace('`', '``', (string) $_TABLES['faq']);
+    $result = DB_query("SHOW COLUMNS FROM `{$table}` LIKE 'sort_order'");
+    if ($result === false || DB_numRows($result) !== 1) {
+        return null;
+    }
+
+    $row = DB_fetchArray($result);
+    return isset($row['Default']) ? $row['Default'] : null;
+}
+
 function faq_ensureFaqSortOrderColumn()
 {
     global $_TABLES;
@@ -92,7 +110,9 @@ function faq_ensureFaqSortOrderColumn()
         return false;
     }
 
-    DB_query("ALTER TABLE {$_TABLES['faq']} MODIFY sort_order int(11) NOT NULL DEFAULT 10");
+    if ((string) faq_faqSortOrderDefault() !== '10') {
+        DB_query("ALTER TABLE {$_TABLES['faq']} MODIFY sort_order int(11) NOT NULL DEFAULT 10");
+    }
 
     if ($added) {
         faq_normalizeAllCategoryOrders();
