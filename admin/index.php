@@ -154,6 +154,47 @@ function faq_setupContentEditor($tpl, $permission)
     return $visual;
 }
 
+function faq_adminPositionOptions($category, $faqId = '')
+{
+    global $_TABLES, $_FAQ_CONF, $LANG_FAQ_ADMIN;
+
+    $category = (string) $category;
+    $faqId = (string) $faqId;
+    $selected = $faqId !== '' ? faq_currentPositionValue($category, $faqId) : 'last';
+
+    $options = '<option value="first"' . ($selected === 'first' ? ' selected="selected"' : '') . '>'
+             . htmlspecialchars($LANG_FAQ_ADMIN['position_first'], ENT_QUOTES, COM_getCharset())
+             . '</option>';
+    $options .= '<option value="last"' . ($selected === 'last' ? ' selected="selected"' : '') . '>'
+              . htmlspecialchars($LANG_FAQ_ADMIN['position_last'], ENT_QUOTES, COM_getCharset())
+              . '</option>';
+
+    $sql = "SELECT faq.id, faq.title, faq.category, cat.title AS category_title
+              FROM {$_TABLES['faq']} faq
+              JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category
+             WHERE 1=1"
+         . COM_getPermSQL('AND', 0, 3, 'faq')
+         . COM_getPermSQL('AND', 0, 3, 'cat');
+
+    if ($faqId !== '') {
+        $sql .= " AND faq.id <> '" . DB_escapeString($faqId) . "'";
+    }
+
+    $sql .= " ORDER BY cat.title ASC, " . faq_faqOrderBySql($_FAQ_CONF['faq_sort_order']);
+    $result = DB_query($sql);
+
+    while ($row = DB_fetchArray($result)) {
+        $value = 'after:' . (string) $row['id'];
+        $label = sprintf($LANG_FAQ_ADMIN['position_after'], (string) $row['title']);
+        $options .= '<option value="' . htmlspecialchars($value, ENT_QUOTES, COM_getCharset()) . '"'
+                  . ' data-category="' . htmlspecialchars((string) $row['category'], ENT_QUOTES, COM_getCharset()) . '"'
+                  . ($selected === $value ? ' selected="selected"' : '')
+                  . '>' . htmlspecialchars($label, ENT_QUOTES, COM_getCharset()) . '</option>';
+    }
+
+    return $options;
+}
+
 /**
 * Shows the FAQ editor
 *
@@ -162,10 +203,11 @@ function faq_setupContentEditor($tpl, $permission)
 */
 function editfaq ($id = '') 
 {
-    global $_CONF, $_GROUPS, $_TABLES, $_USER, $_FAQ_CONF,
+    global $_CONF, $_GROUPS, $_TABLES, $_USER, $_FAQ_CONF, $_SCRIPTS,
            $LANG_FAQ_ADMIN, $LANG_ACCESS;
 
     $retval = '';
+    $_SCRIPTS->setJavaScriptFile('faq_order_admin', faq_assetPath('faq-order-admin.js'), true, 221);
 
     $tpl = COM_newTemplate(CTL_plugin_templatePath('faq', 'admin'));
     $tpl->set_file( array('editor' => 'faqedit.thtml',
@@ -226,9 +268,10 @@ function editfaq ($id = '')
     $tpl->set_var('faq_id', $A['id']);
     $tpl->set_var('faq_lang_desc', $LANG_FAQ_ADMIN['answer']);
     $tpl->set_var('faq_lang_category', $LANG_FAQ_ADMIN['category']);
-    $tpl->set_var('faq_lang_order', $LANG_FAQ_ADMIN['order']);
-    $tpl->set_var('faq_order_help', $LANG_FAQ_ADMIN['order_help']);
-    $tpl->set_var('faq_sort_order', isset($A['sort_order']) ? (int) $A['sort_order'] : 10);
+    $tpl->set_var('faq_lang_position', $LANG_FAQ_ADMIN['position']);
+    $tpl->set_var('faq_position_help', $LANG_FAQ_ADMIN['position_help']);
+    $tpl->set_var('faq_position_options', faq_adminPositionOptions($A['category'], !empty($id) ? $A['id'] : ''));
+    $tpl->set_var('faq_position_category', htmlspecialchars((string) $A['category'], ENT_QUOTES, COM_getCharset()));
     $tpl->set_var('faq_lang_hits', $LANG_FAQ_ADMIN['hits']);
     $tpl->set_var('faq_lang_date', $LANG_FAQ_ADMIN['changed']);
     $tpl->set_var('faq_lang_reset_date', $LANG_FAQ_ADMIN['reset_date']);
@@ -396,7 +439,7 @@ function editcat ($id = '')
 * @return   string                  HTML redirect or error message
 * 
 */
-function savefaq ($id, $old_id, $category, $description, $description_edited, $title, $sort_order, $hits, $date, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon)
+function savefaq ($id, $old_id, $category, $description, $description_edited, $title, $position, $hits, $date, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon)
 {
     global $_CONF, $_GROUPS, $_TABLES, $_USER, $MESSAGE, $LANG_FAQ_ADMIN, $_FAQ_CONF;
 
@@ -439,7 +482,10 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
     }
 
     $title = DB_escapeString(COM_checkHTML(COM_checkWords($title)));
-    $sort_order = max(0, (int) $sort_order);
+    $position = trim((string) $position);
+    if ($position !== 'first' && $position !== 'last' && strpos($position, 'after:') !== 0) {
+        $position = 'last';
+    }
     $id = DB_escapeString($id);
     
     if (empty ($owner_id)) {
@@ -466,6 +512,14 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
 
     $access = 0;
     $do_update = false;
+    $old_category = '';
+    if (!empty($old_id) && DB_count($_TABLES['faq'], 'id', DB_escapeString($old_id)) > 0) {
+        $old_category = (string) DB_getItem(
+            $_TABLES['faq'],
+            'category',
+            "id = '" . DB_escapeString($old_id) . "'"
+        );
+    }
     $old_id = addslashes ($old_id);
     if (DB_count ($_TABLES['faq'], 'id', $old_id) > 0) { /* Check old entry access */
         $r = DB_query ("SELECT COUNT(*) AS cnt
@@ -507,14 +561,14 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
                          , title = '%s'
                          , description = '%s'
                          , category = '%s'
-                         , sort_order = %d
+                         , sort_order = 10
                          , owner_id = %d
                          , group_id = %d 
                          , perm_owner = %d
                          , perm_group = %d
                          , perm_members = %d
                          , perm_anon = %d"
-                         , $id,$title,$description,$category,$sort_order,$owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon);
+                         , $id,$title,$description,$category,$owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon);
             if (SEC_hasRights ('faq.admin')) {
                 $sql .= sprintf(", hits = %d", $hits);
                 if ($date)
@@ -526,8 +580,8 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
         }
         else {
             $sql = "INSERT INTO {$_TABLES['faq']}(id,category,sort_order,title,description,date,hits,owner_id,group_id,perm_owner,perm_group,perm_members,perm_anon) ";
-            $sql .= sprintf(" VALUES('%s','%s',%d,'%s','%s',NOW(),%d,%d,%d,%d,%d,%d,%d)",
-                            $id, $category, $sort_order, $title, $description, $hits, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon);
+            $sql .= sprintf(" VALUES('%s','%s',10,'%s','%s',NOW(),%d,%d,%d,%d,%d,%d,%d)",
+                            $id, $category, $title, $description, $hits, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon);
         }        
         DB_query($sql);
 
@@ -536,6 +590,11 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
                          SET faq_id = '" . DB_escapeString($id) . "', modified = NOW()
                        WHERE faq_id = '" . DB_escapeString($old_id) . "'");
         }
+
+        if ($old_category !== '' && $old_category !== $category) {
+            faq_normalizeCategoryOrder($old_category);
+        }
+        faq_normalizeCategoryOrder($category, $id, $position);
 
         faq_clearLocalCache();
         faq_notifySaved($id, $old_id);
@@ -727,7 +786,7 @@ function listfaq ($cat = '')
                     array('text' => $LANG_FAQ_ADMIN['id'], 'field' => 'id'),
                     array('text' => $LANG_FAQ_ADMIN['title'], 'field' => 'title'),
                     array('text' => $LANG_FAQ_ADMIN['category'], 'field' => 'cat_title'),
-                    array('text' => $LANG_FAQ_ADMIN['order'], 'field' => 'sort_order'),
+                    array('text' => $LANG_FAQ_ADMIN['position'], 'field' => 'position'),
                     array('text' => $LANG_FAQ_ADMIN['hits'], 'field' => 'hits'),
                     array('text' => $LANG_FAQ_ADMIN['access'], 'field' => 'access'));
 
@@ -752,8 +811,17 @@ function listfaq ($cat = '')
     $data_arr = array();
     $r = DB_query($sql);
     $n = DB_numRows ($r);
+    $positionCategory = null;
+    $positionNumber = 0;
     for ($i=0; $i<$n; $i++) {
         $A = DB_fetchArray($r);
+        if ($positionCategory !== $A['category']) {
+            $positionCategory = $A['category'];
+            $positionNumber = 1;
+        } else {
+            $positionNumber++;
+        }
+        $A['position'] = $positionNumber;
         $data_arr[] = $A;
     }
 
@@ -904,7 +972,7 @@ if (($action == $LANG_FAQ_ADMIN['delete']) && !empty ($LANG_FAQ_ADMIN['delete'])
                             UTIL_getParamStr('faq_desc'),
                             UTIL_getParamInt('faq_desc_edited'),
                             UTIL_getParamStr('faq_title'),
-                            UTIL_getParamInt('faq_sort_order'),
+                            UTIL_getParamStr('faq_position', 'last'),
                             UTIL_getParamInt('faq_hits'),
                             UTIL_getParamInt('faq_date'),
                             UTIL_getParam('owner_id'),
