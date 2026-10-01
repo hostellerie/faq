@@ -173,7 +173,7 @@ jobs:
           grep -q "function faq_relationUpdateSettings" relations.inc
           grep -q "function faq_categoryRelationUpdateSettings" relations.inc
           grep -q "function faq_adminRelationSettingsCells" admin/relations.php
-          grep -q "value=\"update_category\"" admin/relations.php
+          grep -q "\$isCategory ? 'update_category' : 'update'" admin/relations.php
           grep -q "association_updated" language/english_utf-8.php
           grep -q "association_updated" language/french_france_utf-8.php
 
