@@ -710,9 +710,12 @@ function listfaq ($cat = '')
              WHERE faq.category = cat.id"
          . COM_getPermSQL( 'AND', 0, 3, 'faq' ) 
          . COM_getPermSQL( 'AND', 0, 3, 'cat' );
-    if ( ! empty($cat))
+    if (!empty($cat)) {
         $sql .= " AND cat.id = '{$cat}'";
-    $sql .= " ORDER BY " . faq_faqOrderBySql($_FAQ_CONF['faq_sort_order']);
+        $sql .= " ORDER BY " . faq_faqOrderBySql($_FAQ_CONF['faq_sort_order']);
+    } else {
+        $sql .= " ORDER BY cat.title ASC, " . faq_faqOrderBySql($_FAQ_CONF['faq_sort_order']);
+    }
      
     $tpl->set_var('faq_lang_category', $LANG_FAQ_ADMIN['category']);
     $tpl->set_var('faq_lang_all', $LANG_FAQ_ADMIN['all_cat']);
