@@ -509,16 +509,18 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
             $raw_id = faq_uniqueSlug($_TABLES['faq'], $raw_id);
         }
     } else {
-        $raw_id = faq_slugify($raw_id, 40);
-        if ($raw_id === '') {
-            $raw_id = $old_id_raw;
-        }
-        if ($raw_id !== $old_id_raw && (int) $confirm_id_change !== 1) {
-            return COM_showMessageText($LANG_FAQ_ADMIN['id_change_required'], $LANG_FAQ_ADMIN['FAQ Editor']);
-        }
-        if ($raw_id !== $old_id_raw
-            && DB_count($_TABLES['faq'], 'id', DB_escapeString($raw_id)) > 0) {
-            return COM_showMessageText($LANG_FAQ_ADMIN['id_exists'], $LANG_FAQ_ADMIN['FAQ Editor']);
+        if ($raw_id !== $old_id_raw) {
+            if ((int) $confirm_id_change !== 1) {
+                return COM_showMessageText($LANG_FAQ_ADMIN['id_change_required'], $LANG_FAQ_ADMIN['FAQ Editor']);
+            }
+            $raw_id = faq_slugify($raw_id, 40);
+            if ($raw_id === '') {
+                $raw_id = $old_id_raw;
+            }
+            if ($raw_id !== $old_id_raw
+                && DB_count($_TABLES['faq'], 'id', DB_escapeString($raw_id)) > 0) {
+                return COM_showMessageText($LANG_FAQ_ADMIN['id_exists'], $LANG_FAQ_ADMIN['FAQ Editor']);
+            }
         }
     }
     $id = $raw_id;
@@ -705,16 +707,18 @@ function savecat ($id, $old_id, $description, $description_edited, $title, $owne
             $raw_id = faq_uniqueSlug($_TABLES['faq_category'], $raw_id);
         }
     } else {
-        $raw_id = faq_slugify($raw_id, 40);
-        if ($raw_id === '') {
-            $raw_id = $old_id_raw;
-        }
-        if ($raw_id !== $old_id_raw && (int) $confirm_id_change !== 1) {
-            return COM_showMessageText($LANG_FAQ_ADMIN['id_change_required'], $LANG_FAQ_ADMIN['Cat Editor']);
-        }
-        if ($raw_id !== $old_id_raw
-            && DB_count($_TABLES['faq_category'], 'id', DB_escapeString($raw_id)) > 0) {
-            return COM_showMessageText($LANG_FAQ_ADMIN['id_exists'], $LANG_FAQ_ADMIN['Cat Editor']);
+        if ($raw_id !== $old_id_raw) {
+            if ((int) $confirm_id_change !== 1) {
+                return COM_showMessageText($LANG_FAQ_ADMIN['id_change_required'], $LANG_FAQ_ADMIN['Cat Editor']);
+            }
+            $raw_id = faq_slugify($raw_id, 40);
+            if ($raw_id === '') {
+                $raw_id = $old_id_raw;
+            }
+            if ($raw_id !== $old_id_raw
+                && DB_count($_TABLES['faq_category'], 'id', DB_escapeString($raw_id)) > 0) {
+                return COM_showMessageText($LANG_FAQ_ADMIN['id_exists'], $LANG_FAQ_ADMIN['Cat Editor']);
+            }
         }
     }
     $id = DB_escapeString($raw_id);
