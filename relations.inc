@@ -541,12 +541,13 @@ function faq_categoryRelationGetForItem($provider, $item_id, $subtype = '', $pla
     $provider = DB_escapeString($provider);
     $item_id = DB_escapeString($item_id);
     $subtype = DB_escapeString(substr((string) $subtype, 0, 64));
+    $faqSortSelect = faq_faqSortOrderColumnExists() ? 'faq.sort_order' : '0';
 
     $sql = "SELECT cr.relation_id AS category_relation_id,
                    cr.category_id, cr.provider, cr.item_id, cr.item_subtype,
                    cr.placement, cr.topic_scope, cr.sort_order,
                    faq.id AS faq_id, faq.title, faq.description, faq.category,
-                   faq.sort_order AS faq_sort_order, faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
+                   {$faqSortSelect} AS faq_sort_order, faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
               FROM {$_TABLES['faq_category_relations']} cr
               JOIN {$_TABLES['faq_category']} cat ON cat.id = cr.category_id
               JOIN {$_TABLES['faq']} faq ON faq.category = cat.id
@@ -742,6 +743,7 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
     $provider = DB_escapeString($provider);
     $item_id = DB_escapeString($item_id);
     $subtype = DB_escapeString(substr((string) $subtype, 0, 64));
+    $faqSortSelect = faq_faqSortOrderColumnExists() ? 'faq.sort_order' : '0';
 
     $sql = "SELECT rel.relation_id, rel.faq_id, rel.provider, rel.item_id, rel.item_subtype,
                    rel.placement, rel.topic_scope, rel.sort_order, faq.title, faq.description, faq.category,
