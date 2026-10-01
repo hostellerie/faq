@@ -724,6 +724,7 @@ function listfaq ($cat = '')
                     array('text' => $LANG_FAQ_ADMIN['id'], 'field' => 'id'),
                     array('text' => $LANG_FAQ_ADMIN['title'], 'field' => 'title'),
                     array('text' => $LANG_FAQ_ADMIN['category'], 'field' => 'cat_title'),
+                    array('text' => $LANG_FAQ_ADMIN['order'], 'field' => 'sort_order'),
                     array('text' => $LANG_FAQ_ADMIN['hits'], 'field' => 'hits'),
                     array('text' => $LANG_FAQ_ADMIN['access'], 'field' => 'access'));
 
