@@ -102,6 +102,11 @@ function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
     global $_TABLES;
 
     $subType = isset($options['sub_type']) ? (string) $options['sub_type'] : '';
+    if ($subType === '' && $id !== '*' && strpos((string) $id, 'category:') === 0) {
+        $subType = 'category';
+        $id = substr((string) $id, 9);
+    }
+
     if ($subType === 'category') {
         $perm = COM_getPermSQL('AND', $uid, 2, 'cat');
 
@@ -207,6 +212,10 @@ function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
 
 function plugin_idtourl_faq($sub_type, $item_id)
 {
+    if ($sub_type === '' && strpos((string) $item_id, 'category:') === 0) {
+        return faq_getCategoryUrl(substr((string) $item_id, 9));
+    }
+
     if ($sub_type === 'category') {
         return faq_getCategoryUrl($item_id);
     }
@@ -461,7 +470,9 @@ function faq_notifyCategorySaved($id, $old_id = '')
     if (version_compare(VERSION, '2.2.2', '>=')) {
         PLG_itemSaved($id, 'faq', $old_id, 'category');
     } else {
-        PLG_itemSaved($id, 'faq', $old_id);
+        $legacyId = 'category:' . $id;
+        $legacyOldId = $old_id !== '' ? 'category:' . $old_id : '';
+        PLG_itemSaved($legacyId, 'faq', $legacyOldId);
     }
 }
 
@@ -474,7 +485,7 @@ function faq_notifyCategoryDeleted($id)
     if (version_compare(VERSION, '2.2.0', '>=')) {
         PLG_itemDeleted($id, 'faq', 'category');
     } else {
-        PLG_itemDeleted($id, 'faq');
+        PLG_itemDeleted('category:' . $id, 'faq');
     }
 }
 
