@@ -9,7 +9,7 @@ The Geeklog FAQ plugin allows webmasters to create a list of FAQ categories whic
 
 ## Main Features
 
-- Ids of FAQ Categories and Entries can be a unique text string (good for SEO)
+- New FAQ/category IDs are generated automatically from the question/title as readable SEO-friendly slugs. Existing IDs stay stable unless an administrator explicitly confirms an ID/URL change.
 - Entries include a hit counter
 - Entries support HTML and autotags
 - FAQ entries use logical positions inside their category: **First**, **After: [existing FAQ]**, or **Last**. The plugin stores the order internally and renumbers the category automatically in steps of 10.
@@ -59,7 +59,7 @@ Version 1.1.0:
 Version 1.0.3:
 - Fixed bug where updating FAQ categories and questions with percent 
   signs (%)was impossible.
-- Added access rights column to FAQ (and category) lists for admins.
+- Access rights remain editable in the FAQ/category editors; the overview lists omit the technical access column for a cleaner content-management view.
 - Added UTF-8 language files for english and swedish in UTF-8 encoding.
 
 Version 1.0.2:
@@ -86,7 +86,7 @@ Version 1.3.0 modernizes FAQ as a reusable Geeklog question-and-answer content p
 ### New architecture
 
 - Normalized Item Info through `plugin_getiteminfo_faq()`, including collection requests with `id = '*'`.
-- Sitemap, URL resolution, lifecycle and capability integration for modern Geeklog consumers.
+- Sitemap, URL resolution, lifecycle and capability integration for modern Geeklog consumers. Category lifecycle events are exposed as subtype `category`, so URL/indexing consumers can react to category creates, updates, renames and deletions.
 - Contextual FAQ associations stored in `faq_relations`, including Geeklog Topic targets.
 - Automatic contextual rendering through `plugin_itemdisplay_faq()` when the host provider calls `PLG_itemDisplay()`.
 - Topic-level FAQ rendering on Geeklog topic index pages and inheritance from Topics to their Articles.
