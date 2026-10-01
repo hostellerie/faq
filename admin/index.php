@@ -638,7 +638,7 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
         faq_normalizeCategoryOrder($category, $id, $position);
 
         faq_clearLocalCache();
-        faq_notifySaved($id, $old_id);
+        faq_notifySaved($raw_id, $old_id_raw);
 
         return COM_refresh ($_CONF['site_admin_url'] . '/plugins/faq/index.php?msg=4&mode=faq&cat=' . $category);
     } else { // missing fields
@@ -800,7 +800,7 @@ function savecat ($id, $old_id, $description, $description_edited, $title, $owne
         }
 
         faq_clearLocalCache();
-        faq_notifyCategorySaved($id, $old_id);
+        faq_notifyCategorySaved($raw_id, $old_id_raw);
 
         return COM_refresh ($_CONF['site_admin_url'] . '/plugins/faq/index.php?msg=4&mode=cat');
     } else { // missing fields
