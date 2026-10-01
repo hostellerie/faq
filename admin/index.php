@@ -165,9 +165,6 @@ function faq_adminPositionOptions($category, $faqId = '')
     $options = '<option value="first"' . ($selected === 'first' ? ' selected="selected"' : '') . '>'
              . htmlspecialchars($LANG_FAQ_ADMIN['position_first'], ENT_QUOTES, COM_getCharset())
              . '</option>';
-    $options .= '<option value="last"' . ($selected === 'last' ? ' selected="selected"' : '') . '>'
-              . htmlspecialchars($LANG_FAQ_ADMIN['position_last'], ENT_QUOTES, COM_getCharset())
-              . '</option>';
 
     $sql = "SELECT faq.id, faq.title, faq.category, cat.title AS category_title
               FROM {$_TABLES['faq']} faq
@@ -191,6 +188,10 @@ function faq_adminPositionOptions($category, $faqId = '')
                   . ($selected === $value ? ' selected="selected"' : '')
                   . '>' . htmlspecialchars($label, ENT_QUOTES, COM_getCharset()) . '</option>';
     }
+
+    $options .= '<option value="last"' . ($selected === 'last' ? ' selected="selected"' : '') . '>'
+              . htmlspecialchars($LANG_FAQ_ADMIN['position_last'], ENT_QUOTES, COM_getCharset())
+              . '</option>';
 
     return $options;
 }
