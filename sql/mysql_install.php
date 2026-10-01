@@ -48,6 +48,7 @@ $_SQL[] = "
 CREATE TABLE {$_TABLES['faq']} (
   id VARCHAR(40) NOT NULL DEFAULT '',
   category VARCHAR(40) DEFAULT NULL,
+  sort_order int(11) NOT NULL DEFAULT 0,
   title VARCHAR(250),
   description TEXT,
   hits INT(11) DEFAULT 0,
