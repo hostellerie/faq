@@ -209,6 +209,7 @@ function editfaq ($id = '')
 
     $retval = '';
     $_SCRIPTS->setJavaScriptFile('faq_order_admin', faq_assetPath('faq-order-admin.js'), true, 221);
+    $_SCRIPTS->setJavaScriptFile('faq_id_admin', faq_assetPath('faq-id-admin.js'), true, 222);
 
     $tpl = COM_newTemplate(CTL_plugin_templatePath('faq', 'admin'));
     $tpl->set_file( array('editor' => 'faqedit.thtml',
@@ -241,7 +242,7 @@ function editfaq ($id = '')
         }
     } else {
         $tpl->set_var('faq_old_id','');
-        $A['id'] = COM_makesid();
+        $A['id'] = '';
         $A['category'] = '';
         $A['unixdate'] = 0;
         $A['description'] = '';
@@ -267,6 +268,12 @@ function editfaq ($id = '')
     $tpl->set_var('faq_title', htmlspecialchars (stripslashes ($A['title'])));
     $tpl->set_var('faq_lang_id', $LANG_FAQ_ADMIN['id']);
     $tpl->set_var('faq_id', $A['id']);
+    $tpl->set_var('faq_auto_id', empty($id) ? '1' : '0');
+    $tpl->set_var('faq_id_readonly', empty($id) ? '' : 'readonly="readonly"');
+    $tpl->set_var('faq_id_help', empty($id) ? $LANG_FAQ_ADMIN['id_auto_help'] : $LANG_FAQ_ADMIN['id_change_help']);
+    $tpl->set_var('faq_id_change_control', empty($id) ? '' :
+        '<label class="faq-id-change-confirm"><input type="checkbox" id="faq-confirm-id-change" name="faq_confirm_id_change" value="1"> '
+        . htmlspecialchars($LANG_FAQ_ADMIN['id_change_confirm'], ENT_QUOTES, COM_getCharset()) . '</label>');
     $tpl->set_var('faq_lang_desc', $LANG_FAQ_ADMIN['answer']);
     $tpl->set_var('faq_lang_category', $LANG_FAQ_ADMIN['category']);
     $tpl->set_var('faq_lang_position', $LANG_FAQ_ADMIN['position']);
@@ -330,10 +337,11 @@ function editfaq ($id = '')
 
 function editcat ($id = '') 
 {
-    global $_CONF, $_GROUPS, $_TABLES, $_USER, $_FAQ_CONF,
+    global $_CONF, $_GROUPS, $_TABLES, $_USER, $_FAQ_CONF, $_SCRIPTS,
            $LANG_FAQ_ADMIN, $LANG_ACCESS;
 
     $retval = '';
+    $_SCRIPTS->setJavaScriptFile('faq_id_admin', faq_assetPath('faq-id-admin.js'), true, 222);
 
     $tpl = COM_newTemplate(CTL_plugin_templatePath('faq', 'admin'));
     $tpl->set_file( array('editor' => 'catedit.thtml'));
@@ -361,7 +369,7 @@ function editcat ($id = '')
         }
     } else {
         $tpl->set_var('faq_old_id','');
-        $A['id'] = COM_makesid();
+        $A['id'] = '';
         $A['description'] = '';
         $A['title']= '';
         $A['owner_id'] = $_USER['uid'];
@@ -384,6 +392,12 @@ function editcat ($id = '')
     $tpl->set_var('faq_title', htmlspecialchars (stripslashes ($A['title'])));
     $tpl->set_var('faq_lang_id', $LANG_FAQ_ADMIN['id']);
     $tpl->set_var('faq_id', $A['id']);
+    $tpl->set_var('faq_auto_id', empty($id) ? '1' : '0');
+    $tpl->set_var('faq_id_readonly', empty($id) ? '' : 'readonly="readonly"');
+    $tpl->set_var('faq_id_help', empty($id) ? $LANG_FAQ_ADMIN['id_auto_help'] : $LANG_FAQ_ADMIN['id_change_help']);
+    $tpl->set_var('faq_id_change_control', empty($id) ? '' :
+        '<label class="faq-id-change-confirm"><input type="checkbox" id="faq-confirm-id-change" name="faq_confirm_id_change" value="1"> '
+        . htmlspecialchars($LANG_FAQ_ADMIN['id_change_confirm'], ENT_QUOTES, COM_getCharset()) . '</label>');
     $tpl->set_var('faq_lang_desc', $LANG_FAQ_ADMIN['description']);
     $tpl->set_var('faq_desc_source', faq_editorEscapeContent($A['description']));
     $tpl->set_var('faq_desc_advanced', faq_editorEscapeContent(faq_prepareEditorHtml($A['description'])));
@@ -440,7 +454,7 @@ function editcat ($id = '')
 * @return   string                  HTML redirect or error message
 * 
 */
-function savefaq ($id, $old_id, $category, $description, $description_edited, $title, $position, $hits, $date, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon)
+function savefaq ($id, $old_id, $category, $description, $description_edited, $title, $position, $hits, $date, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon, $confirm_id_change = 0)
 {
     global $_CONF, $_GROUPS, $_TABLES, $_USER, $MESSAGE, $LANG_FAQ_ADMIN, $_FAQ_CONF;
 
@@ -482,7 +496,33 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
         $description = DB_escapeString(COM_checkHTML(COM_checkWords($description)));
     }
 
+    $plain_title = trim(strip_tags(COM_checkHTML(COM_checkWords($title))));
     $title = DB_escapeString(COM_checkHTML(COM_checkWords($title)));
+
+    $raw_id = trim((string) $id);
+    $old_id_raw = trim((string) $old_id);
+    if ($old_id_raw === '') {
+        $raw_id = faq_slugify($raw_id !== '' ? $raw_id : $plain_title, 40);
+        if ($raw_id === '') {
+            $raw_id = faq_uniqueSlug($_TABLES['faq'], $plain_title);
+        } elseif (DB_count($_TABLES['faq'], 'id', DB_escapeString($raw_id)) > 0) {
+            $raw_id = faq_uniqueSlug($_TABLES['faq'], $raw_id);
+        }
+    } else {
+        $raw_id = faq_slugify($raw_id, 40);
+        if ($raw_id === '') {
+            $raw_id = $old_id_raw;
+        }
+        if ($raw_id !== $old_id_raw && (int) $confirm_id_change !== 1) {
+            return COM_showMessageText($LANG_FAQ_ADMIN['id_change_required'], $LANG_FAQ_ADMIN['FAQ Editor']);
+        }
+        if ($raw_id !== $old_id_raw
+            && DB_count($_TABLES['faq'], 'id', DB_escapeString($raw_id)) > 0) {
+            return COM_showMessageText($LANG_FAQ_ADMIN['id_exists'], $LANG_FAQ_ADMIN['FAQ Editor']);
+        }
+    }
+    $id = $raw_id;
+
     $position = trim((string) $position);
     if ($position !== 'first' && $position !== 'last' && strpos($position, 'after:') !== 0) {
         $position = 'last';
@@ -613,7 +653,7 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
     }
 }
 
-function savecat ($id, $old_id, $description, $description_edited, $title, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon)
+function savecat ($id, $old_id, $description, $description_edited, $title, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon, $confirm_id_change = 0)
 {
     global $_CONF, $_GROUPS, $_TABLES, $_USER, $MESSAGE, $LANG_FAQ_ADMIN, $_FAQ_CONF;
 
@@ -652,8 +692,32 @@ function savecat ($id, $old_id, $description, $description_edited, $title, $owne
         $description = DB_escapeString(COM_checkHTML(COM_checkWords($description)));
     }
 
+    $plain_title = trim(strip_tags(COM_checkHTML(COM_checkWords($title))));
     $title = DB_escapeString(COM_checkHTML(COM_checkWords($title)));
-    $id = DB_escapeString($id);
+
+    $raw_id = trim((string) $id);
+    $old_id_raw = trim((string) $old_id);
+    if ($old_id_raw === '') {
+        $raw_id = faq_slugify($raw_id !== '' ? $raw_id : $plain_title, 40);
+        if ($raw_id === '') {
+            $raw_id = faq_uniqueSlug($_TABLES['faq_category'], $plain_title);
+        } elseif (DB_count($_TABLES['faq_category'], 'id', DB_escapeString($raw_id)) > 0) {
+            $raw_id = faq_uniqueSlug($_TABLES['faq_category'], $raw_id);
+        }
+    } else {
+        $raw_id = faq_slugify($raw_id, 40);
+        if ($raw_id === '') {
+            $raw_id = $old_id_raw;
+        }
+        if ($raw_id !== $old_id_raw && (int) $confirm_id_change !== 1) {
+            return COM_showMessageText($LANG_FAQ_ADMIN['id_change_required'], $LANG_FAQ_ADMIN['Cat Editor']);
+        }
+        if ($raw_id !== $old_id_raw
+            && DB_count($_TABLES['faq_category'], 'id', DB_escapeString($raw_id)) > 0) {
+            return COM_showMessageText($LANG_FAQ_ADMIN['id_exists'], $LANG_FAQ_ADMIN['Cat Editor']);
+        }
+    }
+    $id = DB_escapeString($raw_id);
     
     if (empty ($owner_id)) {
         // this is new link from admin, set default values
@@ -788,8 +852,7 @@ function listfaq ($cat = '')
                     array('text' => $LANG_FAQ_ADMIN['title'], 'field' => 'title'),
                     array('text' => $LANG_FAQ_ADMIN['category'], 'field' => 'cat_title'),
                     array('text' => $LANG_FAQ_ADMIN['position'], 'field' => 'position'),
-                    array('text' => $LANG_FAQ_ADMIN['hits'], 'field' => 'hits'),
-                    array('text' => $LANG_FAQ_ADMIN['access'], 'field' => 'access'));
+                    array('text' => $LANG_FAQ_ADMIN['hits'], 'field' => 'hits'));
 
     $menu_arr = array(
         array(
@@ -857,8 +920,7 @@ function listcat ()
                     array('text' => $LANG_FAQ_ADMIN['id'], 'field' => 'id'),
                     array('text' => $LANG_FAQ_ADMIN['title'], 'field' => 'title'),
                     array('text' => $LANG_FAQ_ADMIN['FAQ Entries'], 'field' => 'cnt'),
-                    array('text' => $LANG_FAQ_ADMIN['hits'], 'field' => 'hits'),
-                    array('text' => $LANG_FAQ_ADMIN['access'], 'field' => 'access'));
+                    array('text' => $LANG_FAQ_ADMIN['hits'], 'field' => 'hits'));
 
     $menu_arr = array(
         array(
@@ -990,7 +1052,8 @@ if (($action == $LANG_FAQ_ADMIN['delete']) && !empty ($LANG_FAQ_ADMIN['delete'])
                             UTIL_getParam('perm_owner'),
                             UTIL_getParam('perm_group'),
                             UTIL_getParam('perm_members'),
-                            UTIL_getParam('perm_anon'));
+                            UTIL_getParam('perm_anon'),
+                            UTIL_getParamInt('faq_confirm_id_change'));
     }
     else if ( $mode == 'cat' ) {
         $display .= savecat(UTIL_getParamStr('faq_id'),
@@ -1003,7 +1066,8 @@ if (($action == $LANG_FAQ_ADMIN['delete']) && !empty ($LANG_FAQ_ADMIN['delete'])
                             UTIL_getParam('perm_owner'),
                             UTIL_getParam('perm_group'),
                             UTIL_getParam('perm_members'),
-                            UTIL_getParam('perm_anon'));
+                            UTIL_getParam('perm_anon'),
+                            UTIL_getParamInt('faq_confirm_id_change'));
     }
     else {
         $pagetitle = $LANG_FAQ_ADMIN['FAQ Editor'];
