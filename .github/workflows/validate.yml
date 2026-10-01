@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - develop-1.3.0
+    paths-ignore:
+      - 'dist/**'
   pull_request:
   workflow_dispatch:
 
