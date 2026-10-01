@@ -179,8 +179,13 @@ jobs:
       - name: Validate FAQ category ordering
         if: matrix.php == '8.1'
         run: |
-          grep -A8 "CREATE TABLE {\$_TABLES\['faq'\]}" sql/mysql_install.php | grep -q "sort_order int(11) NOT NULL DEFAULT 0"
+          grep -A8 "CREATE TABLE {\$_TABLES\['faq'\]}" sql/mysql_install.php | grep -q "sort_order int(11) NOT NULL DEFAULT 10"
           grep -q "function faq_ensureFaqSortOrderColumn" functions.inc
+          grep -q "SET sort_order = 10 WHERE sort_order = 0" functions.inc
+          if grep -A6 "case 'sort_order':" functions.inc; then
+            echo "FAQ ordering must not rely on a zero-display workaround in the admin list callback."
+            exit 1
+          fi
           grep -q "function faq_faqOrderBySql" functions.inc
           grep -q 'name="faq_sort_order"' templates/default/admin/faqedit.thtml
           grep -q "faq_order_help" admin/index.php
