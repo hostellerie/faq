@@ -82,17 +82,25 @@ function faq_ensureFaqSortOrderColumn()
         return false;
     }
 
+    $added = false;
     if (!faq_faqSortOrderColumnExists()) {
         DB_query("ALTER TABLE {$_TABLES['faq']} ADD sort_order int(11) NOT NULL DEFAULT 10 AFTER category");
+        $added = true;
     }
 
-    if (faq_faqSortOrderColumnExists()) {
-        DB_query("ALTER TABLE {$_TABLES['faq']} MODIFY sort_order int(11) NOT NULL DEFAULT 10");
-        DB_query("UPDATE {$_TABLES['faq']} SET sort_order = 10 WHERE sort_order = 0");
-        return true;
+    if (!faq_faqSortOrderColumnExists()) {
+        return false;
     }
 
-    return false;
+    DB_query("ALTER TABLE {$_TABLES['faq']} MODIFY sort_order int(11) NOT NULL DEFAULT 10");
+
+    if ($added) {
+        faq_normalizeAllCategoryOrders();
+    } else {
+        faq_normalizeCategoryOrdersIfNeeded();
+    }
+
+    return true;
 }
 
 function faq_faqOrderBySql($fallback)
@@ -107,6 +115,110 @@ function faq_faqOrderBySql($fallback)
     }
 
     return 'faq.' . $fallback;
+}
+
+function faq_categoryOrderedIds($category, $excludeId = '')
+{
+    global $_TABLES, $_FAQ_CONF;
+
+    $categorySql = DB_escapeString((string) $category);
+    $sql = "SELECT faq.id
+              FROM {$_TABLES['faq']} faq
+             WHERE faq.category = '{$categorySql}'";
+
+    if ($excludeId !== '') {
+        $sql .= " AND faq.id <> '" . DB_escapeString((string) $excludeId) . "'";
+    }
+
+    $sql .= ' ORDER BY ' . faq_faqOrderBySql($_FAQ_CONF['faq_sort_order']);
+
+    $result = DB_query($sql);
+    $ids = array();
+    while ($row = DB_fetchArray($result)) {
+        $ids[] = (string) $row['id'];
+    }
+
+    return $ids;
+}
+
+function faq_normalizeCategoryOrder($category, $movingId = '', $position = 'last')
+{
+    global $_TABLES;
+
+    $category = (string) $category;
+    if ($category === '') {
+        return;
+    }
+
+    $ids = faq_categoryOrderedIds($category, $movingId);
+
+    if ($movingId !== '') {
+        $movingId = (string) $movingId;
+        $position = (string) $position;
+
+        if ($position === 'first') {
+            array_unshift($ids, $movingId);
+        } elseif (strpos($position, 'after:') === 0) {
+            $afterId = substr($position, 6);
+            $index = array_search($afterId, $ids, true);
+            if ($index === false) {
+                $ids[] = $movingId;
+            } else {
+                array_splice($ids, $index + 1, 0, array($movingId));
+            }
+        } else {
+            $ids[] = $movingId;
+        }
+    }
+
+    $order = 10;
+    foreach ($ids as $id) {
+        DB_query("UPDATE {$_TABLES['faq']}
+                     SET sort_order = {$order}
+                   WHERE id = '" . DB_escapeString($id) . "'");
+        $order += 10;
+    }
+}
+
+function faq_normalizeAllCategoryOrders()
+{
+    global $_TABLES;
+
+    $result = DB_query("SELECT id FROM {$_TABLES['faq_category']} ORDER BY id");
+    while ($row = DB_fetchArray($result)) {
+        faq_normalizeCategoryOrder($row['id']);
+    }
+}
+
+function faq_normalizeCategoryOrdersIfNeeded()
+{
+    global $_TABLES;
+
+    $sql = "SELECT category
+              FROM {$_TABLES['faq']}
+             GROUP BY category
+            HAVING MIN(sort_order) < 10
+                OR COUNT(*) <> COUNT(DISTINCT sort_order)";
+    $result = DB_query($sql);
+
+    while ($row = DB_fetchArray($result)) {
+        faq_normalizeCategoryOrder($row['category']);
+    }
+}
+
+function faq_currentPositionValue($category, $faqId)
+{
+    $ids = faq_categoryOrderedIds($category);
+    $index = array_search((string) $faqId, $ids, true);
+
+    if ($index === false) {
+        return 'last';
+    }
+    if ($index === 0) {
+        return 'first';
+    }
+
+    return 'after:' . $ids[$index - 1];
 }
 
 
