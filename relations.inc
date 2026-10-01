@@ -543,35 +543,58 @@ function faq_categoryRelationGetForItem($provider, $item_id, $subtype = '', $pla
     $subtype = DB_escapeString(substr((string) $subtype, 0, 64));
     $faqSortSelect = faq_faqSortOrderColumnExists() ? 'faq.sort_order' : '0';
 
+    /*
+     * Relation tables existed in intermediate 1.3.0 development installs.
+     * Read them defensively: a public PLG_itemDisplay() call must not take down
+     * an unrelated provider merely because one optional relation column has not
+     * yet been added by the FAQ upgrade path.
+     */
+    $relationTable = $_TABLES['faq_category_relations'];
+    $hasItemSubtype = faq_relationColumnExists($relationTable, 'item_subtype');
+    $hasPlacement = faq_relationColumnExists($relationTable, 'placement');
+    $hasTopicScope = faq_relationColumnExists($relationTable, 'topic_scope');
+    $hasSortOrder = faq_relationColumnExists($relationTable, 'sort_order');
+    $hasEnabled = faq_relationColumnExists($relationTable, 'enabled');
+
+    $itemSubtypeSelect = $hasItemSubtype ? 'cr.item_subtype' : "''";
+    $placementSelect = $hasPlacement ? 'cr.placement' : "'automatic'";
+    $topicScopeSelect = $hasTopicScope ? 'cr.topic_scope' : "'both'";
+    $sortOrderSelect = $hasSortOrder ? 'cr.sort_order' : '0';
+
     $sql = "SELECT cr.relation_id AS category_relation_id,
-                   cr.category_id, cr.provider, cr.item_id, cr.item_subtype,
-                   cr.placement, cr.topic_scope, cr.sort_order,
+                   cr.category_id, cr.provider, cr.item_id,
+                   {$itemSubtypeSelect} AS item_subtype,
+                   {$placementSelect} AS placement,
+                   {$topicScopeSelect} AS topic_scope,
+                   {$sortOrderSelect} AS sort_order,
                    faq.id AS faq_id, faq.title, faq.description, faq.category,
                    {$faqSortSelect} AS faq_sort_order, faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
               FROM {$_TABLES['faq_category_relations']} cr
               JOIN {$_TABLES['faq_category']} cat ON cat.id = cr.category_id
               JOIN {$_TABLES['faq']} faq ON faq.category = cat.id
-             WHERE cr.enabled = 1
+             WHERE " . ($hasEnabled ? 'cr.enabled = 1' : '1 = 1') . "
                AND cr.provider = '{$provider}'
                AND cr.item_id = '{$item_id}'";
 
-    if ($subtype !== '') {
+    if ($subtype !== '' && $hasItemSubtype) {
         $sql .= " AND (cr.item_subtype = '' OR cr.item_subtype = '{$subtype}')";
     }
 
-    if ($placement === 'automatic') {
-        $sql .= " AND cr.placement <> 'manual'";
-    } elseif ($placement !== '') {
-        $placement = DB_escapeString($placement);
-        $sql .= " AND cr.placement = '{$placement}'";
+    if ($hasPlacement) {
+        if ($placement === 'automatic') {
+            $sql .= " AND cr.placement <> 'manual'";
+        } elseif ($placement !== '') {
+            $placement = DB_escapeString($placement);
+            $sql .= " AND cr.placement = '{$placement}'";
+        }
     }
-    if ($provider === 'topic' && $topic_scope !== '') {
+    if ($provider === 'topic' && $topic_scope !== '' && $hasTopicScope) {
         $sql .= faq_relationTopicScopeSql('cr', $topic_scope);
     }
 
     $sql .= COM_getPermSQL('AND', 0, 2, 'faq')
           . COM_getPermSQL('AND', 0, 2, 'cat')
-          . ' ORDER BY cr.sort_order ASC, faq.title ASC';
+          . " ORDER BY {$sortOrderSelect} ASC, faq.title ASC";
 
     $result = DB_query($sql);
     while ($row = DB_fetchArray($result)) {
@@ -745,13 +768,29 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
     $subtype = DB_escapeString(substr((string) $subtype, 0, 64));
     $faqSortSelect = faq_faqSortOrderColumnExists() ? 'faq.sort_order' : '0';
 
-    $sql = "SELECT rel.relation_id, rel.faq_id, rel.provider, rel.item_id, rel.item_subtype,
-                   rel.placement, rel.topic_scope, rel.sort_order, faq.title, faq.description, faq.category,
-                   faq.sort_order AS faq_sort_order, faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
+    $relationTable = $_TABLES['faq_relations'];
+    $hasItemSubtype = faq_relationColumnExists($relationTable, 'item_subtype');
+    $hasPlacement = faq_relationColumnExists($relationTable, 'placement');
+    $hasTopicScope = faq_relationColumnExists($relationTable, 'topic_scope');
+    $hasSortOrder = faq_relationColumnExists($relationTable, 'sort_order');
+    $hasEnabled = faq_relationColumnExists($relationTable, 'enabled');
+
+    $itemSubtypeSelect = $hasItemSubtype ? 'rel.item_subtype' : "''";
+    $placementSelect = $hasPlacement ? 'rel.placement' : "'automatic'";
+    $topicScopeSelect = $hasTopicScope ? 'rel.topic_scope' : "'both'";
+    $sortOrderSelect = $hasSortOrder ? 'rel.sort_order' : '0';
+
+    $sql = "SELECT rel.relation_id, rel.faq_id, rel.provider, rel.item_id,
+                   {$itemSubtypeSelect} AS item_subtype,
+                   {$placementSelect} AS placement,
+                   {$topicScopeSelect} AS topic_scope,
+                   {$sortOrderSelect} AS sort_order,
+                   faq.title, faq.description, faq.category,
+                   {$faqSortSelect} AS faq_sort_order, faq.hits, UNIX_TIMESTAMP(faq.date) AS modified
               FROM {$_TABLES['faq_relations']} rel
               JOIN {$_TABLES['faq']} faq ON faq.id = rel.faq_id
               JOIN {$_TABLES['faq_category']} cat ON cat.id = faq.category
-             WHERE rel.enabled = 1
+             WHERE " . ($hasEnabled ? 'rel.enabled = 1' : '1 = 1') . "
                AND rel.provider = '{$provider}'
                AND rel.item_id = '{$item_id}'";
 
@@ -761,23 +800,25 @@ function faq_relationGetForItem($provider, $item_id, $subtype = '', $placement =
      * relations out. The subtype remains useful metadata for consumers that
      * can provide it explicitly.
      */
-    if ($subtype !== '') {
+    if ($subtype !== '' && $hasItemSubtype) {
         $sql .= " AND (rel.item_subtype = '' OR rel.item_subtype = '{$subtype}')";
     }
 
-    if ($placement === 'automatic') {
-        $sql .= " AND rel.placement <> 'manual'";
-    } elseif ($placement !== '') {
-        $placement = DB_escapeString($placement);
-        $sql .= " AND rel.placement = '{$placement}'";
+    if ($hasPlacement) {
+        if ($placement === 'automatic') {
+            $sql .= " AND rel.placement <> 'manual'";
+        } elseif ($placement !== '') {
+            $placement = DB_escapeString($placement);
+            $sql .= " AND rel.placement = '{$placement}'";
+        }
     }
-    if ($provider === 'topic' && $topic_scope !== '') {
+    if ($provider === 'topic' && $topic_scope !== '' && $hasTopicScope) {
         $sql .= faq_relationTopicScopeSql('rel', $topic_scope);
     }
 
     $sql .= COM_getPermSQL('AND', 0, 2, 'faq')
           . COM_getPermSQL('AND', 0, 2, 'cat')
-          . ' ORDER BY rel.sort_order ASC, faq.title ASC';
+          . " ORDER BY {$sortOrderSelect} ASC, faq.title ASC";
 
     $result = DB_query($sql);
     $seen = array();
