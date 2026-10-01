@@ -210,7 +210,9 @@ jobs:
           grep -q "id_change_required" language/french_france_utf-8.php
           test -f public_html/faq-id-admin.js
           grep -q "faq_notifyCategorySaved" modern.inc
+          grep -q "category:' . \$id" modern.inc
           grep -q "subType === 'category'" modern.inc
+          grep -q "strpos((string) \$id, 'category:')" modern.inc
           if grep -q "field' => 'access'" admin/index.php; then
             echo "FAQ/category overview lists must not expose the technical access column."
             exit 1
