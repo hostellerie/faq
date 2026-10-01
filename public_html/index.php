@@ -201,7 +201,7 @@ if ( ! empty($faq_id)) {
                       AND cat.id = '{$cat_id}'"
                 . COM_getPermSQL('AND', 0, 2, 'faq')
                 . COM_getPermSQL('AND', 0, 2, 'cat')
-                . " ORDER BY {$_FAQ_CONF['faq_sort_order']}");
+                . " ORDER BY " . faq_faqOrderBySql($_FAQ_CONF['faq_sort_order']));
 
     $questionList = '';
     while ($faq = DB_fetchArray($r)) {
