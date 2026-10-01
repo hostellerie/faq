@@ -174,3 +174,17 @@ jobs:
           grep -q "value=\"update_category\"" admin/relations.php
           grep -q "association_updated" language/english_utf-8.php
           grep -q "association_updated" language/french_france_utf-8.php
+
+
+      - name: Validate FAQ category ordering
+        if: matrix.php == '8.1'
+        run: |
+          grep -A8 "CREATE TABLE {\$_TABLES\['faq'\]}" sql/mysql_install.php | grep -q "sort_order int(11) NOT NULL DEFAULT 0"
+          grep -q "function faq_ensureFaqSortOrderColumn" functions.inc
+          grep -q "function faq_faqOrderBySql" functions.inc
+          grep -q 'name="faq_sort_order"' templates/default/admin/faqedit.thtml
+          grep -q "faq_order_help" admin/index.php
+          grep -q "UTIL_getParamInt('faq_sort_order')" admin/index.php
+          grep -q "faq_faqOrderBySql" public_html/index.php
+          grep -q "order_help" language/english_utf-8.php
+          grep -q "order_help" language/french_france_utf-8.php
