@@ -66,9 +66,75 @@ function faq_normalizeItemRow($row, $what = '')
     return $result;
 }
 
+function faq_normalizeCategoryRow($row, $what = '')
+{
+    $all = array(
+        'id' => $row['id'],
+        'title' => $row['title'],
+        'url' => faq_getCategoryUrl($row['id']),
+        'description' => $row['description'],
+        'excerpt' => COM_truncate(strip_tags(PLG_replaceTags($row['description'])), 240, '...'),
+        'type' => 'faq',
+        'subtype' => 'category'
+    );
+
+    if ($what === '' || $what === '*' || $what === null) {
+        return $all;
+    }
+
+    $wanted = is_array($what) ? $what : preg_split('/\s*,\s*/', $what, -1, PREG_SPLIT_NO_EMPTY);
+    if (count($wanted) === 1 && isset($all[$wanted[0]])) {
+        return $all[$wanted[0]];
+    }
+
+    $result = array();
+    foreach ($wanted as $field) {
+        if (array_key_exists($field, $all)) {
+            $result[$field] = $all[$field];
+        }
+    }
+
+    return $result;
+}
+
 function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
 {
     global $_TABLES;
+
+    $subType = isset($options['sub_type']) ? (string) $options['sub_type'] : '';
+    if ($subType === 'category') {
+        $perm = COM_getPermSQL('AND', $uid, 2, 'cat');
+
+        if ($id !== '*') {
+            $safeId = DB_escapeString($id);
+            $result = DB_query("SELECT cat.id, cat.title, cat.description
+                                  FROM {$_TABLES['faq_category']} cat
+                                 WHERE cat.id = '{$safeId}' {$perm}
+                                 LIMIT 1");
+            if (DB_numRows($result) !== 1) {
+                return false;
+            }
+            return faq_normalizeCategoryRow(DB_fetchArray($result), $what);
+        }
+
+        $limit = isset($options['limit']) ? (int) $options['limit'] : 50;
+        if ($limit < 1) {
+            $limit = 1;
+        } elseif ($limit > 200) {
+            $limit = 200;
+        }
+
+        $result = DB_query("SELECT cat.id, cat.title, cat.description
+                              FROM {$_TABLES['faq_category']} cat
+                             WHERE 1=1 {$perm}
+                             ORDER BY cat.title ASC
+                             LIMIT {$limit}");
+        $items = array();
+        while ($row = DB_fetchArray($result)) {
+            $items[] = faq_normalizeCategoryRow($row, $what);
+        }
+        return $items;
+    }
 
     $fields = "faq.id, faq.title, faq.description, faq.category, faq.hits,
                UNIX_TIMESTAMP(faq.date) AS date_created,
@@ -141,6 +207,10 @@ function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
 
 function plugin_idtourl_faq($sub_type, $item_id)
 {
+    if ($sub_type === 'category') {
+        return faq_getCategoryUrl($item_id);
+    }
+
     if ($sub_type !== '' && $sub_type !== null && $sub_type !== 'question' && $sub_type !== 'faq') {
         return '';
     }
@@ -377,6 +447,32 @@ function faq_notifyDeleted($id)
 
     if (version_compare(VERSION, '2.2.0', '>=')) {
         PLG_itemDeleted($id, 'faq', 'question');
+    } else {
+        PLG_itemDeleted($id, 'faq');
+    }
+}
+
+function faq_notifyCategorySaved($id, $old_id = '')
+{
+    if (!function_exists('PLG_itemSaved')) {
+        return;
+    }
+
+    if (version_compare(VERSION, '2.2.2', '>=')) {
+        PLG_itemSaved($id, 'faq', $old_id, 'category');
+    } else {
+        PLG_itemSaved($id, 'faq', $old_id);
+    }
+}
+
+function faq_notifyCategoryDeleted($id)
+{
+    if (!function_exists('PLG_itemDeleted')) {
+        return;
+    }
+
+    if (version_compare(VERSION, '2.2.0', '>=')) {
+        PLG_itemDeleted($id, 'faq', 'category');
     } else {
         PLG_itemDeleted($id, 'faq');
     }
