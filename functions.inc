@@ -164,6 +164,9 @@ function faq_getListField_common($mode, $fieldname, $fieldvalue, $A, $icon_arr)
 					$retval = strftime($_CONF['daytime'], $A['unixdate']);
 				}		
                 break;
+        case 'sort_order':
+            $retval = isset($A['sort_order']) ? (string) (int) $A['sort_order'] : '0';
+            break;
         case 'hits':
             $retval = COM_numberFormat ($A['hits']);
             break;
