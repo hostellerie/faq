@@ -139,6 +139,11 @@ $LANG_FAQ_COMMON += array(
 );
 
 $LANG_FAQ_ADMIN += array(
+    'position' => 'Position',
+    'position_first' => 'First',
+    'position_last' => 'Last',
+    'position_after' => 'After: %s',
+    'position_help' => 'Choose this FAQ position inside its category. Internal ordering is recalculated automatically in steps of 10.',
     'order' => 'Order',
     'order_help' => 'Controls this FAQ position inside its category. Lower values appear first; values such as 10, 20, 30 leave room for later insertions.',
     'editor_mode' => 'Editor mode',
