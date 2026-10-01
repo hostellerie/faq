@@ -4,11 +4,15 @@
 
 <div class="admin_basic">
 <dl class="form_block">
-<dt><label for="faq-editor-id">{faq_lang_id}</label></dt>
-<dd><input type="text" size="40" maxlength="40" id="faq-editor-id" name="faq_id" value="{faq_id}" class="size5"></dd>
-
 <dt><label for="faq-editor-title">{faq_lang_title}</label></dt>
 <dd><input type="text" size="69" maxlength="250" id="faq-editor-title" name="faq_title" value="{faq_title}" class="size5"></dd>
+
+<dt><label for="faq-editor-id">{faq_lang_id}</label></dt>
+<dd>
+<input type="text" size="40" maxlength="40" id="faq-editor-id" name="faq_id" value="{faq_id}" class="size5" data-auto-id="{faq_auto_id}" {faq_id_readonly}>
+<div class="description">{faq_id_help}</div>
+{faq_id_change_control}
+</dd>
 
 <dt><label for="sel_editmode">{lang_editor_mode}</label></dt>
 <dd>
