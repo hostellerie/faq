@@ -691,6 +691,9 @@ function plugin_upgrade_faq()
     if (function_exists('faq_relationEnsureTopicScopeColumns')) {
         faq_relationEnsureTopicScopeColumns();
     }
+    if (function_exists('faq_ensureFaqSortOrderColumn')) {
+        faq_ensureFaqSortOrderColumn();
+    }
 
     if ($installed_version == $code_version) {
         return true;
@@ -792,6 +795,9 @@ function plugin_upgrade_faq()
 
     if (function_exists('faq_relationEnsureTopicScopeColumns')) {
         faq_relationEnsureTopicScopeColumns();
+    }
+    if (function_exists('faq_ensureFaqSortOrderColumn')) {
+        faq_ensureFaqSortOrderColumn();
     }
 
     require_once $_CONF['path_system'] . 'classes/config.class.php';
