@@ -83,10 +83,16 @@ function faq_ensureFaqSortOrderColumn()
     }
 
     if (!faq_faqSortOrderColumnExists()) {
-        DB_query("ALTER TABLE {$_TABLES['faq']} ADD sort_order int(11) NOT NULL DEFAULT 0 AFTER category");
+        DB_query("ALTER TABLE {$_TABLES['faq']} ADD sort_order int(11) NOT NULL DEFAULT 10 AFTER category");
     }
 
-    return faq_faqSortOrderColumnExists();
+    if (faq_faqSortOrderColumnExists()) {
+        DB_query("ALTER TABLE {$_TABLES['faq']} ALTER sort_order SET DEFAULT 10");
+        DB_query("UPDATE {$_TABLES['faq']} SET sort_order = 10 WHERE sort_order = 0");
+        return true;
+    }
+
+    return false;
 }
 
 function faq_faqOrderBySql($fallback)
@@ -164,9 +170,6 @@ function faq_getListField_common($mode, $fieldname, $fieldvalue, $A, $icon_arr)
 					$retval = strftime($_CONF['daytime'], $A['unixdate']);
 				}		
                 break;
-        case 'sort_order':
-            $retval = isset($A['sort_order']) ? (string) (int) $A['sort_order'] : '0';
-            break;
         case 'hits':
             $retval = COM_numberFormat ($A['hits']);
             break;
