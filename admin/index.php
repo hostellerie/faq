@@ -35,6 +35,8 @@
 require_once ('../../../lib-common.php');
 require_once ('../../auth.inc.php');
 
+faq_ensureFaqSortOrderColumn();
+
 $display = '';
 $pagetitle = '';
 
@@ -202,6 +204,7 @@ function editfaq ($id = '')
         $A['description'] = '';
         $A['title']= '';
         $A['hits'] = 0;
+        $A['sort_order'] = 0;
         $A['owner_id'] = $_USER['uid'];
         if (isset ($_GROUPS['FAQ Admin'])) {
             $A['group_id'] = $_GROUPS['FAQ Admin'];
@@ -223,6 +226,9 @@ function editfaq ($id = '')
     $tpl->set_var('faq_id', $A['id']);
     $tpl->set_var('faq_lang_desc', $LANG_FAQ_ADMIN['answer']);
     $tpl->set_var('faq_lang_category', $LANG_FAQ_ADMIN['category']);
+    $tpl->set_var('faq_lang_order', $LANG_FAQ_ADMIN['order']);
+    $tpl->set_var('faq_order_help', $LANG_FAQ_ADMIN['order_help']);
+    $tpl->set_var('faq_sort_order', isset($A['sort_order']) ? (int) $A['sort_order'] : 0);
     $tpl->set_var('faq_lang_hits', $LANG_FAQ_ADMIN['hits']);
     $tpl->set_var('faq_lang_date', $LANG_FAQ_ADMIN['changed']);
     $tpl->set_var('faq_lang_reset_date', $LANG_FAQ_ADMIN['reset_date']);
@@ -390,7 +396,7 @@ function editcat ($id = '')
 * @return   string                  HTML redirect or error message
 * 
 */
-function savefaq ($id, $old_id, $category, $description, $description_edited, $title, $hits, $date, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon)
+function savefaq ($id, $old_id, $category, $description, $description_edited, $title, $sort_order, $hits, $date, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon)
 {
     global $_CONF, $_GROUPS, $_TABLES, $_USER, $MESSAGE, $LANG_FAQ_ADMIN, $_FAQ_CONF;
 
@@ -433,6 +439,7 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
     }
 
     $title = DB_escapeString(COM_checkHTML(COM_checkWords($title)));
+    $sort_order = max(0, (int) $sort_order);
     $id = DB_escapeString($id);
     
     if (empty ($owner_id)) {
@@ -500,13 +507,14 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
                          , title = '%s'
                          , description = '%s'
                          , category = '%s'
+                         , sort_order = %d
                          , owner_id = %d
                          , group_id = %d 
                          , perm_owner = %d
                          , perm_group = %d
                          , perm_members = %d
                          , perm_anon = %d"
-                         , $id,$title,$description,$category,$owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon);
+                         , $id,$title,$description,$category,$sort_order,$owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon);
             if (SEC_hasRights ('faq.admin')) {
                 $sql .= sprintf(", hits = %d", $hits);
                 if ($date)
@@ -517,9 +525,9 @@ function savefaq ($id, $old_id, $category, $description, $description_edited, $t
             $sql .= " WHERE id = '{$old_id}'";
         }
         else {
-            $sql = "INSERT INTO {$_TABLES['faq']}(id,category,title,description,date,hits,owner_id,group_id,perm_owner,perm_group,perm_members,perm_anon) ";
-            $sql .= sprintf(" VALUES('%s','%s','%s','%s',NOW(),%d,%d,%d,%d,%d,%d,%d)",
-                            $id, $category, $title, $description, $hits, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon);
+            $sql = "INSERT INTO {$_TABLES['faq']}(id,category,sort_order,title,description,date,hits,owner_id,group_id,perm_owner,perm_group,perm_members,perm_anon) ";
+            $sql .= sprintf(" VALUES('%s','%s',%d,'%s','%s',NOW(),%d,%d,%d,%d,%d,%d,%d)",
+                            $id, $category, $sort_order, $title, $description, $hits, $owner_id, $group_id, $perm_owner, $perm_group, $perm_members, $perm_anon);
         }        
         DB_query($sql);
 
@@ -704,7 +712,7 @@ function listfaq ($cat = '')
          . COM_getPermSQL( 'AND', 0, 3, 'cat' );
     if ( ! empty($cat))
         $sql .= " AND cat.id = '{$cat}'";
-    $sql .= " ORDER BY faq.{$_FAQ_CONF['faq_sort_order']}";
+    $sql .= " ORDER BY " . faq_faqOrderBySql($_FAQ_CONF['faq_sort_order']);
      
     $tpl->set_var('faq_lang_category', $LANG_FAQ_ADMIN['category']);
     $tpl->set_var('faq_lang_all', $LANG_FAQ_ADMIN['all_cat']);
@@ -892,6 +900,7 @@ if (($action == $LANG_FAQ_ADMIN['delete']) && !empty ($LANG_FAQ_ADMIN['delete'])
                             UTIL_getParamStr('faq_desc'),
                             UTIL_getParamInt('faq_desc_edited'),
                             UTIL_getParamStr('faq_title'),
+                            UTIL_getParamInt('faq_sort_order'),
                             UTIL_getParamInt('faq_hits'),
                             UTIL_getParamInt('faq_date'),
                             UTIL_getParam('owner_id'),
