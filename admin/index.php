@@ -204,7 +204,7 @@ function editfaq ($id = '')
         $A['description'] = '';
         $A['title']= '';
         $A['hits'] = 0;
-        $A['sort_order'] = 0;
+        $A['sort_order'] = 10;
         $A['owner_id'] = $_USER['uid'];
         if (isset ($_GROUPS['FAQ Admin'])) {
             $A['group_id'] = $_GROUPS['FAQ Admin'];
@@ -228,7 +228,7 @@ function editfaq ($id = '')
     $tpl->set_var('faq_lang_category', $LANG_FAQ_ADMIN['category']);
     $tpl->set_var('faq_lang_order', $LANG_FAQ_ADMIN['order']);
     $tpl->set_var('faq_order_help', $LANG_FAQ_ADMIN['order_help']);
-    $tpl->set_var('faq_sort_order', isset($A['sort_order']) ? (int) $A['sort_order'] : 0);
+    $tpl->set_var('faq_sort_order', isset($A['sort_order']) ? (int) $A['sort_order'] : 10);
     $tpl->set_var('faq_lang_hits', $LANG_FAQ_ADMIN['hits']);
     $tpl->set_var('faq_lang_date', $LANG_FAQ_ADMIN['changed']);
     $tpl->set_var('faq_lang_reset_date', $LANG_FAQ_ADMIN['reset_date']);
