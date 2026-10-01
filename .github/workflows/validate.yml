@@ -196,3 +196,22 @@ jobs:
             echo "The FAQ editor must expose logical position, not raw sort_order."
             exit 1
           fi
+
+
+      - name: Validate SEO-friendly FAQ IDs
+        if: matrix.php == '8.1'
+        run: |
+          grep -q "function faq_slugify" functions.inc
+          grep -q "function faq_uniqueSlug" functions.inc
+          grep -q 'data-auto-id="{faq_auto_id}"' templates/default/admin/faqedit.thtml
+          grep -q 'data-auto-id="{faq_auto_id}"' templates/default/admin/catedit.thtml
+          grep -q 'faq_confirm_id_change' admin/index.php
+          grep -q "id_change_required" language/english_utf-8.php
+          grep -q "id_change_required" language/french_france_utf-8.php
+          test -f public_html/faq-id-admin.js
+          grep -q "faq_notifyCategorySaved" modern.inc
+          grep -q "subType === 'category'" modern.inc
+          if grep -q "field' => 'access'" admin/index.php; then
+            echo "FAQ/category overview lists must not expose the technical access column."
+            exit 1
+          fi
