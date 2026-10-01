@@ -87,7 +87,7 @@ function faq_ensureFaqSortOrderColumn()
     }
 
     if (faq_faqSortOrderColumnExists()) {
-        DB_query("ALTER TABLE {$_TABLES['faq']} ALTER sort_order SET DEFAULT 10");
+        DB_query("ALTER TABLE {$_TABLES['faq']} MODIFY sort_order int(11) NOT NULL DEFAULT 10");
         DB_query("UPDATE {$_TABLES['faq']} SET sort_order = 10 WHERE sort_order = 0");
         return true;
     }
