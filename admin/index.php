@@ -800,7 +800,8 @@ function savecat ($id, $old_id, $description, $description_edited, $title, $owne
         }
 
         faq_clearLocalCache();
-        
+        faq_notifyCategorySaved($id, $old_id);
+
         return COM_refresh ($_CONF['site_admin_url'] . '/plugins/faq/index.php?msg=4&mode=cat');
     } else { // missing fields
         $retval .= COM_errorLog($LANG_FAQ_ADMIN['missing_fields_cat'],2);
@@ -1015,6 +1016,7 @@ function deletecat ($id)
     DB_delete ($_TABLES['faq'], 'category', $id);
     DB_delete ($_TABLES['faq_category'], 'id', $id);
     faq_clearLocalCache();
+    faq_notifyCategoryDeleted($id);
 
     return COM_refresh ($_CONF['site_admin_url'] . '/plugins/faq/index.php?msg=3&mode=cat');
 }
