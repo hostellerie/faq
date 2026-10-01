@@ -16,6 +16,8 @@ Legend:
 - Geeklog 2.1.1-2.2.2 compatibility target and PHP 5.6-8.1 syntax CI.
 - Modern installer/configuration metadata and `plugin.json`.
 - FAQ/category CRUD preservation and historical autotags.
+- SEO-friendly IDs are generated from the question/category title on creation; changing an existing ID requires explicit confirmation because it changes the public URL.
+- FAQ questions and categories emit lifecycle events suitable for URL/indexing consumers, including category subtype events.
 - Logical FAQ positioning inside each category (First / After an existing FAQ / Last), with automatic 10-step internal renumbering after saves, moves and deletions.
 - Native Advanced Editor integration with HTML-source fallback and MediaGallery picker support.
 - Item Info, collection retrieval, URL resolution, lifecycle callbacks, sitemap, metadata and capability declaration.
