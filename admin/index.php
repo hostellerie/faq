@@ -911,8 +911,17 @@ function deletefaq ($id)
         return COM_refresh ($_CONF['site_admin_url'] . '/plugins/faq/index.php?msq=5&mode=faq');
     }
 
+    $category = (string) DB_getItem(
+        $_TABLES['faq'],
+        'category',
+        "id = '" . DB_escapeString($id) . "'"
+    );
+
     faq_relationDeleteForFaq($id);
     DB_delete ($_TABLES['faq'], 'id', $id);
+    if ($category !== '') {
+        faq_normalizeCategoryOrder($category);
+    }
     faq_clearLocalCache();
     faq_notifyDeleted($id);
 
