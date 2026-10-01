@@ -44,6 +44,10 @@
 <dt><label for="faq-editor-category">{faq_lang_category}</label></dt>
 <dd><select id="faq-editor-category" name="faq_category">{faq_category_options}</select></dd>
 
+<dt><label for="faq-editor-sort-order">{faq_lang_order}</label></dt>
+<dd><input type="number" min="0" id="faq-editor-sort-order" name="faq_sort_order" value="{faq_sort_order}" class="size1">
+<div class="description">{faq_order_help}</div></dd>
+
 <dt><label>{faq_lang_hits}</label></dt>
 <dd>{faq_hits_edit}</dd>
 
