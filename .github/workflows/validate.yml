@@ -181,15 +181,18 @@ jobs:
         run: |
           grep -A8 "CREATE TABLE {\$_TABLES\['faq'\]}" sql/mysql_install.php | grep -q "sort_order int(11) NOT NULL DEFAULT 10"
           grep -q "function faq_ensureFaqSortOrderColumn" functions.inc
-          grep -q "SET sort_order = 10 WHERE sort_order = 0" functions.inc
-          if grep -A6 "case 'sort_order':" functions.inc; then
-            echo "FAQ ordering must not rely on a zero-display workaround in the admin list callback."
+          grep -q "function faq_normalizeCategoryOrder" functions.inc
+          grep -q "function faq_currentPositionValue" functions.inc
+          grep -q "sort_order = {\$order}" functions.inc
+          grep -q 'name="faq_position"' templates/default/admin/faqedit.thtml
+          grep -q "faq_adminPositionOptions" admin/index.php
+          grep -q "UTIL_getParamStr('faq_position', 'last')" admin/index.php
+          grep -q "faq_normalizeCategoryOrder(\$category, \$id, \$position)" admin/index.php
+          grep -q "faq_faqOrderBySql" public_html/index.php
+          grep -q "position_first" language/english_utf-8.php
+          grep -q "position_first" language/french_france_utf-8.php
+          test -f public_html/faq-order-admin.js
+          if grep -q 'name="faq_sort_order"' templates/default/admin/faqedit.thtml; then
+            echo "The FAQ editor must expose logical position, not raw sort_order."
             exit 1
           fi
-          grep -q "function faq_faqOrderBySql" functions.inc
-          grep -q 'name="faq_sort_order"' templates/default/admin/faqedit.thtml
-          grep -q "faq_order_help" admin/index.php
-          grep -q "UTIL_getParamInt('faq_sort_order')" admin/index.php
-          grep -q "faq_faqOrderBySql" public_html/index.php
-          grep -q "order_help" language/english_utf-8.php
-          grep -q "order_help" language/french_france_utf-8.php
