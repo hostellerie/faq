@@ -61,6 +61,48 @@ $_TABLES['faq_category_relations'] = $_DB_table_prefix . 'faq_category_relations
 
 require_once ($_CONF['path'] . 'plugins/faq/relations.inc');
 require_once ($_CONF['path'] . 'plugins/faq/modern.inc');
+function faq_faqSortOrderColumnExists()
+{
+    global $_TABLES;
+
+    if (empty($_TABLES['faq'])) {
+        return false;
+    }
+
+    $table = str_replace('`', '``', (string) $_TABLES['faq']);
+    $result = DB_query("SHOW COLUMNS FROM `{$table}` LIKE 'sort_order'");
+    return $result !== false && DB_numRows($result) > 0;
+}
+
+function faq_ensureFaqSortOrderColumn()
+{
+    global $_TABLES;
+
+    if (empty($_TABLES['faq'])) {
+        return false;
+    }
+
+    if (!faq_faqSortOrderColumnExists()) {
+        DB_query("ALTER TABLE {$_TABLES['faq']} ADD sort_order int(11) NOT NULL DEFAULT 0 AFTER category");
+    }
+
+    return faq_faqSortOrderColumnExists();
+}
+
+function faq_faqOrderBySql($fallback)
+{
+    $fallback = trim((string) $fallback);
+    if ($fallback === '') {
+        $fallback = 'title ASC';
+    }
+
+    if (faq_faqSortOrderColumnExists()) {
+        return 'faq.sort_order ASC, faq.' . $fallback;
+    }
+
+    return 'faq.' . $fallback;
+}
+
 
 function phpblock_faq_random()
 {
