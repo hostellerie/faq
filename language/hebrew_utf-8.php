@@ -59,7 +59,7 @@ $LANG_FAQ_ADMIN = array(
     'save' => 'שמירה',
     'cancel' => 'ביטול',
     'show' => 'הצגה',
-    'accessdenied' => "ניסית לגשת לפריט FAQ שאין לך הרשאה אליו. הניסיון תועד. <a href="{$_CONF['site_admin_url']}/plugins/faq/index.php">חזרה למסך ניהול ה-FAQ</a>.",
+    'accessdenied' => "ניסית לגשת לפריט FAQ שאין לך הרשאה אליו. הניסיון תועד. <a href=\"{$_CONF['site_admin_url']}/plugins/faq/index.php\">חזרה למסך ניהול ה-FAQ</a>.",
     'title' => 'כותרת',
     'description' => 'תיאור',
     'question' => 'שאלה',
