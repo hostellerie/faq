@@ -59,7 +59,7 @@ $LANG_FAQ_ADMIN = array(
     'save' => '儲存',
     'cancel' => '取消',
     'show' => '顯示',
-    'accessdenied' => "您正在嘗試訪問無權存取的 FAQ 項目。此嘗試已被記錄。请<a href="{$_CONF['site_admin_url']}/plugins/faq/index.php">返回 FAQ 管理頁面</a>。",
+    'accessdenied' => "您正在嘗試訪問無權存取的 FAQ 項目。此嘗試已被記錄。请<a href=\"{$_CONF['site_admin_url']}/plugins/faq/index.php\">返回 FAQ 管理頁面</a>。",
     'title' => '標題',
     'description' => '說明',
     'question' => '問題',
