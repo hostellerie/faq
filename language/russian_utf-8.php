@@ -59,7 +59,7 @@ $LANG_FAQ_ADMIN = array(
     'save' => 'сохранить',
     'cancel' => 'отмена',
     'show' => 'показать',
-    'accessdenied' => "Вы пытаетесь открыть элемент FAQ, на который у вас нет прав. Эта попытка зарегистрирована. <a href="{$_CONF['site_admin_url']}/plugins/faq/index.php">Вернуться к экрану администрирования FAQ</a>.",
+    'accessdenied' => "Вы пытаетесь открыть элемент FAQ, на который у вас нет прав. Эта попытка зарегистрирована. <a href=\"{$_CONF['site_admin_url']}/plugins/faq/index.php\">Вернуться к экрану администрирования FAQ</a>.",
     'title' => 'Заголовок',
     'description' => 'Описание',
     'question' => 'Вопрос',
