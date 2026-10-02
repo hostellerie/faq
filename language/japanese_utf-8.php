@@ -59,7 +59,7 @@ $LANG_FAQ_ADMIN = array(
     'save' => '保存',
     'cancel' => 'キャンセル',
     'show' => '表示',
-    'accessdenied' => "権限のないFAQ項目にアクセスしようとしています。この試行は記録されました。<a href="{$_CONF['site_admin_url']}/plugins/faq/index.php">FAQ管理画面に戻ってください</a>。",
+    'accessdenied' => "権限のないFAQ項目にアクセスしようとしています。この試行は記録されました。<a href=\"{$_CONF['site_admin_url']}/plugins/faq/index.php\">FAQ管理画面に戻ってください</a>。",
     'title' => 'タイトル',
     'description' => '説明',
     'question' => '質問',
