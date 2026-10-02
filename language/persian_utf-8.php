@@ -1,336 +1,287 @@
 <?php
 
-###############################################################################
-# persian_utf-8.php
-#
-# This is the Persian language file for Geeklog faq plugin
-# Special thanks to Mahdi Montazeri for his work on this project
-#
-# Copyright (C) 2018 geeklog.ir
-# info AT mahdimontazeri DOT com
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-#
-###############################################################################
-
 $LANG_FAQ_COMMON = array(
-    'FAQs' => 'پرسشگان ها',
-    'FAQ' => 'پرسشگان',
-    'no_new' => 'No recent new FAQs',
-    'FAQ_cat_header' => $_CONF['site_name'] . ' پرسشگان',
-    'Categories' => 'دسته بندی ها',
+    'FAQs' => 'پرسش‌های متداول',
+    'FAQ' => 'پرسش متداول',
+    'no_new' => 'پرسش متداول جدیدی اخیراً اضافه نشده است',
+    'FAQ_cat_header' => $_CONF['site_name'] . ' پرسش‌های متداول',
+    'Categories' => 'دسته‌بندی‌ها',
     'Question' => 'پرسش',
-    'Hits' => 'بازدید',
-    'Updated' => 'بروزرسانی شد',
+    'Hits' => 'بازدیدها',
+    'Updated' => 'به‌روزرسانی شده',
     'Answer' => 'پاسخ',
-    'no_autolink_faq' => '[FAQ ID "%s" does not exist or you do not have access to it]',
-    'no_autolink_cat' => '[FAQ category "%s" does not exist or you do not have access to it]',
-    'autolink_error' => '[error in "%s" FAQ link]'
+    'permalink' => 'پیوند دائمی',
+    'back_to' => 'بازگشت به',
+    'breadcrumb_aria' => 'مسیر راهنمای پرسش‌های متداول',
+    'actions_aria' => 'اقدام‌های پرسش‌های متداول',
+    'related_questions' => 'پرسش‌های مرتبط',
+    'category_page_title' => 'دسته پرسش‌های متداول: %s',
+    'no_autolink_faq' => '[پرسش متداول با شناسه "%s" وجود ندارد یا شما به آن دسترسی ندارید]',
+    'no_autolink_cat' => '[دسته پرسش‌های متداول "%s" وجود ندارد یا شما به آن دسترسی ندارید]',
+    'autolink_error' => '[خطا در پیوند پرسش متداول "%s"]'
 );
 
-/******************************************************************************
-* for stats
-******************************************************************************/
 $LANG_FAQ_STATS = array(
-    'stats_no_hits' => 'به نظر می رسد که هیچ پرسشگانی در این سایت وجود ندارد یا هیچکس همواره روی یکی کلیک نکرده است.',
-    'stats_summary' => 'دسته بندی های/ورودی های پرسشگان (بازدید) در سیستم',
+    'stats_no_hits' => 'به نظر می‌رسد در این سایت پرسش متداولی وجود ندارد یا هنوز هیچ‌کدام مشاهده نشده‌اند.',
+    'stats_summary' => 'دسته‌ها/ورودی‌های پرسش‌های متداول (بازدیدها) در سامانه',
     'Question' => 'پرسش',
-    'Hits' => 'بازدید',
-    'headline' => 'ده پرسشگان برتر',
+    'Hits' => 'بازدیدها',
+    'headline' => 'ده پرسش متداول پربازدید'
 );
 
-/******************************************************************************
-* for the search
-******************************************************************************/
 $LANG_FAQ_SEARCH = array(
- 'FAQ' => 'پرسشگان',
- 'category' => 'دسته بندی',
- 'results' => 'نتایج پرسشگان',
- 'title' => 'پرسش',
- 'date' => 'بروزرسانی شد',
- 'author' => 'نویسنده',
- 'category' => 'دسته بندی',
- 'hits' => 'بازدید'
+    'FAQ' => 'پرسش متداول',
+    'results' => 'نتایج پرسش‌های متداول',
+    'title' => 'پرسش',
+    'date' => 'به‌روزرسانی شده',
+    'author' => 'نویسنده',
+    'category' => 'دسته',
+    'hits' => 'بازدیدها'
 );
 
-/******************************************************************************
-* Messages for COM_showMessage the submission form
-******************************************************************************/
+$PLG_faq_MESSAGE1 = 'شما در حال تلاش برای دسترسی به دسته‌ای از پرسش‌های متداول هستید که اجازه دسترسی به آن را ندارید یا وجود ندارد. این تلاش ثبت شده است.';
+$PLG_faq_MESSAGE2 = 'شما در حال تلاش برای دسترسی به ورودی پرسش متداولی هستید که اجازه دسترسی به آن را ندارید یا وجود ندارد. این تلاش ثبت شده است.';
+$PLG_faq_MESSAGE3 = 'پرسش متداول با موفقیت حذف شد.';
+$PLG_faq_MESSAGE4 = 'پرسش متداول با موفقیت ذخیره شد.';
+$PLG_faq_MESSAGE5 = 'شما در حال تلاش برای انجام عملی روی ورودی پرسش متداولی هستید که اجازه دسترسی به آن را ندارید یا وجود ندارد. این تلاش ثبت شده است.';
+$PLG_faq_MESSAGE6 = 'ارتقای افزونه پرسش‌های متداول با موفقیت انجام شد.';
+$PLG_faq_MESSAGE7 = 'ارتقای افزونه پرسش‌های متداول ناموفق بود.';
 
-$PLG_faq_MESSAGE1 = "شما در حال تلاش برای دسترسی به یک دسته بندی پرسشگان می باشید که به آن دسترسی ندارید یا آن وجود ندارد. این تلاش ضبط شده است.";
-$PLG_faq_MESSAGE2 = "شما در حال تلاش برای دسترسی به یک ورودی پرسشگان می باشید که به آن دسترسی ندارید یا آن وجود ندارد. این تلاش ضبط شده است.";
-$PLG_faq_MESSAGE3 = 'پرسشگان با موفقیت حذف شده است.';
-$PLG_faq_MESSAGE4 = 'پرسشگان با موفقیت ذخیره شده است.';
-$PLG_faq_MESSAGE5 = "شما در حال تلاش برای انجام یک اقدام روی یک ورودی پرسشگان می باشید که دسترسی ندارید یا آن وجود ندارد. این تلاش ضبط شده است.";
-$PLG_faq_MESSAGE6 = 'ارتقا افزونه پرسشگان موفق بود.';
-$PLG_faq_MESSAGE7 = 'ارتقا ناموفق افزونه پرسشگان.';
-/******************************************************************************
-* admin
-******************************************************************************/
 $LANG_FAQ_ADMIN = array(
-    'FAQ_Cat' => 'دسته بندی پرسشگان',
-    'FAQ_Entry' => 'ورودی پرسشگان',
-    'FAQ Entries' => 'ورودی های پرسشگان',
+    'FAQ_Cat' => 'دسته پرسش‌های متداول',
+    'FAQ_Entry' => 'ورودی پرسش متداول',
+    'FAQ Entries' => 'ورودی‌های پرسش متداول',
     'Edit' => 'ویرایش',
-    'FAQ Editor' => 'ویرایشگر پرسشگان',
-    'Cat Editor' => 'ویرایشگر دسته بندی پرسشگان',
-    'Access Denied MSG' => 'با عرض پوزش، شما به صفحه مدیریت وب سایت دسترسی ندارید. لطفا توجه داشته باشید که همه تلاش ها برای دسترسی به ویژگی های غیر مجاز ضبط شده اند.',
+    'FAQ Editor' => 'ویرایشگر پرسش‌های متداول',
+    'Cat Editor' => 'ویرایشگر دسته‌های پرسش‌های متداول',
+    'Access Denied MSG' => 'شما به صفحه مدیریت پرسش‌های متداول دسترسی ندارید. همه تلاش‌ها برای دسترسی به امکانات غیرمجاز ثبت می‌شوند.',
     'delete' => 'حذف',
     'save' => 'ذخیره',
     'cancel' => 'لغو',
     'show' => 'نمایش',
-    'accessdenied' => "شما در حال تلاش برای دسترسی به یک مورد پرسشگان می باشید که حق آن را ندارید. این تلاش ضبط شده است لطفا <a href=\"{$_CONF['site_admin_url']}/plugins/faq/index.php\">به صفحه مدیریت پرسشگان بازگردید</a>",
+    'accessdenied' => "شما در حال تلاش برای دسترسی به موردی از پرسش‌های متداول هستید که اجازه آن را ندارید. این تلاش ثبت شده است. لطفاً <a href="{$_CONF['site_admin_url']}/plugins/faq/index.php">به صفحه مدیریت پرسش‌های متداول بازگردید</a>.",
     'title' => 'عنوان',
-    'description' => 'شرح',
+    'description' => 'توضیحات',
     'question' => 'پرسش',
     'answer' => 'پاسخ',
     'id' => 'شناسه',
-    'hits' => 'بازدید',
-    'changed' => 'بروزرسانی شد',
-    'category' => 'دسته بندی',
-    'all_cat' => 'همه دسته بندی ها',
-    'date_will_update' => '<b>توجه:</b> اگر ذخیره کنید، تاریخ بروزرسانی خواهد شد!',
-    'reset_date' => 'بروزرسانی تاریخ را به <i>در حال حاضر</i> تغییر داد.',
-    'save_rights_error' => 'شما نمی توانید با مجوز هایی که ندارید ذخیره کنید.',
-    'missing_fields_faq' => 'باید پرسش، پاسخ و یک دسته بندی برای هر ورودی پرسشگان عرضه کنید.',
-    'missing_fields_cat' => 'باید عنوان و یک شرح برای هر دسته بندی پرسشگان عرضه کنید.',
-    'delete_note' => 'توجه: حذف این دسته بندی همه پرسشگان های مرتبط با این دسته بندی را حذف می کند.',
-    'FAQ Plugin' => 'افزونه پرسشگان',
-    'faqman_import' => 'افزونه مدیریت پرسشگان را نصب کرده اید (که مشابه این افزونه نمی باشد). اما می توانید داده ها را از افزونه مدیریت پرسشگان وارد کنید.',
-    'cat instructions' => 'برای ایجاد یک دسته بندی پرسشگان روی "ایجاد جدید" کلیک کنید. برای ایجاد ورودی های پرسشگان برای دسته بندی پرسشگان خود روی "ویرایشگر پرسشگان" کلیک کنید.',
-    'faq instructions' => 'Create and manage FAQ questions and answers here. Use the category filter to quickly find the FAQs you want to edit.',
-    'import' => 'وارد كردن',
-    'access' => 'دسترسی'
-);
-
-$LANG_FAQ_IMPORT = array(
-    'header' => 'وارد کردن افزونه پرسشگان',
-    'no_topics' => 'هیچ موضوع مدیریت پرسشگان برای وارد کردن وجود ندارد.',
-    'no_faqman' => 'افزونه مدیریت پرسشگان نصب نشده است.',
-    'not_root' => 'به منظور وارد کردن موضوعات مدیریت پرسشگان باید یک عضو گروه ریشه باشید.',
-    'unknown' => 'اقدام وارد کردن ناشناخته: ',
-    'imported' => '%d پرسشگان در %d دسته بندی وارد شد'
-);
-
-
-/* FAQ 1.3.0 language-key compatibility.
- * Existing translations above are preserved; new keys fall back to English
- * until a native translation is supplied.
- */
-$LANG_FAQ_COMMON += array(
-    'permalink' => 'Permalink',
-    'back_to' => 'Back to',
-    'breadcrumb_aria' => 'FAQ breadcrumb',
-    'actions_aria' => 'FAQ actions',
-    'related_questions' => 'Related questions',
-    'category_page_title' => 'FAQ Category: %s'
-);
-
-$LANG_FAQ_ADMIN += array(
-    'id_auto_help' => 'The ID is generated automatically from the title to create a readable URL. You may adjust it before the first save.',
-    'id_change_help' => 'This ID is part of the public URL. Changing it can affect search indexing and existing links.',
-    'id_change_confirm' => 'I confirm that I want to change the ID and public URL.',
-    'id_change_required' => 'Changing the ID requires explicit confirmation.',
-    'id_exists' => 'This ID is already in use. Choose another ID.',
-    'position' => 'Position',
-    'position_first' => 'First',
-    'position_last' => 'Last',
-    'position_after' => 'After: %s',
-    'position_help' => 'Choose this FAQ position inside its category. Internal ordering is recalculated automatically in steps of 10.',
-    'order' => 'Order',
-    'order_help' => 'Controls this FAQ position inside its category. Lower values appear first; values such as 10, 20, 30 leave room for later insertions.',
-    'editor_mode' => 'Editor mode',
-    'visual_editor' => 'Visual editor',
-    'html_source' => 'HTML source',
-    'insert_media' => 'Insert media',
-    'questions' => 'Questions',
-    'categories' => 'Categories',
-    'associations' => 'Associations',
-    'coverage' => 'Coverage',
-    'configuration' => 'Configuration',
-    'new_question' => 'New question',
-    'new_category' => 'New category',
-    'administration_aria' => 'FAQ administration'
+    'id_auto_help' => 'شناسه به‌طور خودکار از عنوان ساخته می‌شود تا یک نشانی اینترنتی خوانا ایجاد شود. پیش از نخستین ذخیره می‌توانید آن را تغییر دهید.',
+    'id_change_help' => 'این شناسه بخشی از نشانی عمومی است. تغییر آن می‌تواند بر نمایه‌سازی موتورهای جست‌وجو و پیوندهای موجود اثر بگذارد.',
+    'id_change_confirm' => 'تأیید می‌کنم که می‌خواهم شناسه و نشانی عمومی را تغییر دهم.',
+    'id_change_required' => 'تغییر شناسه نیازمند تأیید صریح است.',
+    'id_exists' => 'این شناسه از قبل استفاده شده است. شناسه دیگری انتخاب کنید.',
+    'hits' => 'بازدیدها',
+    'order' => 'ترتیب',
+    'order_help' => 'جایگاه این پرسش متداول را در دسته کنترل می‌کند. مقدارهای کمتر زودتر نمایش داده می‌شوند؛ مقدارهایی مانند 10، 20 و 30 برای درج‌های بعدی فاصله باقی می‌گذارند.',
+    'position' => 'جایگاه',
+    'position_first' => 'اول',
+    'position_last' => 'آخر',
+    'position_after' => 'پس از: %s',
+    'position_help' => 'جایگاه این پرسش متداول را در دسته انتخاب کنید. ترتیب داخلی به‌طور خودکار با گام‌های 10 دوباره محاسبه می‌شود.',
+    'changed' => 'به‌روزرسانی شده',
+    'category' => 'دسته',
+    'all_cat' => 'همه دسته‌ها',
+    'date_will_update' => '<b>توجه:</b> هنگام ذخیره، تاریخ به‌روزرسانی می‌شود!',
+    'reset_date' => 'تاریخ تغییر را به <i>اکنون</i> به‌روزرسانی کنید.',
+    'save_rights_error' => 'نمی‌توانید با مجوزهایی که در اختیار ندارید ذخیره کنید.',
+    'missing_fields_faq' => 'برای هر ورودی پرسش متداول باید پرسش، پاسخ و یک دسته تعیین کنید.',
+    'missing_fields_cat' => 'برای هر دسته پرسش‌های متداول باید عنوان و توضیحات تعیین کنید.',
+    'delete_note' => 'توجه: حذف این دسته، همه پرسش‌های متداول مرتبط با آن را حذف می‌کند.',
+    'FAQ Plugin' => 'افزونه پرسش‌های متداول',
+    'faqman_import' => 'افزونه FAQMAN نصب است (این افزونه با افزونه حاضر متفاوت است). می‌توانید داده‌ها را از FAQMAN وارد کنید.',
+    'cat instructions' => 'دسته‌های پرسش‌های متداول را اینجا ایجاد و مدیریت کنید. برای مدیریت پرسش‌های هر دسته از زبانه «پرسش‌ها» استفاده کنید.',
+    'faq instructions' => 'پرسش‌ها و پاسخ‌های متداول را اینجا ایجاد و مدیریت کنید. با فیلتر دسته‌ها می‌توانید پرسش مورد نظر برای ویرایش را سریع پیدا کنید.',
+    'import' => 'وارد کردن',
+    'access' => 'دسترسی',
+    'editor_mode' => 'حالت ویرایشگر',
+    'visual_editor' => 'ویرایشگر دیداری',
+    'html_source' => 'کد HTML',
+    'insert_media' => 'درج رسانه',
+    'questions' => 'پرسش‌ها',
+    'categories' => 'دسته‌ها',
+    'associations' => 'ارتباط‌ها',
+    'coverage' => 'پوشش',
+    'configuration' => 'پیکربندی',
+    'new_question' => 'پرسش جدید',
+    'new_category' => 'دسته جدید',
+    'administration_aria' => 'مدیریت پرسش‌های متداول'
 );
 
 $LANG_FAQ_RELATIONS = array(
-    'title' => 'FAQ Associations',
-    'intro' => 'Associate either one FAQ or an entire FAQ category with content exposed by Geeklog providers. A category association is dynamic: newly added FAQs in that category are included automatically. Providers and selectable content are discovered automatically when possible; manual ID remains a fallback.',
-    'add_association' => 'Add association',
-    'association_source' => 'Association source',
-    'individual_faq' => 'Individual FAQ',
-    'whole_category' => 'Whole category',
-    'faq' => 'FAQ',
-    'faq_category' => 'FAQ category',
-    'select_category' => 'Select a category',
-    'provider' => 'Provider',
-    'select_provider' => 'Select a provider',
-    'content' => 'Content',
-    'select_provider_first' => 'Select a provider first',
-    'content_id' => 'Content ID',
-    'placement' => 'Placement',
-    'automatic' => 'Automatic',
-    'manual_only' => 'Manual only',
-    'order' => 'Order',
-    'advanced_fallback' => 'Advanced fallback',
-    'subtype' => 'Subtype',
-    'subtype_help' => 'Subtype is normally detected from the selected provider item. Enter it manually only for a legacy/custom provider that does not expose it.',
-    'save_association' => 'Save association',
-    'current_faq_associations' => 'Current individual FAQ associations',
-    'current_category_associations' => 'Current category associations',
-    'filtered_content' => 'Filtered content:',
-    'show_all_associations' => 'Show all associations',
-    'relation_table_missing' => 'The FAQ 1.3.0 relation table is not installed yet. Run the plugin upgrade.',
-    'category_relation_table_missing' => 'The FAQ category relation table is not installed yet.',
-    'category' => 'Category',
-    'action' => 'Action',
-    'delete' => 'Delete',
-    'category_association_saved' => 'Category association saved. New FAQs added to this category will be included automatically.',
-    'association_saved' => 'Association saved.',
-    'association_save_failed' => 'The association could not be saved. Check the selected FAQ/category and content.',
-    'association_deleted' => 'Association deleted.',
-    'update' => 'Update',
-    'association_updated' => 'Association updated.',
-    'association_update_failed' => 'The association could not be updated.',
-    'select_content' => 'Select content',
-    'loading' => 'Loading…',
-    'no_selectable_content' => 'No selectable content',
-    'enter_id_manually' => 'Enter ID manually…',
-    'collection_unavailable' => 'Collection unavailable; enter the content ID manually.',
-    'unable_load_collection' => 'Unable to load the provider collection; enter the content ID manually.',
-    'manual_fallback' => 'Manual fallback: enter the content ID. Subtype remains optional.',
-    'provider_no_item_info' => 'This provider does not expose Geeklog Item Info.',
-    'provider_no_content' => 'The provider returned no selectable content.',
-    'provider_selectable_count' => '%d selectable item(s).',
-    'external_confirmation_required' => 'This article already contains an external FAQ/Q&A signal. Confirm the association explicitly before saving.',
-    'confirm_external_faq' => 'If the selected article already contains an external FAQ/Q&A, I confirm that this managed association should still be added.',
-    'topic_provider' => 'Geeklog topic',
-    'topic_scope' => 'Topic scope',
-    'topic_scope_both' => 'Topic + topic articles',
-    'topic_scope_topic' => 'Topic only',
-    'topic_scope_articles' => 'Topic articles only',
-    'topic_scope_help' => 'For a Topic association, choose whether FAQs appear on the Topic page, are inherited by its Articles, or both.',
-    'display_help_title' => 'How contextual FAQ display works',
-    'display_help_intro' => 'Associations can be rendered automatically or placed manually inside the content.',
-    'display_help_automatic' => 'FAQ renders at the native insertion point supported by the selected provider.',
-    'display_help_manual' => 'No automatic output. Insert this autotag where the associated FAQ should appear:',
-    'display_help_related' => 'Explicitly renders associations for a provider and content ID.',
-    'display_help_embed' => 'Embeds one specific FAQ independently of associations.',
-    'display_help_context_note' => '[faq-context] uses the current content provider and ID. On articles it also applies topic inheritance and duplicate/external-FAQ protection.'
+    'title' => 'ارتباط‌های پرسش‌های متداول',
+    'intro' => 'یک پرسش متداول یا یک دسته کامل را به محتوایی که ارائه‌دهندگان Geeklog عرضه می‌کنند مرتبط کنید. ارتباط دسته پویا است: پرسش‌های جدیدی که به آن دسته افزوده می‌شوند به‌طور خودکار وارد ارتباط خواهند شد. ارائه‌دهندگان و محتوای قابل انتخاب در صورت امکان خودکار شناسایی می‌شوند و وارد کردن دستی شناسه همچنان به‌عنوان راه جایگزین در دسترس است.',
+    'add_association' => 'افزودن ارتباط',
+    'association_source' => 'منبع ارتباط',
+    'individual_faq' => 'پرسش متداول تکی',
+    'whole_category' => 'کل دسته',
+    'faq' => 'پرسش متداول',
+    'faq_category' => 'دسته پرسش‌های متداول',
+    'select_category' => 'یک دسته انتخاب کنید',
+    'provider' => 'ارائه‌دهنده',
+    'select_provider' => 'یک ارائه‌دهنده انتخاب کنید',
+    'content' => 'محتوا',
+    'select_provider_first' => 'ابتدا یک ارائه‌دهنده انتخاب کنید',
+    'content_id' => 'شناسه محتوا',
+    'placement' => 'محل قرارگیری',
+    'automatic' => 'خودکار',
+    'manual_only' => 'فقط دستی',
+    'order' => 'ترتیب',
+    'advanced_fallback' => 'راه جایگزین پیشرفته',
+    'subtype' => 'زیرنوع',
+    'subtype_help' => 'زیرنوع معمولاً از مورد انتخاب‌شده ارائه‌دهنده تشخیص داده می‌شود. فقط برای ارائه‌دهنده قدیمی یا سفارشی که آن را ارائه نمی‌کند، زیرنوع را دستی وارد کنید.',
+    'save_association' => 'ذخیره ارتباط',
+    'current_faq_associations' => 'ارتباط‌های فعلی پرسش‌های متداول تکی',
+    'current_category_associations' => 'ارتباط‌های فعلی دسته‌ها',
+    'filtered_content' => 'محتوای فیلترشده:',
+    'show_all_associations' => 'نمایش همه ارتباط‌ها',
+    'relation_table_missing' => 'جدول ارتباط‌های FAQ 1.3.0 هنوز نصب نشده است. ارتقای افزونه را اجرا کنید.',
+    'category_relation_table_missing' => 'جدول ارتباط دسته‌های پرسش‌های متداول هنوز نصب نشده است.',
+    'category' => 'دسته',
+    'action' => 'عمل',
+    'delete' => 'حذف',
+    'category_association_saved' => 'ارتباط دسته ذخیره شد. پرسش‌های جدیدی که به این دسته افزوده شوند به‌طور خودکار وارد خواهند شد.',
+    'association_saved' => 'ارتباط ذخیره شد.',
+    'association_save_failed' => 'ارتباط ذخیره نشد. پرسش/دسته و محتوای انتخاب‌شده را بررسی کنید.',
+    'association_deleted' => 'ارتباط حذف شد.',
+    'update' => 'به‌روزرسانی',
+    'association_updated' => 'ارتباط به‌روزرسانی شد.',
+    'association_update_failed' => 'ارتباط به‌روزرسانی نشد.',
+    'select_content' => 'انتخاب محتوا',
+    'loading' => 'در حال بارگذاری…',
+    'no_selectable_content' => 'محتوای قابل انتخابی وجود ندارد',
+    'enter_id_manually' => 'شناسه را دستی وارد کنید…',
+    'collection_unavailable' => 'مجموعه در دسترس نیست؛ شناسه محتوا را دستی وارد کنید.',
+    'unable_load_collection' => 'مجموعه ارائه‌دهنده بارگذاری نشد؛ شناسه محتوا را دستی وارد کنید.',
+    'manual_fallback' => 'راه جایگزین دستی: شناسه محتوا را وارد کنید. زیرنوع اختیاری است.',
+    'provider_no_item_info' => 'این ارائه‌دهنده Geeklog Item Info را عرضه نمی‌کند.',
+    'provider_no_content' => 'ارائه‌دهنده محتوای قابل انتخابی برنگرداند.',
+    'provider_selectable_count' => '%d مورد قابل انتخاب.',
+    'external_confirmation_required' => 'این مقاله از قبل یک نشانه خارجی FAQ/Q&A دارد. پیش از ذخیره، ارتباط را صریحاً تأیید کنید.',
+    'confirm_external_faq' => 'اگر مقاله انتخاب‌شده از قبل FAQ/Q&A خارجی دارد، تأیید می‌کنم که این ارتباط مدیریت‌شده همچنان باید افزوده شود.',
+    'topic_provider' => 'موضوع Geeklog',
+    'topic_scope' => 'دامنه موضوع',
+    'topic_scope_both' => 'موضوع + مقاله‌های موضوع',
+    'topic_scope_topic' => 'فقط موضوع',
+    'topic_scope_articles' => 'فقط مقاله‌های موضوع',
+    'topic_scope_help' => 'برای ارتباط با یک موضوع، انتخاب کنید که پرسش‌ها در صفحه موضوع نمایش داده شوند، به مقاله‌های آن به ارث برسند یا هر دو حالت اعمال شود.',
+    'display_help_title' => 'نحوه نمایش زمینه‌ای پرسش‌های متداول',
+    'display_help_intro' => 'ارتباط‌ها می‌توانند خودکار نمایش داده شوند یا دستی در محتوا قرار گیرند.',
+    'display_help_automatic' => 'پرسش متداول در نقطه درج بومی که ارائه‌دهنده انتخاب‌شده پشتیبانی می‌کند نمایش داده می‌شود.',
+    'display_help_manual' => 'خروجی خودکاری وجود ندارد. این برچسب خودکار را در محلی قرار دهید که پرسش متداول مرتبط باید نمایش داده شود:',
+    'display_help_related' => 'ارتباط‌های یک ارائه‌دهنده و شناسه محتوا را به‌طور صریح نمایش می‌دهد.',
+    'display_help_embed' => 'یک پرسش متداول مشخص را مستقل از ارتباط‌ها در محتوا جاسازی می‌کند.',
+    'display_help_context_note' => '[faq-context] از ارائه‌دهنده و شناسه محتوای فعلی استفاده می‌کند. در مقاله‌ها، ارث‌بری موضوع و محافظت در برابر تکرار/پرسش‌های خارجی نیز اعمال می‌شود.'
 );
 
 $LANG_FAQ_COVERAGE = array(
-    'title' => 'FAQ Coverage',
-    'intro' => 'Review which content uses managed FAQs, topic-inherited FAQs, or FAQ already present in the content. Use the filters to find content with no FAQ, external FAQ signals, or associations to review.',
-    'provider' => 'Provider',
-    'faq_status' => 'FAQ status',
-    'all' => 'All',
-    'managed_faq_only' => 'Managed FAQ only',
-    'external_faq_only' => 'External FAQ signal only',
-    'managed_external' => 'Managed + external',
-    'no_faq_detected' => 'No FAQ detected',
-    'show' => 'Show',
-    'provider_not_enumerable' => 'This provider does not expose an enumerable Item Info collection on this installation. FAQ will not query third-party plugin tables. Manual associations remain available.',
-    'core_audit_label' => 'Core content audit:',
-    'core_audit_help' => 'Articles and Static Pages are inspected read-only because their current Geeklog providers do not expose the required collection/content contract. External FAQ detection is an editorial signal, not proof.',
-    'managed' => 'Managed',
-    'external_signal' => 'External signal',
-    'none' => 'None',
-    'manage' => 'Manage',
-    'edit' => 'Edit',
-    'managed_relations' => 'Managed relations:',
-    'managed_only' => 'Managed only',
-    'external_only' => 'External only',
-    'both' => 'Both',
-    'content' => 'Content',
-    'external_signals' => 'External signals',
-    'action' => 'Action',
-    'articles' => 'Articles',
-    'topics' => 'Topics',
-    'origin_direct' => 'Direct association',
-    'origin_topic' => 'Inherited from topic',
-    'topic_inheritance_blocked' => 'Topic inheritance blocked by external FAQ',
-    'static_pages' => 'Static Pages',
-    'videos' => 'Videos',
-    'documents' => 'Documents',
-    'maps' => 'Maps',
-    'media_gallery' => 'Media Gallery',
+    'title' => 'پوشش پرسش‌های متداول',
+    'intro' => 'بررسی کنید کدام محتوا از پرسش‌های مدیریت‌شده، پرسش‌های به ارث رسیده از موضوع یا پرسش‌هایی که از قبل در محتوا وجود دارند استفاده می‌کند. از فیلترها برای یافتن محتوای بدون پرسش متداول، نشانه‌های خارجی یا ارتباط‌های نیازمند بررسی استفاده کنید.',
+    'provider' => 'ارائه‌دهنده',
+    'faq_status' => 'وضعیت پرسش متداول',
+    'all' => 'همه',
+    'managed_faq_only' => 'فقط پرسش مدیریت‌شده',
+    'external_faq_only' => 'فقط نشانه خارجی پرسش متداول',
+    'managed_external' => 'مدیریت‌شده + خارجی',
+    'no_faq_detected' => 'پرسش متداولی شناسایی نشد',
+    'show' => 'نمایش',
+    'provider_not_enumerable' => 'این ارائه‌دهنده در این نصب، مجموعه قابل شمارشی از Item Info عرضه نمی‌کند. FAQ جدول‌های افزونه‌های شخص ثالث را مستقیم جست‌وجو نخواهد کرد. ارتباط‌های دستی همچنان در دسترس هستند.',
+    'core_audit_label' => 'ممیزی محتوای هسته:',
+    'core_audit_help' => 'مقاله‌ها و صفحات ایستا فقط به‌صورت خواندنی بررسی می‌شوند، زیرا ارائه‌دهندگان فعلی Geeklog قرارداد لازم مجموعه/محتوا را عرضه نمی‌کنند. شناسایی پرسش متداول خارجی یک نشانه ویراستاری است، نه اثبات قطعی.',
+    'managed' => 'مدیریت‌شده',
+    'external_signal' => 'نشانه خارجی',
+    'none' => 'هیچ',
+    'manage' => 'مدیریت',
+    'edit' => 'ویرایش',
+    'managed_relations' => 'ارتباط‌های مدیریت‌شده:',
+    'managed_only' => 'فقط مدیریت‌شده',
+    'external_only' => 'فقط خارجی',
+    'both' => 'هر دو',
+    'content' => 'محتوا',
+    'external_signals' => 'نشانه‌های خارجی',
+    'action' => 'عمل',
+    'articles' => 'مقاله‌ها',
+    'topics' => 'موضوع‌ها',
+    'origin_direct' => 'ارتباط مستقیم',
+    'origin_topic' => 'به ارث رسیده از موضوع',
+    'topic_inheritance_blocked' => 'ارث‌بری موضوع به‌دلیل پرسش متداول خارجی مسدود شده است',
+    'static_pages' => 'صفحات ایستا',
+    'videos' => 'ویدئوها',
+    'documents' => 'اسناد',
+    'maps' => 'نقشه‌ها',
+    'media_gallery' => 'گالری رسانه',
     'signal_faqpage_jsonld' => 'FAQPage JSON-LD',
-    'signal_faqpage_microdata' => 'FAQPage microdata',
-    'signal_question_answer_schema' => 'Question/Answer schema',
-    'signal_details_summary' => 'Repeated details/summary Q&A',
-    'signal_faq_heading' => 'FAQ heading'
+    'signal_faqpage_microdata' => 'ریز‌داده FAQPage',
+    'signal_question_answer_schema' => 'طرحواره Question/Answer',
+    'signal_details_summary' => 'پرسش و پاسخ تکرارشونده با details/summary',
+    'signal_faq_heading' => 'عنوان پرسش‌های متداول'
+);
+
+$LANG_FAQ_IMPORT = array(
+    'header' => 'وارد کردن افزونه پرسش‌های متداول',
+    'no_topics' => 'موضوع FAQMAN برای وارد کردن وجود ندارد.',
+    'no_faqman' => 'افزونه FAQMAN نصب نشده است.',
+    'not_root' => 'برای وارد کردن موضوع‌های FAQMAN باید عضو گروه ROOT باشید.',
+    'unknown' => 'عمل وارد کردن ناشناخته: ',
+    'imported' => '%d پرسش متداول در %d دسته وارد شد'
 );
 
 $LANG_configsections['faq'] = array(
-    'label' => 'FAQ',
-    'title' => 'FAQ Configuration'
+    'label' => 'پرسش‌های متداول',
+    'title' => 'پیکربندی پرسش‌های متداول'
 );
 
 $LANG_confignames['faq'] = array(
-    'hidenewfaq' => 'Hide FAQs from What\'s New',
-    'hidefaqmenu' => 'Hide FAQ menu item',
-    'newfaqinterval' => 'New FAQ interval (seconds)',
-    'no_hit_rights' => 'Rights excluded from hit counting',
-    'contextual_enabled' => 'Enable contextual FAQs',
-    'contextual_default_placement' => 'Default contextual placement',
-    'structured_data' => 'Enable FAQ structured data',
-    'coverage_limit' => 'Coverage page result limit',
-    'default_permissions' => 'Default permissions'
+    'hidenewfaq' => 'پنهان کردن پرسش‌های متداول از بخش تازه‌ها',
+    'hidefaqmenu' => 'پنهان کردن گزینه پرسش‌های متداول از منو',
+    'newfaqinterval' => 'بازه زمانی پرسش متداول جدید (ثانیه)',
+    'no_hit_rights' => 'مجوزهای مستثنا از شمارش بازدید',
+    'contextual_enabled' => 'فعال‌سازی پرسش‌های متداول زمینه‌ای',
+    'contextual_default_placement' => 'محل پیش‌فرض نمایش زمینه‌ای',
+    'structured_data' => 'فعال‌سازی داده ساخت‌یافته پرسش‌های متداول',
+    'coverage_limit' => 'حد نتایج صفحه پوشش',
+    'default_permissions' => 'مجوزهای پیش‌فرض'
 );
 
 $LANG_configsubgroups['faq'] = array(
-    'sg_main' => 'FAQ settings'
+    'sg_main' => 'تنظیمات پرسش‌های متداول'
 );
 
 $LANG_tab['faq'] = array(
-    'tab_general' => 'General',
-    'tab_context' => 'Contextual FAQs',
-    'tab_permissions' => 'Permissions'
+    'tab_general' => 'عمومی',
+    'tab_context' => 'پرسش‌های متداول زمینه‌ای',
+    'tab_permissions' => 'مجوزها'
 );
 
 $LANG_fs['faq'] = array(
-    'fs_general' => 'General settings',
-    'fs_context' => 'Contextual FAQ settings',
-    'fs_permissions' => 'Default permissions'
+    'fs_general' => 'تنظیمات عمومی',
+    'fs_context' => 'تنظیمات پرسش‌های متداول زمینه‌ای',
+    'fs_permissions' => 'مجوزهای پیش‌فرض'
 );
 
 $LANG_configselects['faq'][0] = array(
-    'True' => 1,
-    'False' => 0
+    'بله' => 1,
+    'خیر' => 0
 );
 
 $LANG_configselects['faq'][1] = array(
-    'Automatic (provider item display point)' => 'automatic',
-    'Manual only' => 'manual'
+    'خودکار (نقطه نمایش مورد ارائه‌دهنده)' => 'automatic',
+    'فقط دستی' => 'manual'
 );
 
 $LANG_configselects['faq'][12] = array(
-    'No access' => 0,
-    'Read-Only' => 2,
-    'Read-Write' => 3
+    'بدون دسترسی' => 0,
+    'فقط خواندنی' => 2,
+    'خواندن و نوشتن' => 3
 );
 
 $LANG_configtooltips['faq'] = array(
-    'hidenewfaq' => 'Hide FAQ entries from the Geeklog What\'s New block.',
-    'hidefaqmenu' => 'Hide the FAQ item from the site menu while keeping public FAQ URLs available.',
-    'newfaqinterval' => 'Number of seconds during which a recently updated FAQ is considered new.',
-    'no_hit_rights' => 'Comma-separated FAQ rights whose users should not increment FAQ hit counters.',
-    'contextual_enabled' => 'Allow FAQ associations to be rendered inside supported content providers.',
-    'contextual_default_placement' => 'Automatic lets the content provider choose its native item-display position. Manual only disables automatic contextual output.',
-    'structured_data' => 'Output FAQPage structured data on standalone FAQ pages when appropriate.',
-    'coverage_limit' => 'Maximum number of provider items inspected and displayed on the Coverage administration page.',
-    'default_permissions' => 'Default owner, group, member and anonymous permissions assigned to newly created FAQ content.'
+    'hidenewfaq' => 'ورودی‌های پرسش متداول را از بلوک «تازه‌ها» در Geeklog پنهان می‌کند.',
+    'hidefaqmenu' => 'گزینه پرسش‌های متداول را از منوی سایت پنهان می‌کند، در حالی که نشانی‌های عمومی FAQ همچنان در دسترس می‌مانند.',
+    'newfaqinterval' => 'تعداد ثانیه‌هایی که یک پرسش متداول تازه به‌روزرسانی‌شده، جدید در نظر گرفته می‌شود.',
+    'no_hit_rights' => 'فهرست جداشده با ویرگول از مجوزهای FAQ که کاربران دارای آن‌ها نباید شمارنده بازدید را افزایش دهند.',
+    'contextual_enabled' => 'نمایش ارتباط‌های پرسش متداول را در ارائه‌دهندگان محتوای پشتیبانی‌شده مانند مقاله‌ها، اسناد، نقشه‌ها و ویدئوها فعال می‌کند.',
+    'contextual_default_placement' => 'حالت خودکار اجازه می‌دهد ارائه‌دهنده محتوا نقطه نمایش بومی خود را انتخاب کند. حالت فقط دستی، خروجی زمینه‌ای خودکار را غیرفعال می‌کند.',
+    'structured_data' => 'در صورت مناسب بودن، داده ساخت‌یافته FAQPage را در صفحات مستقل پرسش‌های متداول خروجی می‌دهد.',
+    'coverage_limit' => 'بیشترین تعداد موارد ارائه‌دهنده که در صفحه مدیریت پوشش بررسی و نمایش داده می‌شوند.',
+    'default_permissions' => 'مجوزهای پیش‌فرض مالک، گروه، اعضا و کاربران ناشناس که به محتوای جدید پرسش‌های متداول اختصاص داده می‌شوند.'
 );

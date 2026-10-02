@@ -216,15 +216,27 @@ Older development rows containing `before` or `after` are interpreted as `automa
 
 FAQ 1.3.0 keeps all public, administration, Associations, Coverage and native Configuration labels in the plugin language files.
 
-Maintained language files:
+Maintained UTF-8 language files for the 1.3.0 interface:
+
+- `english_utf-8.php`
+- `spanish_utf-8.php`
+- `spanish_argentina_utf-8.php`
+- `italian_utf-8.php`
+- `japanese_utf-8.php`
+- `russian_utf-8.php`
+- `chinese_simplified_utf-8.php`
+- `chinese_traditional_utf-8.php`
+- `hebrew_utf-8.php`
+- `persian_utf-8.php`
+- `french_canada_utf-8.php`
+- `french_france_utf-8.php`
+- `german_utf-8.php`
+- `german_formal_utf-8.php`
+
+Legacy language files retained for compatibility:
 
 - `english.php`
-- `english_utf-8.php`
-- `french_france_utf-8.php`
-- `persian_utf-8.php`
 - `swedish.php`
 - `swedish_utf-8.php`
 
-French has a complete native translation for the current 1.3.0 interface.
-
-Historical Persian and Swedish translations keep their existing translated strings and include explicit English fallbacks for newer 1.3.0 keys that have not yet received a native translation. This keeps the language-key contract complete and avoids missing labels or undefined language keys.
+For the 13 maintained non-English UTF-8 variants listed above, FAQ 1.3.0 language coverage is aligned with `english_utf-8.php`: all required language keys are present, placeholders are preserved, and no English fallback block is required for the current interface.
